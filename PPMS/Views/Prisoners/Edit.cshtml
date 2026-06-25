@@ -1,0 +1,75 @@
+@model PPMS.Models.Prisoner
+@{ ViewData["Title"] = "Edit Prisoner"; }
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2><i class="fas fa-user-edit me-2" style="color:#1565c0;"></i>Edit Prisoner Record</h2>
+    <a href="/Prisoners/Details/@Model.Id" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back</a>
+</div>
+
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-id-card me-2"></i>Personal Information</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Prisoner ID</label>
+                            <input asp-for="PrisonerId" class="form-control" />
+                            <span asp-validation-for="PrisonerId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name</label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6"><label class="form-label fw-semibold">National ID</label><input asp-for="NationalId" class="form-control" /></div>
+                        <div class="col-md-3"><label class="form-label fw-semibold">Gender</label><select asp-for="Gender" class="form-select"><option>Male</option><option>Female</option></select></div>
+                        <div class="col-md-3"><label class="form-label fw-semibold">Date of Birth</label><input asp-for="DateOfBirth" type="date" class="form-control" /></div>
+                        <div class="col-12"><label class="form-label fw-semibold">Address</label><input asp-for="Address" class="form-control" /></div>
+                        <div class="col-md-6"><label class="form-label fw-semibold">Emergency Contact</label><input asp-for="EmergencyContact" class="form-control" /></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><i class="fas fa-gavel me-2"></i>Criminal Information</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label fw-semibold">Crime Type</label><input asp-for="CrimeType" class="form-control" /></div>
+                        <div class="col-md-3"><label class="form-label fw-semibold">Sentence (Months)</label><input asp-for="SentenceDurationMonths" type="number" class="form-control" id="sm" /></div>
+                        <div class="col-md-3"><label class="form-label fw-semibold">Status</label><select asp-for="CriminalStatus" class="form-select"><option>Active</option><option>Released</option><option>Transferred</option><option>Escaped</option></select></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Entry Date</label><input asp-for="EntryDate" type="date" class="form-control" id="ed" /></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Release Date</label><input asp-for="ReleaseDate" type="date" class="form-control" id="rd" readonly style="background:#f8fafc;" /></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Prison</label>@Html.DropDownList("PrisonId", ViewBag.Prisons as SelectList, "-- Select --", new{@class="form-select"})</div>
+                        <div class="col-12"><label class="form-label fw-semibold">Fingerprint Data</label><textarea asp-for="FingerprintData" class="form-control" rows="2"></textarea></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header"><i class="fas fa-camera me-2"></i>Update Photo</div>
+                <div class="card-body text-center">
+                    <div id="pp" style="width:140px;height:160px;border:2px dashed #cbd5e1;border-radius:8px;margin:0 auto 12px;overflow:hidden;background:#f8fafc;display:flex;align-items:center;justify-content:center;">
+                        @if (!string.IsNullOrEmpty(Model.PhotoPath)) { <img src="@Model.PhotoPath" style="width:100%;height:100%;object-fit:cover;" /> }
+                        else { <i class="fas fa-user" style="font-size:3rem;color:#cbd5e1;"></i> }
+                    </div>
+                    <input type="file" name="photo" class="form-control form-control-sm" accept="image/*" onchange="var r=new FileReader();r.onload=function(e){document.getElementById('pp').innerHTML='<img src=\''+e.target.result+'\' style=\'width:100%;height:100%;object-fit:cover;\'/>';};r.readAsDataURL(this.files[0]);" />
+                </div>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Save Changes</button>
+                <a href="/Prisoners" class="btn btn-outline-secondary"><i class="fas fa-times me-2"></i>Cancel</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+<script>
+function calc(){ var e=document.getElementById('ed').value,m=parseInt(document.getElementById('sm').value)||0;if(e&&m>0){var d=new Date(e);d.setMonth(d.getMonth()+m);document.getElementById('rd').value=d.toISOString().split('T')[0];}}
+document.getElementById('ed').addEventListener('change',calc);document.getElementById('sm').addEventListener('input',calc);
+</script>
+}

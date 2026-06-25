@@ -1,0 +1,85 @@
+@model IEnumerable<PPMS.Models.Prison>
+@{ ViewData["Title"] = "Prison Management"; }
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><img src="/images/spf-logo.png" style="width:34px;height:34px;object-fit:contain;vertical-align:middle;" class="me-2" />Prison Management</h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">Manage all correctional facilities across Puntland</p>
+    </div>
+    @if (User.IsInRole("SuperAdmin") || User.IsInRole("PrisonAdministrator"))
+    { <a href="/Prisons/Create" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Add Prison</a> }
+</div>
+<div class="card mb-4"><div class="card-body py-3">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-5"><div class="input-group input-group-sm"><span class="input-group-text"><i class="fas fa-search"></i></span><input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by name or city..." /></div></div>
+        <div class="col-md-3"><select name="security" class="form-select form-select-sm"><option value="">All Security Levels</option><option value="Minimum" selected="@(ViewBag.Security as string == "Minimum" ? "selected" : null)">Minimum</option><option value="Medium" selected="@(ViewBag.Security as string == "Medium" ? "selected" : null)">Medium</option><option value="Maximum" selected="@(ViewBag.Security as string == "Maximum" ? "selected" : null)">Maximum</option></select></div>
+        <div class="col-md-2"><button type="submit" class="btn btn-primary btn-sm w-100"><i class="fas fa-filter me-1"></i>Filter</button></div>
+        @if (!string.IsNullOrEmpty(ViewBag.Search as string) || !string.IsNullOrEmpty(ViewBag.Security as string))
+        { <div class="col-md-2"><a href="/Prisons" class="btn btn-outline-secondary btn-sm w-100">Clear</a></div> }
+    </form>
+</div></div>
+@if (!Model.Any())
+{
+    <div class="card"><div class="card-body text-center py-5">
+        <img src="/images/spf-logo.png" style="width:64px;height:64px;object-fit:contain;opacity:0.35;" class="mb-3" />
+        <h5 class="text-muted">No prisons found</h5>
+        <p class="text-muted">@(ViewBag.Search != null ? "Try adjusting your search." : "No facilities registered yet.")</p>
+        @if (User.IsInRole("SuperAdmin") || User.IsInRole("PrisonAdministrator"))
+        { <a href="/Prisons/Create" class="btn btn-primary mt-2"><i class="fas fa-plus me-1"></i>Add Prison</a> }
+    </div></div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var p in Model)
+        {
+            var pct = p.Capacity > 0 ? (int)((double)p.CurrentPopulation / p.Capacity * 100) : 0;
+            var barColor = pct >= 90 ? "bg-danger" : pct >= 70 ? "bg-warning" : "bg-success";
+            var secColor = p.SecurityLevel == "Maximum" ? "#dc2626" : p.SecurityLevel == "Medium" ? "#d97706" : "#16a34a";
+            <div class="col-md-6 col-xl-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#d97706,#f59e0b);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <img src="/images/spf-logo.png" style="width:30px;height:30px;object-fit:contain;background:#fff;border-radius:50%;padding:3px;" />
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold" style="font-size:0.9rem;">@p.PrisonName</h6>
+                                    <p class="text-muted mb-0" style="font-size:0.78rem;"><i class="fas fa-map-marker-alt me-1"></i>@p.City</p>
+                                </div>
+                            </div>
+                            <span class="badge" style="background:@secColor;font-size:0.68rem;">@p.SecurityLevel</span>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted">Population</small>
+                                <small class="fw-semibold">@p.CurrentPopulation / @p.Capacity</small>
+                            </div>
+                            <div class="progress" style="height:8px;border-radius:4px;">
+                                <div class="progress-bar @barColor" style="width:@pct%;border-radius:4px;transition:width 0.6s ease;"></div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <small class="text-muted">@pct% occupied</small>
+                                @if (pct >= 90) { <small class="text-danger fw-semibold"><i class="fas fa-exclamation-triangle me-1"></i>Over capacity</small> }
+                                else if (pct >= 70) { <small class="text-warning fw-semibold">Near capacity</small> }
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(p.ContactNumber))
+                        { <p class="text-muted mb-1" style="font-size:0.8rem;"><i class="fas fa-phone me-2"></i>@p.ContactNumber</p> }
+                        @if (!string.IsNullOrEmpty(p.Address))
+                        { <p class="text-muted mb-0" style="font-size:0.78rem;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;"><i class="fas fa-map me-2"></i>@p.Address</p> }
+                    </div>
+                    <div class="card-footer d-flex gap-1 py-2">
+                        <a href="/Prisons/Details/@p.Id" class="btn btn-sm btn-outline-info flex-fill" style="font-size:0.78rem;"><i class="fas fa-eye me-1"></i>View</a>
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("PrisonAdministrator"))
+                        {
+                            <a href="/Prisons/Edit/@p.Id" class="btn btn-sm btn-outline-primary flex-fill" style="font-size:0.78rem;"><i class="fas fa-edit me-1"></i>Edit</a>
+                            <a href="/Prisons/Delete/@p.Id" class="btn btn-sm btn-outline-danger" style="font-size:0.78rem;padding:4px 10px;"><i class="fas fa-trash"></i></a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    @await Html.PartialAsync("_Pagination")
+}

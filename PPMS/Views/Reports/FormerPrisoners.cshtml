@@ -1,0 +1,87 @@
+@model IEnumerable<PPMS.Models.Prisoner>
+@{ ViewData["Title"] = "Former Prisoners Archive Report"; }
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-archive me-2" style="color:#d97706;"></i>Former Prisoners Archive Report</h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">Complete historical record — @Model.Count() records shown</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/Reports/ExportFormerPrisonersExcel?status=@ViewBag.Status"
+           class="btn btn-success btn-sm"><i class="fas fa-file-excel me-1"></i>Export Excel</a>
+        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="fas fa-print me-1"></i>Print</button>
+        <a href="/Reports" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back</a>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-auto">
+                <label class="form-label mb-0">Filter by Status:</label>
+            </div>
+            <div class="col-auto">
+                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    @foreach (var s in new[]{"Released","Transferred","Deceased","Administrative"})
+                    { <option value="@s" selected="@(ViewBag.Status as string == s ? "selected" : null)">@s</option> }
+                </select>
+            </div>
+            @if (!string.IsNullOrEmpty(ViewBag.Status as string))
+            {
+                <div class="col-auto">
+                    <a href="/Reports/FormerPrisoners" class="btn btn-outline-secondary btn-sm">Clear</a>
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card"><div class="card-body text-center py-5">
+        <i class="fas fa-archive fa-3x mb-3 text-muted opacity-50"></i>
+        <h5 class="text-muted">No archived records found</h5>
+    </div></div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size:0.83rem;">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Prisoner ID</th><th>Full Name</th><th>National ID</th>
+                            <th>Gender</th><th>Crime Type</th><th>Sentence</th><th>Prison</th>
+                            <th>Entry Date</th><th>Release Date</th><th>Archive Status</th><th>Archived Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ int idx = 1; }
+                        @foreach (var p in Model)
+                        {
+                            var r = p.ArchiveReason ?? "Administrative";
+                            var rc = r=="Released"?"#166534":r=="Transferred"?"#1e40af":r=="Deceased"?"#374151":"#92400e";
+                            var rb = r=="Released"?"#dcfce7":r=="Transferred"?"#dbeafe":r=="Deceased"?"#f3f4f6":"#fef3c7";
+                            <tr>
+                                <td class="text-muted">@(idx++)</td>
+                                <td><code>@p.PrisonerId</code></td>
+                                <td><strong>@p.FullName</strong></td>
+                                <td>@p.NationalId</td>
+                                <td>@p.Gender</td>
+                                <td><span class="badge bg-secondary" style="font-size:0.72rem;">@p.CrimeType</span></td>
+                                <td>@p.SentenceDurationMonths mo.</td>
+                                <td>@p.Prison?.PrisonName</td>
+                                <td>@p.EntryDate.ToString("yyyy-MM-dd")</td>
+                                <td>@p.ReleaseDate.ToString("yyyy-MM-dd")</td>
+                                <td><span style="background:@rb;color:@rc;font-size:0.7rem;padding:2px 9px;border-radius:20px;font-weight:700;">@r</span></td>
+                                <td>@(p.ArchivedAt?.ToString("yyyy-MM-dd") ?? "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

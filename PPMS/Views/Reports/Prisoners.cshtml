@@ -1,0 +1,47 @@
+@model IEnumerable<PPMS.Models.Prisoner>
+@{ ViewData["Title"] = "Prisoner Report"; }
+<div class="page-header d-flex justify-content-between align-items-center no-print">
+    <h2><i class="fas fa-user-lock me-2"></i>Prisoner Report</h2>
+    <div class="d-flex gap-2">
+        <a href="/Reports/ExportPrisonersExcel" class="btn btn-success btn-sm"><i class="fas fa-file-excel me-1"></i>Export Excel</a>
+        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="fas fa-print me-1"></i>Print</button>
+        <a href="/Reports" class="btn btn-outline-secondary btn-sm">Back</a>
+    </div>
+</div>
+<div class="card mb-3 no-print"><div class="card-body py-2">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3"><select name="prisonId" class="form-select form-select-sm"><option value="">All Prisons</option>@foreach(var p in ViewBag.Prisons as List<PPMS.Models.Prison>??new()){<option value="@p.Id">@p.PrisonName</option>}</select></div>
+        <div class="col-md-3"><input name="crimeType" class="form-control form-control-sm" placeholder="Crime type filter..." /></div>
+        <div class="col-md-2"><input name="from" type="date" class="form-control form-control-sm" /></div>
+        <div class="col-md-2"><input name="to" type="date" class="form-control form-control-sm" /></div>
+        <div class="col-auto"><button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter me-1"></i>Filter</button></div>
+    </form>
+</div></div>
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <span>Prisoner Report &mdash; @DateTime.Now.ToString("MMMM dd, yyyy")</span>
+        <span>Total: @Model.Count()</span>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+            <thead><tr><th>#</th><th>Prisoner ID</th><th>Name</th><th>National ID</th><th>Crime</th><th>Prison</th><th>Entry</th><th>Release</th><th>Status</th></tr></thead>
+            <tbody>
+                @{ int i = 1; }
+                @foreach (var p in Model) {
+                    <tr>
+                        <td>@i++</td>
+                        <td><code>@p.PrisonerId</code></td>
+                        <td>@p.FullName</td>
+                        <td>@p.NationalId</td>
+                        <td>@p.CrimeType</td>
+                        <td>@p.Prison?.PrisonName</td>
+                        <td>@p.EntryDate.ToString("MMM dd, yyyy")</td>
+                        <td>@p.ReleaseDate.ToString("MMM dd, yyyy")</td>
+                        <td><span class="badge @(p.CriminalStatus=="Active"?"bg-danger":p.CriminalStatus=="Released"?"bg-success":"bg-secondary")">@p.CriminalStatus</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>@@media print { .no-print { display:none!important; } #sidebar, #topbar { display:none!important; } #main-content { margin-left:0!important; } }</style>

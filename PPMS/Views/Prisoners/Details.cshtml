@@ -1,0 +1,71 @@
+@model PPMS.Models.Prisoner
+@{ ViewData["Title"] = "Prisoner Details"; }
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2><i class="fas fa-id-badge me-2" style="color:#1565c0;"></i>Prisoner Profile</h2>
+    <div>
+        <a href="/Prisoners/Edit/@Model.Id" class="btn btn-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</a>
+        <a href="/Prisoners" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body py-4">
+                @if (!string.IsNullOrEmpty(Model.PhotoPath)) {
+                    <img src="@Model.PhotoPath" style="width:140px;height:160px;object-fit:cover;border-radius:8px;border:3px solid #e2e8f0;" />
+                } else {
+                    <div style="width:140px;height:160px;background:#e2e8f0;border-radius:8px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:4rem;color:#94a3b8;"><i class="fas fa-user"></i></div>
+                }
+                <h5 class="mt-3 mb-1">@Model.FullName</h5>
+                <p class="text-muted mb-2"><code>@Model.PrisonerId</code></p>
+                <span class="badge @(Model.CriminalStatus=="Active"?"bg-danger":Model.CriminalStatus=="Released"?"bg-success":Model.CriminalStatus=="Escaped"?"bg-warning text-dark":"bg-secondary") px-3 py-2">@Model.CriminalStatus</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="card mb-3">
+            <div class="card-header"><i class="fas fa-user me-2"></i>Personal Information</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4"><small class="text-muted d-block">National ID</small><strong>@Model.NationalId</strong></div>
+                    <div class="col-md-4"><small class="text-muted d-block">Gender</small><strong>@Model.Gender</strong></div>
+                    <div class="col-md-4"><small class="text-muted d-block">Date of Birth</small><strong>@Model.DateOfBirth.ToString("MMM dd, yyyy")</strong></div>
+                    <div class="col-md-8"><small class="text-muted d-block">Address</small><strong>@(string.IsNullOrEmpty(Model.Address)?"N/A":Model.Address)</strong></div>
+                    <div class="col-md-4"><small class="text-muted d-block">Emergency Contact</small><strong>@(string.IsNullOrEmpty(Model.EmergencyContact)?"N/A":Model.EmergencyContact)</strong></div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header"><i class="fas fa-gavel me-2"></i>Incarceration Details</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4"><small class="text-muted d-block">Crime Type</small><strong>@Model.CrimeType</strong></div>
+                    <div class="col-md-4"><small class="text-muted d-block">Sentence</small><strong>@Model.SentenceDurationMonths months</strong></div>
+                    <div class="col-md-4"><small class="text-muted d-block">Prison</small><strong>@Model.Prison?.PrisonName</strong></div>
+                    <div class="col-md-4"><small class="text-muted d-block">Entry Date</small><strong>@Model.EntryDate.ToString("MMM dd, yyyy")</strong></div>
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Release Date</small>
+                        <strong class="@(Model.ReleaseDate < DateTime.Now ? "text-danger" : "text-success")">@Model.ReleaseDate.ToString("MMM dd, yyyy")</strong>
+                    </div>
+                    <div class="col-md-4"><small class="text-muted d-block">Days Remaining</small>
+                        <strong>@(Model.ReleaseDate > DateTime.Now ? ((Model.ReleaseDate - DateTime.Now).Days + " days") : "Released/Overdue")</strong>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.FingerprintData)) {
+                        <div class="col-12"><small class="text-muted d-block">Fingerprint Reference</small><strong>@Model.FingerprintData</strong></div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><i class="fas fa-info-circle me-2"></i>Record Information</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4"><small class="text-muted d-block">Registered</small><strong>@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</strong></div>
+                    <div class="col-md-4"><small class="text-muted d-block">Last Updated</small><strong>@Model.UpdatedAt.ToString("MMM dd, yyyy HH:mm")</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

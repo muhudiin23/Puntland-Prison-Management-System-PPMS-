@@ -1,0 +1,75 @@
+@model IEnumerable<PPMS.Models.Alert>
+@{ ViewData["Title"] = "Alert Management"; }
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-bell me-2 text-warning"></i>Alert Management</h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">Monitor and manage security alerts across all prisons &mdash; <strong>@ViewBag.ActiveCount</strong> active</p>
+    </div>
+    <div class="d-flex gap-2">
+        @if (ViewBag.ActiveCount > 0)
+        {
+            <form asp-action="DismissAll" method="post" class="d-inline" onsubmit="return confirm('Dismiss all active alerts?')">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-secondary btn-sm"><i class="fas fa-check-double me-1"></i>Dismiss All</button>
+            </form>
+        }
+        <a href="/Alerts?showAll=@(!(bool)ViewBag.ShowAll)" class="btn btn-outline-secondary btn-sm"><i class="fas fa-history me-1"></i>@(ViewBag.ShowAll?"Active Only":"Show History")</a>
+        <a href="/Alerts/Create" class="btn btn-warning text-dark"><i class="fas fa-plus me-2"></i>Create Alert</a>
+    </div>
+</div>
+<div class="card mb-3"><div class="card-body py-2">
+    <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
+        <input type="hidden" name="showAll" value="@ViewBag.ShowAll" />
+        <select name="alertType" class="form-select form-select-sm" style="max-width:220px;">
+            <option value="">All Alert Types</option>
+            @foreach(var t in new[]{"Escape Alert","Security Alert","Wanted Criminal Alert","Prison Capacity Alert"})
+            { <option value="@t" selected="@(ViewBag.AlertType as string == t ? "selected" : null)">@t</option> }
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter me-1"></i>Filter</button>
+    </form>
+</div></div>
+@if (!Model.Any())
+{
+    <div class="card"><div class="card-body text-center py-5"><i class="fas fa-check-circle fa-3x mb-3 text-success"></i><h5 class="text-muted">@(ViewBag.ShowAll?"No alerts in history":"No active alerts")</h5><p class="text-muted mb-0">The system is operating normally.</p></div></div>
+}
+else
+{
+    <div class="d-flex flex-column gap-2">
+        @foreach (var a in Model)
+        {
+            var borderColor = a.AlertType.Contains("Escape") ? "#dc2626" : a.AlertType.Contains("Wanted") ? "#7c3aed" : a.AlertType.Contains("Security") ? "#d97706" : "#0891b2";
+            var iconClass = a.AlertType.Contains("Escape") ? "fa-running" : a.AlertType.Contains("Wanted") ? "fa-exclamation-triangle" : a.AlertType.Contains("Security") ? "fa-shield-alt" : "fa-tachometer-alt";
+            <div class="card @(a.IsDismissed?"opacity-60":"")">
+                <div class="card-body d-flex align-items-start gap-3 py-3" style="border-left:4px solid @borderColor;border-radius:0 14px 14px 0;">
+                    <div style="width:42px;height:42px;border-radius:12px;background:rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas @iconClass" style="color:@borderColor;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="badge" style="background:@borderColor;font-size:0.68rem;">@a.AlertType</span>
+                                <span class="badge @(a.Severity=="Critical"?"bg-danger":a.Severity=="High"?"bg-warning text-dark":a.Severity=="Low"?"bg-success":"bg-secondary")" style="font-size:0.65rem;">@a.Severity</span>
+                                @if (a.IsDismissed) { <span class="badge bg-secondary" style="font-size:0.65rem;">Dismissed</span> }
+                            </div>
+                            <span class="text-muted" style="font-size:0.72rem;white-space:nowrap;">@a.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                        </div>
+                        <p class="mb-0 mt-1" style="font-size:0.875rem;font-weight:500;">@a.Message</p>
+                        <div class="text-muted mt-1" style="font-size:0.72rem;">
+                            @if (!string.IsNullOrEmpty(a.CreatedBy)) { <span><i class="fas fa-user me-1"></i>Created by @a.CreatedBy</span> }
+                            @if (a.IsDismissed && a.DismissedAt.HasValue) { <span class="ms-2"><i class="fas fa-check me-1"></i>Dismissed @a.DismissedAt.Value.ToString("MMM dd HH:mm")</span> }
+                        </div>
+                    </div>
+                    @if (!a.IsDismissed)
+                    {
+                        <form asp-action="Dismiss" method="post" class="ms-2 flex-shrink-0">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@a.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-secondary" title="Dismiss alert"><i class="fas fa-times me-1"></i>Dismiss</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+    @await Html.PartialAsync("_Pagination")
+}

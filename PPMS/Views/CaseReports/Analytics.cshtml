@@ -1,0 +1,456 @@
+@{ ViewData["Title"] = "Crime Analytics Dashboard"; }
+
+<style>
+.ana-card { border-radius:18px; padding:20px 22px; position:relative; overflow:hidden; transition:transform .2s; border:none; }
+.ana-card:hover { transform:translateY(-3px); }
+.ana-num  { font-size:2.6rem; font-weight:900; color:#fff; line-height:1; letter-spacing:-2px; }
+.ana-lbl  { font-size:0.68rem; font-weight:800; color:rgba(255,255,255,0.75); text-transform:uppercase; letter-spacing:1.5px; margin-top:4px; }
+.ana-ico  { position:absolute; right:14px; bottom:10px; font-size:2.8rem; opacity:0.15; color:#fff; }
+.insight-card { border-radius:14px; padding:16px 18px; border:none; }
+.trend-up   { color:#16a34a; }
+.trend-down { color:#dc2626; }
+.trend-stable { color:#6b7280; }
+.trend-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--bs-border-color); }
+.trend-row:last-child { border-bottom:none; }
+.range-stat { text-align:center; padding:16px 10px; border-radius:12px; background:var(--bs-secondary-bg); }
+.range-stat .val { font-size:1.8rem; font-weight:800; line-height:1; }
+.range-stat .lbl { font-size:0.68rem; font-weight:700; color:var(--bs-secondary-color); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+</style>
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-chart-bar me-2" style="color:#dc2626;"></i>Crime Analytics &amp; Intelligence Dashboard</h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">
+            Dynamic analysis of all registered cases — Updated in real-time
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="fas fa-print me-1"></i>Print</button>
+        <a href="/CaseReports/ExportExcel" class="btn btn-outline-success btn-sm"><i class="fas fa-file-excel me-1"></i>Export</a>
+        <a href="/CaseReports" class="btn btn-outline-secondary btn-sm"><i class="fas fa-list me-1"></i>Case List</a>
+    </div>
+</div>
+
+<!-- ── Summary stat cards ──────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="ana-card" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);box-shadow:0 8px 20px rgba(127,29,29,.4);">
+            <div class="ana-num">@ViewBag.TotalCases</div>
+            <div class="ana-lbl">Total Cases</div>
+            <i class="fas fa-folder ana-ico"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="ana-card" style="background:linear-gradient(135deg,#78350f,#d97706);box-shadow:0 8px 20px rgba(120,53,15,.35);">
+            <div class="ana-num">@ViewBag.OpenCases</div>
+            <div class="ana-lbl">Open Cases</div>
+            <i class="fas fa-folder-open ana-ico"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="ana-card" style="background:linear-gradient(135deg,#1e3a8a,#2563eb);box-shadow:0 8px 20px rgba(30,58,138,.35);">
+            <div class="ana-num">@ViewBag.UnderReview</div>
+            <div class="ana-lbl">Under Review</div>
+            <i class="fas fa-search ana-ico"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="ana-card" style="background:linear-gradient(135deg,#166534,#16a34a);box-shadow:0 8px 20px rgba(22,101,52,.35);">
+            <div class="ana-num">@ViewBag.ClosedCases</div>
+            <div class="ana-lbl">Closed Cases</div>
+            <i class="fas fa-check-circle ana-ico"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="ana-card" style="background:linear-gradient(135deg,#1f2937,#374151);box-shadow:0 8px 20px rgba(31,41,55,.4);">
+            <div class="ana-num">@ViewBag.Dismissed</div>
+            <div class="ana-lbl">Dismissed</div>
+            <i class="fas fa-times-circle ana-ico"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="ana-card" style="background:linear-gradient(135deg,#4a1d96,#7c3aed);box-shadow:0 8px 20px rgba(124,58,237,.35);">
+            <div class="ana-num" style="font-size:1.4rem;letter-spacing:-1px;">@ViewBag.MostCommonCrime</div>
+            <div class="ana-lbl">Top Crime Type</div>
+            <i class="fas fa-exclamation-triangle ana-ico"></i>
+        </div>
+    </div>
+</div>
+
+<!-- ── Date Range Analysis ─────────────────────────────────────── -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-calendar-alt me-2"></i>Date Range Crime Analysis</span>
+        <span class="badge bg-info text-dark" style="font-size:0.7rem;">Select any date range to generate insights</span>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end mb-4">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Start Date</label>
+                <input type="date" name="from" value="@ViewBag.From" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">End Date</label>
+                <input type="date" name="to" value="@ViewBag.To" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-danger w-100">
+                    <i class="fas fa-chart-line me-2"></i>Analyze Period
+                </button>
+            </div>
+            @if (!string.IsNullOrEmpty(ViewBag.From as string))
+            {
+                <div class="col-md-3">
+                    <a href="/CaseReports/Analytics" class="btn btn-outline-secondary w-100">Clear</a>
+                </div>
+            }
+        </form>
+
+        @if (ViewBag.RangeCount != null)
+        {
+            var rangeFrom   = (DateTime)ViewBag.RangeFrom;
+            var rangeTo     = (DateTime)ViewBag.RangeTo;
+            var rangeCount  = (int)ViewBag.RangeCount;
+            var growthPct   = (double)ViewBag.GrowthPct;
+            var prevCount   = (int)ViewBag.PrevCount;
+            var topCrime    = ViewBag.TopCrime as string;
+            var topPct      = (double)ViewBag.TopCrimePct;
+            var lowCrime    = ViewBag.LowCrime as string;
+            var growthColor = growthPct > 0 ? "#dc2626" : growthPct < 0 ? "#16a34a" : "#6b7280";
+            var growthIcon  = growthPct > 0 ? "fa-arrow-up" : growthPct < 0 ? "fa-arrow-down" : "fa-equals";
+            var crimes      = ViewBag.RangeCrimes as IEnumerable<dynamic>;
+
+            <!-- Narrative -->
+            <div class="alert mb-4" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #93c5fd;border-left:5px solid #1565c0;border-radius:12px;font-size:0.88rem;">
+                <i class="fas fa-brain me-2" style="color:#1565c0;font-size:1rem;"></i>
+                <strong>Analysis Result:</strong>
+                Between <strong>@rangeFrom.ToString("MMMM dd, yyyy")</strong> and <strong>@rangeTo.ToString("MMMM dd, yyyy")</strong>,
+                there were <strong>@rangeCount</strong> reported criminal cases.
+                @if (topCrime != null)
+                {
+                    <text><strong>@topCrime</strong> accounted for <strong>@topPct%</strong> of all reported crimes, making it the most common crime category.</text>
+                }
+                @if (prevCount > 0)
+                {
+                    <text> Compared to the previous period (@prevCount cases), crime
+                    <strong style="color:@growthColor;">@(growthPct > 0 ? "increased" : growthPct < 0 ? "decreased" : "remained stable")
+                    by @Math.Abs(growthPct)%</strong>.</text>
+                }
+            </div>
+
+            <!-- Range stats row -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="range-stat">
+                        <div class="val">@rangeCount</div>
+                        <div class="lbl">Cases in Period</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="range-stat">
+                        <div class="val" style="color:@growthColor;">
+                            <i class="fas @growthIcon" style="font-size:1.2rem;"></i>@Math.Abs(growthPct)%
+                        </div>
+                        <div class="lbl">vs Previous Period</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="range-stat">
+                        <div class="val" style="font-size:1.3rem;color:#dc2626;">@topCrime</div>
+                        <div class="lbl">Most Common Crime</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="range-stat">
+                        <div class="val" style="font-size:1.3rem;color:#16a34a;">@lowCrime</div>
+                        <div class="lbl">Least Common Crime</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crime breakdown table -->
+            @if (crimes != null)
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0" style="font-size:0.84rem;">
+                        <thead>
+                            <tr><th>Crime Type</th><th>Cases</th><th>Percentage</th><th>Distribution</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in crimes)
+                            {
+                                <tr>
+                                    <td><span class="badge bg-secondary" style="font-size:0.72rem;">@item.type</span></td>
+                                    <td><strong>@item.count</strong></td>
+                                    <td>@item.pct%</td>
+                                    <td>
+                                        <div style="background:#e2e8f0;border-radius:4px;height:10px;width:200px;">
+                                            <div style="background:#dc2626;height:10px;border-radius:4px;width:@(item.pct)%;"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-3 text-muted">
+                <i class="fas fa-calendar-alt fa-2x mb-2 opacity-50"></i>
+                <p class="mb-0">Select a date range above to generate a detailed crime analysis report.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ── Charts ─────────────────────────────────────────────────── -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Cases by Crime Type</div>
+            <div class="card-body" style="padding:20px;">
+                <canvas id="crimeTypeChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-chart-pie me-2"></i>Case Status Breakdown</div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <canvas id="statusChart" style="max-height:220px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-chart-line me-2"></i>Monthly Case Trend (Last 12 Months)</div>
+            <div class="card-body" style="padding:20px;">
+                <canvas id="monthlyChart" height="110"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Cases by Prison</div>
+            <div class="card-body" style="padding:20px;">
+                <canvas id="prisonChart" height="160"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Annual Case Volume</div>
+            <div class="card-body" style="padding:20px;">
+                <canvas id="yearChart" height="130"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-search me-2"></i>Investigation Status Breakdown</div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <canvas id="investigationChart" style="max-height:200px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Crime Trend Prediction ─────────────────────────────────── -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="fas fa-trending-up"></i>
+                Crime Trend Analysis
+                <span class="badge bg-warning text-dark ms-auto" style="font-size:0.68rem;">Last 6 months vs Previous 6 months</span>
+            </div>
+            <div class="card-body p-0">
+                @{
+                    var trends = ViewBag.TrendData as dynamic;
+                }
+                @if (trends != null)
+                {
+                    <div style="padding:8px 16px;">
+                        @foreach (var t in trends)
+                        {
+                            var trendClass = t.trend == "up" ? "trend-up" : t.trend == "down" ? "trend-down" : "trend-stable";
+                            var trendIcon  = t.trend == "up" ? "fa-arrow-up" : t.trend == "down" ? "fa-arrow-down" : "fa-minus";
+                            var trendBg    = t.trend == "up" ? "#fef2f2" : t.trend == "down" ? "#f0fdf4" : "#f9fafb";
+                            <div class="trend-row">
+                                <div style="width:130px;font-weight:600;font-size:0.84rem;">@t.crime</div>
+                                <div class="d-flex gap-3 flex-grow-1 align-items-center" style="font-size:0.8rem;">
+                                    <span class="text-muted">Recent: <strong>@t.recent</strong></span>
+                                    <span class="text-muted">Prev: <strong>@t.previous</strong></span>
+                                </div>
+                                <div class="@trendClass fw-bold d-flex align-items-center gap-1" style="font-size:0.84rem;">
+                                    <i class="fas @trendIcon" style="font-size:0.7rem;"></i>
+                                    @(t.pct > 0 ? "+" : "")@t.pct%
+                                </div>
+                                <span style="font-size:0.68rem;padding:2px 8px;border-radius:10px;background:@trendBg;font-weight:700;"
+                                      class="@trendClass">
+                                    @(t.trend == "up" ? "RISING" : t.trend == "down" ? "FALLING" : "STABLE")
+                                </span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">Not enough data for trend analysis.</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-lightbulb me-2"></i>Key Intelligence Insights</div>
+            <div class="card-body">
+                @{
+                    int total = (int)ViewBag.TotalCases;
+                    int open  = (int)ViewBag.OpenCases;
+                    int closed = (int)ViewBag.ClosedCases;
+                    double closureRate = total > 0 ? Math.Round((double)closed / total * 100, 1) : 0;
+                }
+                <div class="insight-card mb-3" style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1px solid #fed7aa;">
+                    <div style="font-size:0.7rem;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:1px;">Most Common Crime</div>
+                    <div style="font-size:1.1rem;font-weight:800;color:#92400e;margin-top:4px;">@ViewBag.MostCommonCrime</div>
+                    <div style="font-size:0.75rem;color:#78350f;">@ViewBag.MostCommonCrimeCount cases registered</div>
+                </div>
+                <div class="insight-card mb-3" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #93c5fd;">
+                    <div style="font-size:0.7rem;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:1px;">Highest Risk Prison</div>
+                    <div style="font-size:1.1rem;font-weight:800;color:#1e40af;margin-top:4px;">@ViewBag.HighestCasePrison</div>
+                    <div style="font-size:0.75rem;color:#1e3a8a;">@ViewBag.HighestCasePrisonCount cases registered</div>
+                </div>
+                <div class="insight-card mb-3" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;">
+                    <div style="font-size:0.7rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:1px;">Case Closure Rate</div>
+                    <div style="font-size:1.6rem;font-weight:900;color:#166534;margin-top:4px;">@closureRate%</div>
+                    <div style="font-size:0.75rem;color:#14532d;">@closed of @total cases closed</div>
+                </div>
+                <div class="insight-card" style="background:linear-gradient(135deg,#fef2f2,#fecaca);border:1px solid #fca5a5;">
+                    <div style="font-size:0.7rem;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:1px;">Open Case Rate</div>
+                    <div style="font-size:1.6rem;font-weight:900;color:#991b1b;margin-top:4px;">
+                        @(total > 0 ? Math.Round((double)open / total * 100, 1) : 0)%
+                    </div>
+                    <div style="font-size:0.75rem;color:#7f1d1d;">@open cases still open</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Quick Reports section ──────────────────────────────────── -->
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-file-alt me-2"></i>Quick Reports &amp; Exports</div>
+    <div class="card-body">
+        <div class="row g-3">
+            @foreach (var cat in new[]{"","Open","Closed","Under Review","Dismissed"})
+            {
+                var label = string.IsNullOrEmpty(cat) ? "All Cases" : cat + " Cases";
+                <div class="col-md-2dot4">
+                    <a href="/CaseReports/ExportExcel?caseStatus=@cat"
+                       class="btn btn-outline-success w-100 btn-sm"><i class="fas fa-file-excel me-1"></i>@label</a>
+                </div>
+            }
+        </div>
+        <div class="row g-3 mt-1">
+            @foreach (var crime in PPMS.Controllers.CaseReportsController.CrimeCategories.Take(5))
+            {
+                <div class="col-md-2dot4">
+                    <a href="/CaseReports/ExportExcel?crimeType=@crime"
+                       class="btn btn-outline-secondary w-100 btn-sm"><i class="fas fa-download me-1"></i>@crime</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+.col-md-2dot4 { flex:0 0 auto; width:20%; }
+@@media (max-width:767px) { .col-md-2dot4 { width:50%; } }
+</style>
+
+@section Scripts {
+<script>
+var isDark   = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+var gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+var textColor = isDark ? '#94a3b8' : '#64748b';
+var crimeColors = ['#dc2626','#ea580c','#d97706','#0891b2','#059669','#7c3aed','#be123c','#2563eb','#1565c0','#6b7280'];
+var statusColors = ['#d97706','#2563eb','#16a34a','#6b7280'];
+
+Chart.defaults.color = textColor;
+Chart.defaults.borderColor = gridColor;
+
+function baseOpts(legend) {
+    return {
+        responsive:true,
+        plugins:{
+            legend:{ display:!!legend, labels:{ color:textColor, font:{size:11} } },
+            tooltip:{ backgroundColor:isDark?'#1e293b':'#fff', titleColor:isDark?'#e2e8f0':'#0f172a', bodyColor:isDark?'#94a3b8':'#64748b', borderColor:gridColor, borderWidth:1, padding:10 }
+        }
+    };
+}
+
+// Cases by crime type
+$.getJSON('/api/charts/cases-by-type', function(d) {
+    new Chart(document.getElementById('crimeTypeChart'), {
+        type:'bar',
+        data:{ labels:d.map(x=>x.label), datasets:[{ label:'Cases', data:d.map(x=>x.count), backgroundColor:crimeColors, borderRadius:6, borderWidth:0 }] },
+        options:{ ...baseOpts(false), scales:{ y:{ beginAtZero:true, ticks:{color:textColor,stepSize:1}, grid:{color:gridColor} }, x:{ ticks:{color:textColor}, grid:{display:false} } } }
+    });
+});
+
+// Case status doughnut
+$.getJSON('/api/charts/cases-by-status', function(d) {
+    new Chart(document.getElementById('statusChart'), {
+        type:'doughnut',
+        data:{ labels:d.map(x=>x.label), datasets:[{ data:d.map(x=>x.count), backgroundColor:statusColors, borderWidth:2, borderColor:isDark?'#1e293b':'#fff' }] },
+        options:{ ...baseOpts(true), cutout:'65%', plugins:{...baseOpts(true).plugins, legend:{position:'bottom', labels:{padding:10, font:{size:10}, color:textColor}}} }
+    });
+});
+
+// Monthly trend
+$.getJSON('/api/charts/cases-monthly', function(d) {
+    new Chart(document.getElementById('monthlyChart'), {
+        type:'line',
+        data:{ labels:d.map(x=>x.label), datasets:[{ label:'Cases', data:d.map(x=>x.count), borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,0.08)', fill:true, tension:0.4, pointBackgroundColor:'#dc2626', pointRadius:4 }] },
+        options:{ ...baseOpts(false), scales:{ y:{beginAtZero:true, ticks:{stepSize:1,color:textColor}, grid:{color:gridColor}}, x:{ticks:{color:textColor,font:{size:10}}, grid:{display:false}} } }
+    });
+});
+
+// Cases by prison
+$.getJSON('/api/charts/cases-by-prison', function(d) {
+    new Chart(document.getElementById('prisonChart'), {
+        type:'bar',
+        data:{ labels:d.map(x=>x.label), datasets:[{ label:'Cases', data:d.map(x=>x.count), backgroundColor:'rgba(220,38,38,0.7)', borderColor:'#dc2626', borderWidth:2, borderRadius:6 }] },
+        options:{ ...baseOpts(false), indexAxis:'y', scales:{ x:{beginAtZero:true, ticks:{stepSize:1,color:textColor}, grid:{color:gridColor}}, y:{ticks:{color:textColor,font:{size:10}}, grid:{display:false}} } }
+    });
+});
+
+// Annual volume
+$.getJSON('/api/charts/cases-by-year', function(d) {
+    new Chart(document.getElementById('yearChart'), {
+        type:'bar',
+        data:{ labels:d.map(x=>x.label), datasets:[{ label:'Cases', data:d.map(x=>x.count), backgroundColor:crimeColors, borderRadius:8, borderWidth:0 }] },
+        options:{ ...baseOpts(false), scales:{ y:{beginAtZero:true, ticks:{stepSize:1,color:textColor}, grid:{color:gridColor}}, x:{ticks:{color:textColor}, grid:{display:false}} } }
+    });
+});
+
+// Investigation status
+$.getJSON('/api/charts/cases-investigation', function(d) {
+    new Chart(document.getElementById('investigationChart'), {
+        type:'doughnut',
+        data:{ labels:d.map(x=>x.label), datasets:[{ data:d.map(x=>x.count), backgroundColor:['#0891b2','#d97706','#16a34a','#6b7280'], borderWidth:2, borderColor:isDark?'#1e293b':'#fff' }] },
+        options:{ ...baseOpts(true), cutout:'65%', plugins:{...baseOpts(true).plugins, legend:{position:'bottom', labels:{padding:10, font:{size:10}, color:textColor}}} }
+    });
+});
+</script>
+}

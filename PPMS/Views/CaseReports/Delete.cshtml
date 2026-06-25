@@ -1,0 +1,22 @@
+@model PPMS.Models.CaseReport
+@{ ViewData["Title"] = "Delete Case Report"; }
+<div class="page-header"><h2><i class="fas fa-trash me-2 text-danger"></i>Delete Case Report</h2></div>
+<div class="card" style="max-width:560px;margin:0 auto;">
+    <div class="card-body text-center py-5">
+        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+        <h5>Are you sure you want to permanently delete this case?</h5>
+        <p class="text-muted">This action cannot be undone. All associated files will also be deleted.</p>
+        <div class="alert alert-warning text-start">
+            <strong>@Model.CaseId</strong> — @Model.CaseTitle<br/>
+            Crime: <span class="badge bg-secondary">@Model.CrimeType</span>
+            &mdash; Status: @Model.CaseStatus<br/>
+            Registered: @Model.DateReported.ToString("MMM dd, yyyy")
+        </div>
+        <form asp-action="Delete" method="post" class="d-inline-block me-2">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger"><i class="fas fa-trash me-1"></i>Yes, Delete</button>
+        </form>
+        <a href="/CaseReports/Details/@Model.Id" class="btn btn-outline-secondary"><i class="fas fa-times me-1"></i>Cancel</a>
+    </div>
+</div>

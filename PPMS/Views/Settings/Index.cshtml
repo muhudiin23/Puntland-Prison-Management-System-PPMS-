@@ -1,0 +1,358 @@
+@model PPMS.Models.ViewModels.SettingsViewModel
+@{ ViewData["Title"] = "Settings"; }
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2><i class="fas fa-cog me-2" style="color:#7c3aed;"></i>Settings &amp; Profile</h2>
+    <span class="badge bg-success px-3 py-2"><i class="fas fa-shield-alt me-1"></i>Secure</span>
+</div>
+
+<div class="row g-4">
+    <!-- LEFT: Nav pills -->
+    <div class="col-lg-3">
+        <div class="card">
+            <div class="card-body p-2">
+                <!-- Profile summary -->
+                <div class="text-center py-3 mb-1 border-bottom">
+                    <div id="photoDisplay" class="mx-auto mb-2"
+                         style="width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid #e2e8f0;background:#f8fafc;display:flex;align-items:center;justify-content:center;">
+                        @if (!string.IsNullOrEmpty(Model.ProfilePhotoPath))
+                        {
+                            <img src="@Model.ProfilePhotoPath" style="width:100%;height:100%;object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <span style="font-size:2rem;font-weight:800;color:#1565c0;">@(Model.FullName.Length > 0 ? Model.FullName[0].ToString().ToUpper() : "?")</span>
+                        }
+                    </div>
+                    <div style="font-weight:700;font-size:0.9rem;">@Model.FullName</div>
+                    <div class="text-muted" style="font-size:0.75rem;">@@@Model.Username</div>
+                    <span class="badge mt-1" style="background:@(Model.Role=="SuperAdmin"?"#dc2626":Model.Role=="PrisonAdministrator"?"#d97706":"#0891b2");font-size:0.65rem;">
+                        @Model.Role
+                    </span>
+                </div>
+                <div class="nav flex-column nav-pills" id="settingsTab" role="tablist">
+                    <a class="nav-link active d-flex align-items-center gap-2 mb-1" data-bs-toggle="pill" href="#profile" id="profile-tab">
+                        <i class="fas fa-user" style="width:16px;text-align:center;"></i> Profile
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2 mb-1" data-bs-toggle="pill" href="#security" id="security-tab">
+                        <i class="fas fa-shield-alt" style="width:16px;text-align:center;"></i> Security
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2 mb-1" data-bs-toggle="pill" href="#appearance" id="appearance-tab">
+                        <i class="fas fa-palette" style="width:16px;text-align:center;"></i> Appearance
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2" data-bs-toggle="pill" href="#account-info">
+                        <i class="fas fa-info-circle" style="width:16px;text-align:center;"></i> Account Info
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Tab content -->
+    <div class="col-lg-9">
+        <div class="tab-content">
+
+            <!-- ── PROFILE TAB ─────────────────── -->
+            <div class="tab-pane fade show active" id="profile">
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-camera me-2"></i>Profile Photo</div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-4 flex-wrap">
+                            <div id="previewWrap" style="width:100px;height:100px;border-radius:50%;overflow:hidden;border:3px solid #e2e8f0;background:#f8fafc;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                                @if (!string.IsNullOrEmpty(Model.ProfilePhotoPath))
+                                {
+                                    <img id="photoPreview" src="@Model.ProfilePhotoPath" style="width:100%;height:100%;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <span id="photoPreview" style="font-size:2.5rem;font-weight:800;color:#1565c0;">@(Model.FullName.Length > 0 ? Model.FullName[0].ToString().ToUpper() : "?")</span>
+                                }
+                            </div>
+                            <div>
+                                <form asp-action="UpdateProfile" method="post" enctype="multipart/form-data" id="photoForm">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="FullName" value="@Model.FullName" />
+                                    <input type="hidden" name="Username" value="@Model.Username" />
+                                    <input type="hidden" name="Email" value="@Model.Email" />
+                                    <input type="hidden" name="PhoneNumber" value="@Model.PhoneNumber" />
+                                    <input type="hidden" name="Theme" value="@Model.Theme" />
+                                    <input type="file" name="profilePhoto" id="photoInput" class="d-none" accept="image/jpeg,image/png,image/gif,image/webp" />
+                                    <label for="photoInput" class="btn btn-outline-primary btn-sm mb-2 me-2" style="cursor:pointer;">
+                                        <i class="fas fa-upload me-1"></i>Upload Photo
+                                    </label>
+                                    <button type="submit" id="photoSaveBtn" class="btn btn-primary btn-sm mb-2 me-2" style="display:none;">
+                                        <i class="fas fa-save me-1"></i>Save Photo
+                                    </button>
+                                </form>
+                                @if (!string.IsNullOrEmpty(Model.ProfilePhotoPath))
+                                {
+                                    <form asp-action="RemovePhoto" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-danger btn-sm mb-2"
+                                                onclick="return confirm('Remove profile photo?')">
+                                            <i class="fas fa-trash me-1"></i>Remove
+                                        </button>
+                                    </form>
+                                }
+                                <p class="text-muted small mb-0">JPG, PNG, GIF or WebP — max 5MB.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-id-card me-2"></i>Personal Information</div>
+                    <div class="card-body">
+                        <form asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input name="FullName" value="@Model.FullName" class="form-control" required maxlength="150" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">@@</span>
+                                        <input name="Username" value="@Model.Username" class="form-control" required maxlength="100" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Email Address</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                        <input name="Email" value="@Model.Email" type="email" class="form-control" maxlength="200" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Phone Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                        <input name="PhoneNumber" value="@Model.PhoneNumber" type="tel" class="form-control" maxlength="20" pattern="[+\d\s\-()]+" />
+                                    </div>
+                                </div>
+                                <input type="hidden" name="Theme" value="@Model.Theme" />
+                                <div class="col-12 d-flex gap-2 mt-1">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Save Profile
+                                    </button>
+                                    <a href="/" class="btn btn-outline-secondary">Cancel</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── SECURITY TAB ────────────────── -->
+            <div class="tab-pane fade" id="security">
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-key me-2"></i>Change Password</div>
+                    <div class="card-body" style="max-width:500px;">
+                        <div class="alert alert-info d-flex align-items-center gap-2 mb-3" style="font-size:0.82rem;border-radius:10px;">
+                            <i class="fas fa-info-circle"></i>
+                            Password must be at least 8 characters and contain letters and numbers.
+                        </div>
+                        <form asp-action="ChangePassword" method="post">
+                            @Html.AntiForgeryToken()
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Current Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input name="CurrentPassword" type="password" class="form-control" required id="cp" />
+                                    <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('cp')"><i class="fas fa-eye"></i></button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">New Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock-open"></i></span>
+                                    <input name="NewPassword" type="password" class="form-control" required minlength="8" id="np" oninput="checkStrength(this.value)" />
+                                    <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('np')"><i class="fas fa-eye"></i></button>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="progress" style="height:5px;border-radius:3px;">
+                                        <div id="strengthBar" class="progress-bar" style="width:0%;transition:width 0.3s;"></div>
+                                    </div>
+                                    <small id="strengthLabel" class="text-muted"></small>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Confirm New Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-check-circle"></i></span>
+                                    <input name="ConfirmPassword" type="password" class="form-control" required id="cfp" />
+                                    <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('cfp')"><i class="fas fa-eye"></i></button>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-danger w-100">
+                                <i class="fas fa-shield-alt me-2"></i>Update Password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-history me-2"></i>Login History</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="p-3 rounded" style="background:var(--bs-secondary-bg);">
+                                    <div class="text-muted" style="font-size:0.75rem;">Last Login</div>
+                                    <div class="fw-bold">@(Model.LastLoginAt?.ToString("MMM dd, yyyy HH:mm") ?? "N/A")</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 rounded" style="background:var(--bs-secondary-bg);">
+                                    <div class="text-muted" style="font-size:0.75rem;">Last IP Address</div>
+                                    <div class="fw-bold">@(Model.LastLoginIp ?? "N/A")</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 rounded" style="background:var(--bs-secondary-bg);">
+                                    <div class="text-muted" style="font-size:0.75rem;">Total Logins</div>
+                                    <div class="fw-bold">@Model.LoginCount times</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── APPEARANCE TAB ─────────────── -->
+            <div class="tab-pane fade" id="appearance">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-palette me-2"></i>Theme &amp; Appearance</div>
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3">Color Theme</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="theme-option @(Model.Theme=="light"?"selected":"")" onclick="setTheme('light')"
+                                     style="border:2px solid @(Model.Theme=="light"?"#1565c0":"var(--bs-border-color)");border-radius:14px;padding:20px;cursor:pointer;transition:all 0.2s;text-align:center;">
+                                    <div style="width:60px;height:40px;background:#f0f4f8;border-radius:8px;margin:0 auto 10px;border:1px solid #e2e8f0;"></div>
+                                    <div style="font-weight:600;font-size:0.9rem;">Light Mode</div>
+                                    <small class="text-muted">Clean &amp; professional</small>
+                                    @if (Model.Theme == "light") { <div class="mt-2"><i class="fas fa-check-circle text-primary"></i></div> }
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="theme-option @(Model.Theme=="dark"?"selected":"")" onclick="setTheme('dark')"
+                                     style="border:2px solid @(Model.Theme=="dark"?"#1565c0":"var(--bs-border-color)");border-radius:14px;padding:20px;cursor:pointer;transition:all 0.2s;text-align:center;">
+                                    <div style="width:60px;height:40px;background:#0f172a;border-radius:8px;margin:0 auto 10px;border:1px solid #1e293b;"></div>
+                                    <div style="font-weight:600;font-size:0.9rem;">Dark Mode</div>
+                                    <small class="text-muted">Easy on the eyes</small>
+                                    @if (Model.Theme == "dark") { <div class="mt-2"><i class="fas fa-check-circle text-primary"></i></div> }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-secondary d-flex align-items-center gap-2" style="font-size:0.82rem;">
+                            <i class="fas fa-info-circle"></i>
+                            You can also toggle the theme using the <i class="fas fa-moon"></i> / <i class="fas fa-sun"></i> button in the top navigation bar.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── ACCOUNT INFO TAB ───────────── -->
+            <div class="tab-pane fade" id="account-info">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-info-circle me-2"></i>Account Information</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="text-muted" style="font-size:0.75rem;">Full Name</label>
+                                <div class="fw-semibold">@Model.FullName</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted" style="font-size:0.75rem;">Username</label>
+                                <div class="fw-semibold">@@@Model.Username</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted" style="font-size:0.75rem;">Email</label>
+                                <div class="fw-semibold">@(Model.Email ?? "Not set")</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted" style="font-size:0.75rem;">Phone</label>
+                                <div class="fw-semibold">@(Model.PhoneNumber ?? "Not set")</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted" style="font-size:0.75rem;">System Role</label>
+                                <div><span class="badge" style="background:@(Model.Role=="SuperAdmin"?"#dc2626":Model.Role=="PrisonAdministrator"?"#d97706":"#0891b2");">@Model.Role</span></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted" style="font-size:0.75rem;">Prison Assigned</label>
+                                <div class="fw-semibold">@(Model.PrisonAssigned ?? "All Prisons")</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted" style="font-size:0.75rem;">Account Created</label>
+                                <div class="fw-semibold">@Model.CreatedAt.ToString("MMMM dd, yyyy")</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted" style="font-size:0.75rem;">Last Login</label>
+                                <div class="fw-semibold">@(Model.LastLoginAt?.ToString("MMM dd, yyyy HH:mm") ?? "First login")</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+// Photo preview
+document.getElementById('photoInput')?.addEventListener('change', function () {
+    if (this.files[0]) {
+        var r = new FileReader();
+        r.onload = function (e) {
+            var wrap = document.getElementById('previewWrap');
+            wrap.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;" />';
+            document.getElementById('photoSaveBtn').style.display = 'inline-flex';
+        };
+        r.readAsDataURL(this.files[0]);
+    }
+});
+
+// Tab activation from URL hash
+var hash = window.location.hash;
+if (hash) { var tab = document.querySelector('[href="' + hash + '"]'); if (tab) new bootstrap.Tab(tab).show(); }
+
+// Toggle password visibility
+function togglePwd(id) {
+    var el = document.getElementById(id);
+    el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+// Password strength checker
+function checkStrength(val) {
+    var bar = document.getElementById('strengthBar');
+    var lbl = document.getElementById('strengthLabel');
+    var score = 0;
+    if (val.length >= 8) score++;
+    if (val.length >= 12) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    var levels = [{w:20,c:'bg-danger',t:'Very Weak'},{w:40,c:'bg-warning',t:'Weak'},{w:60,c:'bg-info',t:'Fair'},{w:80,c:'bg-primary',t:'Strong'},{w:100,c:'bg-success',t:'Very Strong'}];
+    var l = levels[Math.min(score, 4)];
+    bar.style.width = l.w + '%';
+    bar.className = 'progress-bar ' + l.c;
+    lbl.textContent = l.t;
+}
+
+// Set theme
+function setTheme(t) {
+    var token = document.querySelector('input[name="__RequestVerificationToken"]');
+    if (!token) return;
+    $.post('/Settings/UpdateTheme', { theme: t, __RequestVerificationToken: token.value }, function () {
+        document.documentElement.setAttribute('data-bs-theme', t);
+        window.location.reload();
+    });
+}
+</script>
+}

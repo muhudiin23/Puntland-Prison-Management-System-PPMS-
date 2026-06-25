@@ -1,0 +1,95 @@
+@model PPMS.Models.Prisoner
+@{ ViewData["Title"] = "Archive Prisoner Record"; }
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-archive me-2" style="color:#d97706;"></i>Archive Prisoner Record</h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">The record will be preserved permanently in the Former Prisoners Archive</p>
+    </div>
+    <a href="/Prisoners" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back to Records</a>
+</div>
+
+<div style="max-width:600px;margin:0 auto;">
+    <div class="alert d-flex gap-3 align-items-start mb-4" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #f59e0b;border-left:4px solid #d97706;border-radius:12px;">
+        <i class="fas fa-shield-alt mt-1" style="color:#d97706;font-size:1.2rem;flex-shrink:0;"></i>
+        <div>
+            <strong style="color:#92400e;">Data Protection Guaranteed</strong>
+            <p class="mb-0 mt-1" style="font-size:0.84rem;color:#78350f;">
+                This record will <strong>never be permanently deleted</strong>. It will be moved to the
+                <strong>Former Prisoners Archive</strong> where it remains fully accessible for auditing,
+                investigation, and future reference. Administrators can restore it at any time.
+            </p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header" style="background:linear-gradient(135deg,#7c3a00,#d97706);">
+            <i class="fas fa-user-lock me-2"></i>Prisoner to Archive
+        </div>
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                @if (!string.IsNullOrEmpty(Model.PhotoPath))
+                {
+                    <img src="@Model.PhotoPath" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:3px solid #e2e8f0;" />
+                }
+                else
+                {
+                    <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#d97706,#f59e0b);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.4rem;flex-shrink:0;">
+                        @(Model.FullName.Length > 0 ? Model.FullName[0].ToString().ToUpper() : "?")
+                    </div>
+                }
+                <div>
+                    <h5 class="mb-0 fw-bold">@Model.FullName</h5>
+                    <div class="text-muted" style="font-size:0.82rem;">
+                        <code>@Model.PrisonerId</code> &bull; @Model.Gender &bull; @Model.NationalId
+                    </div>
+                </div>
+            </div>
+            <div class="row g-2" style="font-size:0.85rem;">
+                <div class="col-6"><span class="text-muted">Crime:</span> <strong>@Model.CrimeType</strong></div>
+                <div class="col-6"><span class="text-muted">Prison:</span> <strong>@Model.Prison?.PrisonName</strong></div>
+                <div class="col-6"><span class="text-muted">Entry:</span> <strong>@Model.EntryDate.ToString("MMM dd, yyyy")</strong></div>
+                <div class="col-6"><span class="text-muted">Release:</span> <strong>@Model.ReleaseDate.ToString("MMM dd, yyyy")</strong></div>
+                <div class="col-6"><span class="text-muted">Sentence:</span> <strong>@Model.SentenceDurationMonths months</strong></div>
+                <div class="col-6"><span class="text-muted">Status:</span>
+                    <span class="badge @(Model.CriminalStatus=="Active"?"bg-danger":Model.CriminalStatus=="Released"?"bg-success":"bg-secondary")">@Model.CriminalStatus</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Delete" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-clipboard-list me-2"></i>Archive Details</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Archive Reason <span class="text-danger">*</span></label>
+                    <select name="archiveReason" class="form-select" required>
+                        <option value="">— Select reason —</option>
+                        <option value="Released">Released — Sentence completed / early release</option>
+                        <option value="Transferred">Transferred — Moved to external facility</option>
+                        <option value="Deceased">Deceased — Prisoner passed away</option>
+                        <option value="Administrative">Administrative — Admin / system action</option>
+                    </select>
+                    <div class="form-text">This will update the prisoner's final status in the archive.</div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-semibold">Additional Notes <span class="text-muted fw-normal">(optional)</span></label>
+                    <textarea name="archiveNotes" class="form-control" rows="3"
+                              placeholder="Add any relevant notes about this archival (transfer destination, circumstances, etc.)..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-3 justify-content-end">
+            <a href="/Prisoners" class="btn btn-outline-secondary"><i class="fas fa-times me-1"></i>Cancel</a>
+            <button type="submit" class="btn btn-warning text-dark fw-bold"
+                    onclick="return confirm('Confirm: Move this prisoner record to the archive?')">
+                <i class="fas fa-archive me-1"></i>Archive Record
+            </button>
+        </div>
+    </form>
+</div>

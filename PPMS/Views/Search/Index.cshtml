@@ -1,0 +1,127 @@
+@{ ViewData["Title"] = "Criminal Search"; }
+<div class="page-header"><h2><i class="fas fa-search me-2" style="color:#0891b2;"></i>Criminal Search & Detection</h2></div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Search Query</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input name="query" value="@ViewBag.Query" class="form-control form-control-lg" placeholder="Enter name, national ID, or prisoner ID..." autofocus />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Search Type</label>
+                <select name="searchType" class="form-select form-select-lg">
+                    <option value="">All Fields</option>
+                    <option value="name" selected="@(ViewBag.SearchType=="name")">By Name</option>
+                    <option value="nationalid" selected="@(ViewBag.SearchType=="nationalid")">By National ID</option>
+                    <option value="prisonerid" selected="@(ViewBag.SearchType=="prisonerid")">By Prisoner ID</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary btn-lg w-100"><i class="fas fa-search me-2"></i>Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (ViewBag.Query != null) {
+    var prisoners  = ViewBag.Prisoners         as List<PPMS.Models.Prisoner>       ?? new();
+    var archived   = ViewBag.ArchivedPrisoners as List<PPMS.Models.Prisoner>       ?? new();
+    var wanted     = ViewBag.WantedCriminals   as List<PPMS.Models.WantedCriminal> ?? new();
+    int total      = prisoners.Count + archived.Count + wanted.Count;
+
+    <div class="alert @(total > 0 ? "alert-info" : "alert-warning")">
+        <i class="fas @(total > 0 ? "fa-info-circle" : "fa-exclamation-circle") me-2"></i>
+        Found <strong>@prisoners.Count</strong> active prisoner(s),
+        <strong>@archived.Count</strong> archived record(s), and
+        <strong>@wanted.Count</strong> wanted criminal(s) for "<strong>@ViewBag.Query</strong>"
+    </div>
+
+    if (wanted.Any()) {
+        <div class="card mb-4 border-danger">
+            <div class="card-header bg-danger text-white"><i class="fas fa-exclamation-triangle me-2"></i>WANTED CRIMINALS MATCH (@wanted.Count)</div>
+            <div class="card-body p-0">
+                <table class="table mb-0">
+                    <thead><tr><th>Photo</th><th>Name</th><th>National ID</th><th>Crime</th><th>Location</th><th>Risk</th><th>Action</th></tr></thead>
+                    <tbody>
+                        @foreach (var w in wanted) {
+                            <tr class="table-danger">
+                                <td>@if (!string.IsNullOrEmpty(w.PhotoPath)) { <img src="@w.PhotoPath" style="width:40px;height:45px;object-fit:cover;border-radius:4px;" /> } else { <div style="width:40px;height:45px;background:#fecaca;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#dc2626;">?</div> }</td>
+                                <td><strong>@w.CriminalName</strong></td>
+                                <td>@w.NationalId</td>
+                                <td>@w.CrimeDescription</td>
+                                <td>@w.LastKnownLocation</td>
+                                <td><span class="badge @(w.RiskLevel=="Critical"?"bg-danger":w.RiskLevel=="High"?"bg-warning text-dark":"bg-secondary")">@w.RiskLevel</span></td>
+                                <td><a href="/WantedCriminals/Details/@w.Id" class="btn btn-sm btn-danger">View</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    if (prisoners.Any()) {
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-user-lock me-2"></i>Active Prisoner Records (@prisoners.Count)</div>
+            <div class="card-body p-0">
+                <table class="table mb-0">
+                    <thead><tr><th>Photo</th><th>Prisoner ID</th><th>Name</th><th>National ID</th><th>Crime</th><th>Prison</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody>
+                        @foreach (var p in prisoners) {
+                            <tr>
+                                <td>@if (!string.IsNullOrEmpty(p.PhotoPath)) { <img src="@p.PhotoPath" style="width:40px;height:40px;object-fit:cover;border-radius:50%;" /> } else { <div style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#94a3b8;"><i class="fas fa-user"></i></div> }</td>
+                                <td><code>@p.PrisonerId</code></td>
+                                <td><strong>@p.FullName</strong></td>
+                                <td>@p.NationalId</td>
+                                <td>@p.CrimeType</td>
+                                <td>@p.Prison?.PrisonName</td>
+                                <td><span class="badge @(p.CriminalStatus=="Active"?"bg-danger":p.CriminalStatus=="Released"?"bg-success":"bg-secondary")">@p.CriminalStatus</span></td>
+                                <td><a href="/Prisoners/Details/@p.Id" class="btn btn-sm btn-outline-primary">View</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    @if (archived.Any()) {
+        <div class="card">
+            <div class="card-header" style="background:linear-gradient(135deg,#78350f,#d97706);">
+                <i class="fas fa-archive me-2"></i>Former Prisoners Archive (@archived.Count)
+                <span class="badge bg-warning text-dark ms-2" style="font-size:0.7rem;">Historical Records</span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table mb-0">
+                    <thead><tr><th>Photo</th><th>Prisoner ID</th><th>Name</th><th>National ID</th><th>Crime</th><th>Prison</th><th>Archive Status</th><th>Archived</th><th>Action</th></tr></thead>
+                    <tbody>
+                        @foreach (var p in archived) {
+                            <tr style="opacity:0.85;">
+                                <td>@if (!string.IsNullOrEmpty(p.PhotoPath)) { <img src="@p.PhotoPath" style="width:40px;height:40px;object-fit:cover;border-radius:50%;filter:grayscale(0.3);" /> } else { <div style="width:40px;height:40px;background:#d1d5db;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#6b7280;font-weight:700;">@(p.FullName.Length>0?p.FullName[0].ToString().ToUpper():"?")</div> }</td>
+                                <td><code>@p.PrisonerId</code></td>
+                                <td><strong>@p.FullName</strong></td>
+                                <td>@p.NationalId</td>
+                                <td>@p.CrimeType</td>
+                                <td>@p.Prison?.PrisonName</td>
+                                <td>
+                                    @{
+                                        var r=p.ArchiveReason??"Administrative";
+                                        var rc=r=="Released"?"#166534":r=="Transferred"?"#1e40af":r=="Deceased"?"#374151":"#92400e";
+                                        var rb=r=="Released"?"#dcfce7":r=="Transferred"?"#dbeafe":r=="Deceased"?"#f3f4f6":"#fef3c7";
+                                    }
+                                    <span style="background:@rb;color:@rc;font-size:0.7rem;padding:2px 9px;border-radius:20px;font-weight:700;">@r</span>
+                                </td>
+                                <td style="font-size:0.8rem;">@(p.ArchivedAt?.ToString("MMM dd, yyyy") ?? "—")</td>
+                                <td><a href="/FormerPrisoners/Details/@p.Id" class="btn btn-sm btn-outline-warning">View Archive</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}

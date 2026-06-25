@@ -1,0 +1,459 @@
+@model PPMS.Models.ViewModels.DashboardViewModel
+@{ ViewData["Title"] = "Dashboard"; }
+
+<style>
+/* ── Enhanced dashboard cards ─────────────────────────── */
+.mod-card {
+    position: relative; border-radius: 20px; padding: 22px 20px 18px;
+    overflow: hidden; cursor: pointer; min-height: 150px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    transition: transform 0.22s ease, box-shadow 0.28s ease;
+    border: none;
+}
+.mod-card:hover { transform: translateY(-6px); }
+.mod-card .mod-svg {
+    position: absolute; right: -6px; top: 50%;
+    transform: translateY(-50%); opacity: 0.13; pointer-events: none;
+}
+.mod-card .mod-label {
+    font-size: 0.68rem; font-weight: 800; color: rgba(255,255,255,0.75);
+    text-transform: uppercase; letter-spacing: 1.8px; margin-bottom: 4px;
+}
+.mod-card .mod-num {
+    font-size: 3rem; font-weight: 900; color: #fff;
+    line-height: 1; letter-spacing: -2px;
+}
+.mod-card .mod-link {
+    color: rgba(255,255,255,0.82); font-size: 0.72rem; font-weight: 700;
+    text-decoration: none; border: 1px solid rgba(255,255,255,0.32);
+    padding: 5px 16px; border-radius: 30px;
+    transition: background 0.15s, color 0.15s; letter-spacing: 0.4px;
+    display: inline-block;
+}
+.mod-card .mod-link:hover { background: rgba(255,255,255,0.22); color: #fff; }
+.mod-card .mod-icon {
+    width: 38px; height: 38px; border-radius: 12px;
+    background: rgba(255,255,255,0.15); display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+}
+/* Secondary mini cards */
+.mini-card {
+    position: relative; border-radius: 18px; padding: 18px 20px;
+    overflow: hidden; display: flex; align-items: center; gap: 16px;
+    min-height: 88px; border: none;
+    transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+.mini-card:hover { transform: translateY(-4px); }
+.mini-card .mini-icon {
+    width: 50px; height: 50px; border-radius: 14px;
+    background: rgba(255,255,255,0.18); display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+}
+.mini-card .mini-num { font-size: 2rem; font-weight: 900; color: #fff; line-height: 1; }
+.mini-card .mini-label { font-size: 0.72rem; font-weight: 700; color: rgba(255,255,255,0.75); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+@@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+</style>
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-tachometer-alt me-2" style="color:#1565c0;"></i>System Dashboard</h2>
+        <p class="text-muted mb-0" style="font-size:0.82rem;">Real-time overview of all Puntland prison operations</p>
+    </div>
+    <span class="badge bg-success px-3 py-2 d-flex align-items-center gap-1">
+        <span style="width:7px;height:7px;border-radius:50%;background:#fff;display:inline-block;animation:pulse 1.5s infinite;"></span>
+        SYSTEM ONLINE
+    </span>
+</div>
+
+<!-- ── Main stat cards ──────────────────────────────────────────── -->
+<div class="row g-4 mb-4">
+
+    <!-- Prisoners -->
+    <div class="col-6 col-xl-3">
+        <div class="mod-card" onclick="window.location='/Prisoners'"
+             style="background:linear-gradient(140deg,#0a3170 0%,#1565c0 55%,#1e88e5 100%);box-shadow:0 10px 30px rgba(13,71,161,0.4);">
+            <!-- Prison bars + inmate watermark -->
+            <svg class="mod-svg" width="140" height="130" viewBox="0 0 140 130" fill="none">
+                <rect x="4"  y="0" width="9" height="118" rx="4.5" fill="white"/>
+                <rect x="28" y="0" width="9" height="118" rx="4.5" fill="white"/>
+                <rect x="52" y="0" width="9" height="118" rx="4.5" fill="white"/>
+                <rect x="76" y="0" width="9" height="118" rx="4.5" fill="white"/>
+                <rect x="100" y="0" width="9" height="118" rx="4.5" fill="white"/>
+                <rect x="0" y="22" width="115" height="8" rx="4" fill="white"/>
+                <rect x="0" y="80" width="115" height="8" rx="4" fill="white"/>
+                <circle cx="128" cy="44" r="17" fill="white"/>
+                <path d="M104 130 C106 96 116 84 128 84 C140 84 140 96 140 130Z" fill="white"/>
+                <ellipse cx="123" cy="106" rx="8" ry="5" fill="none" stroke="white" stroke-width="3.5"/>
+                <ellipse cx="135" cy="106" rx="8" ry="5" fill="none" stroke="white" stroke-width="3.5"/>
+                <rect x="127" y="103" width="10" height="6" fill="white"/>
+            </svg>
+            <div style="position:relative;z-index:1;">
+                <div class="mod-label">Total Prisoners</div>
+                <div class="mod-num">@Model.TotalPrisoners</div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center" style="position:relative;z-index:1;">
+                <a href="/Prisoners" class="mod-link" onclick="event.stopPropagation()"><i class="fas fa-arrow-right me-1"></i>View Records</a>
+                <div class="mod-icon"><i class="fas fa-user-lock" style="color:#fff;font-size:1rem;"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff -->
+    <div class="col-6 col-xl-3">
+        <div class="mod-card" onclick="window.location='/Staff'"
+             style="background:linear-gradient(140deg,#1b4332 0%,#1a7a45 55%,#2e9e60 100%);box-shadow:0 10px 30px rgba(27,67,50,0.45);">
+            <!-- Officer badge + personnel watermark -->
+            <svg class="mod-svg" width="140" height="130" viewBox="0 0 140 130" fill="none">
+                <path d="M70 4 L122 26 L122 76 Q122 108 70 126 Q18 108 18 76 L18 26 Z" fill="white"/>
+                <path d="M70 14 L112 33 L112 74 Q112 102 70 118 Q28 102 28 74 L28 33 Z" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
+                <circle cx="70" cy="55" r="14" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="3"/>
+                <text x="70" y="63" text-anchor="middle" fill="rgba(0,0,0,0.12)" font-size="24" font-weight="900">★</text>
+                <circle cx="12" cy="28" r="11" fill="white" opacity="0.55"/>
+                <path d="M0 65 Q6 48 12 48 Q18 48 24 65" fill="white" opacity="0.55"/>
+                <circle cx="128" cy="28" r="11" fill="white" opacity="0.55"/>
+                <path d="M116 65 Q122 48 128 48 Q134 48 140 65" fill="white" opacity="0.55"/>
+                <rect x="42" y="118" width="56" height="8" rx="4" fill="white" opacity="0.4"/>
+            </svg>
+            <div style="position:relative;z-index:1;">
+                <div class="mod-label">Total Staff</div>
+                <div class="mod-num">@Model.TotalStaff</div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center" style="position:relative;z-index:1;">
+                <a href="/Staff" class="mod-link" onclick="event.stopPropagation()"><i class="fas fa-arrow-right me-1"></i>View Personnel</a>
+                <div class="mod-icon"><i class="fas fa-users-cog" style="color:#fff;font-size:1rem;"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prisons -->
+    <div class="col-6 col-xl-3">
+        <div class="mod-card" onclick="window.location='/Prisons'"
+             style="background:linear-gradient(140deg,#7c3a00 0%,#c06000 55%,#e07820 100%);box-shadow:0 10px 30px rgba(124,58,0,0.45);">
+            <!-- Prison facility / building watermark -->
+            <svg class="mod-svg" width="140" height="130" viewBox="0 0 140 130" fill="none">
+                <!-- Guard towers -->
+                <rect x="0"  y="28" width="22" height="100" rx="3" fill="white"/>
+                <rect x="3"  y="18" width="16" height="18" rx="2" fill="white"/>
+                <rect x="118" y="28" width="22" height="100" rx="3" fill="white"/>
+                <rect x="121" y="18" width="16" height="18" rx="2" fill="white"/>
+                <!-- Watchtower tops -->
+                <rect x="1" y="14" width="20" height="6" rx="1" fill="white"/>
+                <rect x="119" y="14" width="20" height="6" rx="1" fill="white"/>
+                <!-- Main building -->
+                <rect x="24" y="48" width="92" height="82" rx="2" fill="white"/>
+                <!-- Roof / gable -->
+                <polygon points="14,48 70,14 126,48" fill="white"/>
+                <!-- Windows row 1 -->
+                <rect x="32" y="58" width="14" height="13" rx="2" fill="rgba(0,0,0,0.14)"/>
+                <rect x="58" y="58" width="14" height="13" rx="2" fill="rgba(0,0,0,0.14)"/>
+                <rect x="84" y="58" width="14" height="13" rx="2" fill="rgba(0,0,0,0.14)"/>
+                <rect x="110" y="58" width="14" height="13" rx="2" fill="rgba(0,0,0,0.14)"/>
+                <!-- Windows row 2 -->
+                <rect x="32" y="82" width="14" height="13" rx="2" fill="rgba(0,0,0,0.14)"/>
+                <rect x="110" y="82" width="14" height="13" rx="2" fill="rgba(0,0,0,0.14)"/>
+                <!-- Door -->
+                <rect x="55" y="94" width="30" height="36" rx="3" fill="rgba(0,0,0,0.16)"/>
+                <!-- Fence line -->
+                <line x1="0" y1="128" x2="140" y2="128" stroke="white" stroke-width="4" opacity="0.5"/>
+                <line x1="20" y1="115" x2="20" y2="128" stroke="white" stroke-width="3" opacity="0.5"/>
+                <line x1="44" y1="115" x2="44" y2="128" stroke="white" stroke-width="3" opacity="0.5"/>
+                <line x1="96" y1="115" x2="96" y2="128" stroke="white" stroke-width="3" opacity="0.5"/>
+                <line x1="120" y1="115" x2="120" y2="128" stroke="white" stroke-width="3" opacity="0.5"/>
+            </svg>
+            <div style="position:relative;z-index:1;">
+                <div class="mod-label">Total Prisons</div>
+                <div class="mod-num">@Model.TotalPrisons</div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center" style="position:relative;z-index:1;">
+                <a href="/Prisons" class="mod-link" onclick="event.stopPropagation()"><i class="fas fa-arrow-right me-1"></i>View Facilities</a>
+                <div class="mod-icon" style="background:rgba(255,255,255,0.18);border-radius:12px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;">
+                    <img src="/images/spf-logo.png" style="width:26px;height:26px;object-fit:contain;background:#fff;border-radius:50%;padding:2px;" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wanted Criminals -->
+    <div class="col-6 col-xl-3">
+        <div class="mod-card" onclick="window.location='/WantedCriminals'"
+             style="background:linear-gradient(140deg,#7f0000 0%,#c62828 55%,#e53935 100%);box-shadow:0 10px 30px rgba(127,0,0,0.45);">
+            <!-- Magnifying glass + target watermark -->
+            <svg class="mod-svg" width="140" height="130" viewBox="0 0 140 130" fill="none">
+                <circle cx="52" cy="52" r="38" fill="none" stroke="white" stroke-width="11"/>
+                <line x1="79" y1="79" x2="128" y2="128" stroke="white" stroke-width="13" stroke-linecap="round"/>
+                <circle cx="52" cy="52" r="22" fill="none" stroke="white" stroke-width="4"/>
+                <circle cx="52" cy="52" r="8"  fill="white"/>
+                <line x1="30" y1="52" x2="74" y2="52" stroke="white" stroke-width="4"/>
+                <line x1="52" y1="30" x2="52" y2="74" stroke="white" stroke-width="4"/>
+                <polygon points="110,5 120,0 130,5 128,16 112,16" fill="white" opacity="0.55"/>
+                <polygon points="4,14 14,8 24,14 22,26 6,26" fill="white" opacity="0.55"/>
+            </svg>
+            <div style="position:relative;z-index:1;">
+                <div class="mod-label">Wanted Criminals</div>
+                <div class="mod-num">@Model.WantedCriminals</div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center" style="position:relative;z-index:1;">
+                <a href="/WantedCriminals" class="mod-link" onclick="event.stopPropagation()"><i class="fas fa-arrow-right me-1"></i>View Wanted List</a>
+                <div class="mod-icon"><i class="fas fa-exclamation-triangle" style="color:#fff;font-size:1rem;"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Secondary stats + Quick Actions ─────────────────────────── -->
+<div class="row g-4 mb-4">
+    <!-- Active Alerts -->
+    <div class="col-md-3">
+        <div class="mini-card" onclick="window.location='/Alerts'" style="cursor:pointer;background:linear-gradient(135deg,#4a1190,#7c3aed);box-shadow:0 8px 22px rgba(124,58,237,0.38);">
+            <svg style="position:absolute;right:-4px;bottom:-4px;opacity:0.13;pointer-events:none;" width="80" height="80" viewBox="0 0 80 80" fill="none">
+                <path d="M40 6 L40 6 C55 6 68 19 68 36 L68 52 L76 68 L4 68 L12 52 L12 36 C12 19 25 6 40 6Z" fill="white"/>
+                <circle cx="40" cy="74" r="8" fill="white"/>
+            </svg>
+            <div class="mini-icon"><i class="fas fa-bell" style="color:#fff;font-size:1.3rem;"></i></div>
+            <div style="position:relative;z-index:1;">
+                <div class="mini-num">@Model.ActiveAlerts</div>
+                <div class="mini-label">Active Alerts</div>
+            </div>
+        </div>
+    </div>
+    <!-- Releases This Month -->
+    <div class="col-md-2">
+        <div class="mini-card" style="background:linear-gradient(135deg,#005f6b,#0891b2);box-shadow:0 8px 22px rgba(8,145,178,0.38);">
+            <svg style="position:absolute;right:-4px;bottom:-4px;opacity:0.13;pointer-events:none;" width="80" height="80" viewBox="0 0 80 80" fill="none">
+                <rect x="5"  y="10" width="50" height="65" rx="4" fill="none" stroke="white" stroke-width="6"/>
+                <line x1="55" y1="40" x2="78" y2="40" stroke="white" stroke-width="6" stroke-linecap="round"/>
+                <polyline points="68,28 80,40 68,52" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="mini-icon"><i class="fas fa-door-open" style="color:#fff;font-size:1.3rem;"></i></div>
+            <div style="position:relative;z-index:1;">
+                <div class="mini-num">@Model.PrisonersReleasedThisMonth</div>
+                <div class="mini-label">Releases This Month</div>
+            </div>
+        </div>
+    </div>
+    <!-- Former Prisoners Archive -->
+    <div class="col-md-2">
+        <div class="mini-card" onclick="window.location='/FormerPrisoners'" style="cursor:pointer;background:linear-gradient(135deg,#3d1a00,#92400e);box-shadow:0 8px 22px rgba(120,53,15,0.42);">
+            <svg style="position:absolute;right:-4px;bottom:-4px;opacity:0.13;pointer-events:none;" width="80" height="80" viewBox="0 0 80 80" fill="none">
+                <rect x="5" y="18" width="70" height="55" rx="4" fill="none" stroke="white" stroke-width="6"/>
+                <rect x="5" y="8"  width="70" height="16" rx="3" fill="white"/>
+                <line x1="22" y1="42" x2="58" y2="42" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                <line x1="22" y1="55" x2="44" y2="55" stroke="white" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+            <div class="mini-icon"><i class="fas fa-archive" style="color:#fff;font-size:1.3rem;"></i></div>
+            <div style="position:relative;z-index:1;">
+                <div class="mini-num">@Model.FormerPrisonersCount</div>
+                <div class="mini-label">Former Prisoners</div>
+            </div>
+        </div>
+    </div>
+    <!-- Case Reports -->
+    <div class="col-md-2">
+        <div class="mini-card" onclick="window.location='/CaseReports'" style="cursor:pointer;background:linear-gradient(135deg,#7f1d1d,#dc2626);box-shadow:0 8px 22px rgba(220,38,38,0.38);">
+            <svg style="position:absolute;right:-4px;bottom:-4px;opacity:0.13;pointer-events:none;" width="80" height="80" viewBox="0 0 80 80" fill="none">
+                <rect x="8" y="4" width="48" height="66" rx="5" fill="none" stroke="white" stroke-width="6"/>
+                <line x1="20" y1="24" x2="44" y2="24" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                <line x1="20" y1="38" x2="44" y2="38" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                <line x1="20" y1="52" x2="36" y2="52" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                <circle cx="62" cy="62" r="16" fill="white"/>
+                <text x="62" y="68" text-anchor="middle" fill="#dc2626" font-size="18" font-weight="900">!</text>
+            </svg>
+            <div class="mini-icon"><i class="fas fa-folder-open" style="color:#fff;font-size:1.3rem;"></i></div>
+            <div style="position:relative;z-index:1;">
+                <div class="mini-num">@Model.TotalCaseReports</div>
+                <div class="mini-label">Case Reports</div>
+            </div>
+        </div>
+    </div>
+    <!-- Quick Actions -->
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-rocket me-2"></i>Quick Actions</div>
+            <div class="card-body d-flex flex-wrap gap-2 align-items-center py-3">
+                <a href="/Prisoners/Create"      class="btn btn-sm btn-outline-primary"><i class="fas fa-plus me-1"></i>Register Prisoner</a>
+                <a href="/WantedCriminals/Create" class="btn btn-sm btn-outline-danger"><i class="fas fa-plus me-1"></i>Wanted Criminal</a>
+                <a href="/CaseReports/Create"     class="btn btn-sm btn-outline-danger"><i class="fas fa-gavel me-1"></i>New Case</a>
+                <a href="/Alerts/Create"          class="btn btn-sm btn-outline-warning"><i class="fas fa-bell me-1"></i>Create Alert</a>
+                <a href="/Search"                 class="btn btn-sm btn-outline-info"><i class="fas fa-search me-1"></i>Search Criminal</a>
+                <a href="/CaseReports/Analytics"  class="btn btn-sm btn-outline-secondary"><i class="fas fa-chart-bar me-1"></i>Crime Analytics</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Charts row ──────────────────────────────────────────────── -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-chart-line me-2"></i>Monthly Prisoner Registrations (12 months)</div>
+            <div class="card-body" style="padding:20px;">
+                <canvas id="monthlyChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-chart-pie me-2"></i>Criminal Status</div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <canvas id="statusChart" style="max-height:220px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><img src="/images/spf-logo.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;background:#fff;border-radius:50%;padding:1px;" class="me-2" />Prison Occupancy</div>
+            <div class="card-body" style="padding:20px;">
+                <canvas id="occupancyChart" height="160"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Top Crime Types</div>
+            <div class="card-body" style="padding:20px;">
+                <canvas id="crimeChart" height="160"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Alerts & Activities ──────────────────────────────────────── -->
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-bell me-2"></i>Active Alerts</span>
+                <a href="/Alerts" class="btn btn-sm btn-outline-light py-1">View All</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.RecentAlerts.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-check-circle fa-2x mb-2 text-success"></i>
+                        <p class="mb-0">No active alerts</p>
+                    </div>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var a in Model.RecentAlerts)
+                        {
+                            <li class="list-group-item d-flex align-items-start gap-2 py-3" style="border-left:3px solid @(a.AlertType.Contains("Escape")?"#dc2626":a.AlertType.Contains("Wanted")?"#7c3aed":a.AlertType.Contains("Security")?"#d97706":"#0891b2");">
+                                <i class="fas @(a.AlertType.Contains("Escape")?"fa-running text-danger":a.AlertType.Contains("Wanted")?"fa-exclamation-triangle":a.AlertType.Contains("Security")?"fa-shield-alt text-warning":"fa-bell text-info") mt-1" style="@(a.AlertType.Contains("Wanted")?"color:#7c3aed;":"")"></i>
+                                <div class="flex-grow-1 min-width-0">
+                                    <div style="font-size:0.84rem;font-weight:600;" class="text-truncate">@a.Message</div>
+                                    <div style="font-size:0.7rem;" class="text-muted d-flex justify-content-between">
+                                        <span>@a.AlertType</span>
+                                        <span>@a.CreatedAt.ToString("MMM dd HH:mm")</span>
+                                    </div>
+                                </div>
+                                <form asp-controller="Alerts" asp-action="Dismiss" method="post" class="ms-1">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@a.Id" />
+                                    <button type="submit" class="btn btn-xs btn-outline-secondary p-1" style="font-size:0.7rem;line-height:1;" title="Dismiss">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-history me-2"></i>Recent Activity</div>
+            <div class="card-body" style="max-height:400px;overflow-y:auto;">
+                @if (!Model.RecentActivities.Any())
+                {
+                    <p class="text-muted text-center py-3 mb-0">No recent activities.</p>
+                }
+                else
+                {
+                    @foreach (var act in Model.RecentActivities)
+                    {
+                        <div class="timeline-item">
+                            <div style="font-size:0.84rem;font-weight:500;">@act.Description</div>
+                            <div class="d-flex gap-3" style="font-size:0.7rem;color:var(--bs-secondary-color);margin-top:2px;">
+                                <span><i class="fas fa-user me-1"></i>@act.UserName</span>
+                                <span><i class="fas fa-clock me-1"></i>@act.CreatedAt.ToString("MMM dd, HH:mm")</span>
+                                <span class="badge" style="font-size:0.6rem;background:rgba(21,101,192,0.15);color:#1565c0;">@act.ActivityType</span>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+var gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+var textColor = isDark ? '#94a3b8' : '#64748b';
+var colors = ['#1565c0','#16a34a','#d97706','#dc2626','#7c3aed','#0891b2','#ea580c','#db2777'];
+
+Chart.defaults.color = textColor;
+Chart.defaults.borderColor = gridColor;
+
+function baseOptions() {
+    return {
+        responsive: true,
+        plugins: {
+            legend: { labels: { color: textColor, font: { size: 11 } } },
+            tooltip: { backgroundColor: isDark ? '#1e293b' : '#fff', titleColor: isDark ? '#e2e8f0' : '#0f172a', bodyColor: isDark ? '#94a3b8' : '#64748b', borderColor: gridColor, borderWidth: 1, padding: 10 }
+        }
+    };
+}
+
+$.getJSON('/api/charts/monthly-registrations', function(data) {
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'line',
+        data: {
+            labels: data.map(d => d.label),
+            datasets: [{ label: 'Prisoners Registered', data: data.map(d => d.count), borderColor: '#1565c0', backgroundColor: 'rgba(21,101,192,0.08)', fill: true, tension: 0.4, pointBackgroundColor: '#1565c0', pointRadius: 4 }]
+        },
+        options: { ...baseOptions(), scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: textColor }, grid: { color: gridColor } }, x: { ticks: { color: textColor }, grid: { display: false } } } }
+    });
+});
+
+$.getJSON('/api/charts/criminal-status', function(data) {
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.count), backgroundColor: ['#dc2626','#16a34a','#d97706','#0891b2','#7c3aed'], borderWidth: 2, borderColor: isDark ? '#1e293b' : '#fff' }] },
+        options: { ...baseOptions(), plugins: { ...baseOptions().plugins, legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 }, color: textColor } } }, cutout: '68%' }
+    });
+});
+
+$.getJSON('/api/charts/prison-occupancy', function(data) {
+    new Chart(document.getElementById('occupancyChart'), {
+        type: 'bar',
+        data: {
+            labels: data.map(d => d.label),
+            datasets: [
+                { label: 'Capacity',   data: data.map(d => d.capacity),   backgroundColor: 'rgba(21,101,192,0.15)', borderColor: '#1565c0', borderWidth: 2, borderRadius: 6 },
+                { label: 'Population', data: data.map(d => d.population), backgroundColor: 'rgba(220,38,38,0.7)',   borderColor: '#dc2626', borderWidth: 2, borderRadius: 6 }
+            ]
+        },
+        options: { ...baseOptions(), scales: { y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } }, x: { ticks: { color: textColor }, grid: { display: false } } } }
+    });
+});
+
+$.getJSON('/api/charts/crime-types', function(data) {
+    new Chart(document.getElementById('crimeChart'), {
+        type: 'bar',
+        data: {
+            labels: data.map(d => d.label),
+            datasets: [{ label: 'Cases', data: data.map(d => d.count), backgroundColor: colors, borderRadius: 6, borderWidth: 0 }]
+        },
+        options: { ...baseOptions(), indexAxis: 'y', scales: { x: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } } } }
+    });
+});
+</script>
+}

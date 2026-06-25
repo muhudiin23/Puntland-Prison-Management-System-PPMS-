@@ -1,0 +1,66 @@
+@model PPMS.Models.Prison
+@{ ViewData["Title"] = Model.PrisonName; }
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2><img src="/images/spf-logo.png" style="width:32px;height:32px;object-fit:contain;vertical-align:middle;" class="me-2" />@Model.PrisonName</h2>
+    <div>
+        <a href="/Prisons/Edit/@Model.Id" class="btn btn-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</a>
+        <a href="/Prisons" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back</a>
+    </div>
+</div>
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Prison Information</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-5 text-muted">City</dt><dd class="col-7">@Model.City</dd>
+                    <dt class="col-5 text-muted">Security</dt><dd class="col-7"><span class="badge @(Model.SecurityLevel=="Maximum"?"bg-danger":Model.SecurityLevel=="Medium"?"bg-warning text-dark":"bg-success")">@Model.SecurityLevel</span></dd>
+                    <dt class="col-5 text-muted">Capacity</dt><dd class="col-7">@Model.Capacity</dd>
+                    <dt class="col-5 text-muted">Population</dt><dd class="col-7">@Model.CurrentPopulation</dd>
+                    <dt class="col-5 text-muted">Phone</dt><dd class="col-7">@Model.ContactNumber</dd>
+                    <dt class="col-5 text-muted">Address</dt><dd class="col-7">@Model.Address</dd>
+                </dl>
+                @{ var pct = Model.Capacity > 0 ? (int)((double)Model.CurrentPopulation / Model.Capacity * 100) : 0; }
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between mb-1"><small>Occupancy</small><small>@pct%</small></div>
+                    <div class="progress"><div class="progress-bar @(pct>=90?"bg-danger":pct>=70?"bg-warning":"bg-success")" style="width:@pct%"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between">
+                <span><i class="fas fa-user-lock me-2"></i>Prisoners (@Model.Prisoners.Count)</span>
+                <a href="/Prisoners?prisonId=@Model.Id" class="btn btn-sm btn-outline-light">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Name</th><th>Crime</th><th>Status</th><th>Release</th></tr></thead>
+                    <tbody>
+                        @foreach (var p in Model.Prisoners.Take(5)) {
+                            <tr>
+                                <td>@p.FullName</td><td>@p.CrimeType</td>
+                                <td><span class="badge @(p.CriminalStatus=="Active"?"bg-danger":"bg-success") small">@p.CriminalStatus</span></td>
+                                <td>@p.ReleaseDate.ToString("MMM dd, yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><i class="fas fa-users-cog me-2"></i>Staff (@Model.Staff.Count)</div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Name</th><th>Role</th><th>Shift</th></tr></thead>
+                    <tbody>
+                        @foreach (var s in Model.Staff.Take(5)) {
+                            <tr><td>@s.FullName</td><td>@s.Role</td><td>@s.ShiftSchedule</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

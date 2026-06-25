@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  ppms:
+    build:
+      context: ./PPMS
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=PPMS_DB;User Id=sa;Password=PPMS_Str0ng!Pass;TrustServerCertificate=true;MultipleActiveResultSets=true
+    volumes:
+      - ppms_uploads:/app/wwwroot/uploads
+    networks:
+      - ppms_network
+    restart: unless-stopped
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "PPMS_Str0ng!Pass"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    volumes:
+      - ppms_sqldata:/var/opt/mssql
+    networks:
+      - ppms_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'PPMS_Str0ng!Pass' -Q 'SELECT 1' -No -C || exit 1"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+      timeout: 5s
+
+volumes:
+  ppms_sqldata:
+  ppms_uploads:
+
+networks:
+  ppms_network:
+    driver: bridge

@@ -1,0 +1,180 @@
+@model IEnumerable<PPMS.Models.CaseReport>
+@{ ViewData["Title"] = "Case Reports"; }
+
+<style>
+.case-status-Open         { background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; }
+.case-status-Under-Review { background:#fef9c3; color:#854d0e; border:1px solid #fde68a; }
+.case-status-Closed       { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; }
+.case-status-Dismissed    { background:#f9fafb; color:#374151; border:1px solid #e5e7eb; }
+.case-badge { font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:20px; }
+</style>
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-folder-open me-2" style="color:#dc2626;"></i>Case Reports &amp; Crime Registry</h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">Registered criminal cases across all Puntland prisons</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/CaseReports/Analytics" class="btn btn-outline-info btn-sm"><i class="fas fa-chart-bar me-1"></i>Crime Analytics</a>
+        <a href="/CaseReports/ExportExcel?crimeType=@ViewBag.CrimeType&caseStatus=@ViewBag.CaseStatus&from=@ViewBag.From&to=@ViewBag.To"
+           class="btn btn-outline-success btn-sm"><i class="fas fa-file-excel me-1"></i>Export Excel</a>
+        <a href="/CaseReports/Create" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i>Register Case</a>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input name="search" value="@ViewBag.Search" class="form-control"
+                           placeholder="Case ID, title, prisoner, officer..." />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select name="crimeType" class="form-select form-select-sm">
+                    <option value="">All Crime Types</option>
+                    @foreach (var t in (ViewBag.Categories as string[]) ?? Array.Empty<string>())
+                    { <option value="@t" selected="@(ViewBag.CrimeType as string == t ? "selected" : null)">@t</option> }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="caseStatus" class="form-select form-select-sm">
+                    <option value="">All Statuses</option>
+                    @foreach (var s in (ViewBag.CaseStatuses as string[]) ?? Array.Empty<string>())
+                    { <option value="@s" selected="@(ViewBag.CaseStatus as string == s ? "selected" : null)">@s</option> }
+                </select>
+            </div>
+            <div class="col-md-2">
+                @Html.DropDownList("prisonId", ViewBag.Prisons as Microsoft.AspNetCore.Mvc.Rendering.SelectList,
+                    "All Prisons", new { @class = "form-select form-select-sm" })
+            </div>
+            <div class="col-md-1">
+                <input type="date" name="from" value="@ViewBag.From" class="form-control form-control-sm" title="From date" />
+            </div>
+            <div class="col-md-1">
+                <input type="date" name="to" value="@ViewBag.To" class="form-control form-control-sm" title="To date" />
+            </div>
+            <div class="col-md-1 d-flex gap-1">
+                <button type="submit" class="btn btn-primary btn-sm flex-fill"><i class="fas fa-filter"></i></button>
+                @if (!string.IsNullOrEmpty(ViewBag.Search as string) || !string.IsNullOrEmpty(ViewBag.CrimeType as string)
+                  || !string.IsNullOrEmpty(ViewBag.CaseStatus as string) || !string.IsNullOrEmpty(ViewBag.From as string))
+                { <a href="/CaseReports" class="btn btn-outline-secondary btn-sm"><i class="fas fa-times"></i></a> }
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-folder-open fa-3x mb-3 text-muted opacity-50"></i>
+            <h5 class="text-muted">No case reports found</h5>
+            <p class="text-muted">@(ViewBag.Search != null ? "Try adjusting your search filters." : "Register your first case report to begin tracking.")</p>
+            <a href="/CaseReports/Create" class="btn btn-primary mt-2"><i class="fas fa-plus me-1"></i>Register Case</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-database me-2"></i>@ViewBag.TotalCount cases found</span>
+            <select name="sort" onchange="window.location='?sort='+this.value+'&search=@ViewBag.Search&crimeType=@ViewBag.CrimeType&caseStatus=@ViewBag.CaseStatus'"
+                    class="form-select form-select-sm w-auto">
+                <option value="">Latest Crime Date</option>
+                <option value="date_asc"  selected="@(ViewBag.Sort as string == "date_asc"  ? "selected" : null)">Oldest Crime Date</option>
+                <option value="title"     selected="@(ViewBag.Sort as string == "title"     ? "selected" : null)">Case Title</option>
+                <option value="crime"     selected="@(ViewBag.Sort as string == "crime"     ? "selected" : null)">Crime Type</option>
+                <option value="reported"  selected="@(ViewBag.Sort as string == "reported"  ? "selected" : null)">Date Reported</option>
+            </select>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Case ID</th>
+                            <th>Case Title</th>
+                            <th>Crime Type</th>
+                            <th class="d-none d-md-table-cell">Prisoner</th>
+                            <th class="d-none d-xl-table-cell">Prison</th>
+                            <th class="d-none d-lg-table-cell">Date of Crime</th>
+                            <th class="d-none d-md-table-cell">Investigation</th>
+                            <th>Status</th>
+                            <th style="width:100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model)
+                        {
+                            var crimeColor = c.CrimeType switch {
+                                "Murder"           => "#dc2626",
+                                "Terrorism"        => "#7f1d1d",
+                                "Drug Trafficking" => "#7c3aed",
+                                "Human Trafficking"=> "#be123c",
+                                "Robbery"          => "#ea580c",
+                                "Assault"          => "#d97706",
+                                "Theft"            => "#0891b2",
+                                "Fraud"            => "#059669",
+                                "Cybercrime"       => "#2563eb",
+                                _                  => "#6b7280"
+                            };
+                            <tr>
+                                <td><code style="font-size:0.78rem;">@c.CaseId</code></td>
+                                <td>
+                                    <a href="/CaseReports/Details/@c.Id" class="text-decoration-none fw-semibold" style="font-size:0.87rem;">@c.CaseTitle</a>
+                                    @if (!string.IsNullOrEmpty(c.OfficerInCharge))
+                                    { <div class="text-muted" style="font-size:0.7rem;"><i class="fas fa-user-tie me-1"></i>@c.OfficerInCharge</div> }
+                                </td>
+                                <td>
+                                    <span style="background:@crimeColor;color:#fff;font-size:0.68rem;font-weight:700;padding:3px 8px;border-radius:12px;">@c.CrimeType</span>
+                                </td>
+                                <td class="d-none d-md-table-cell" style="font-size:0.85rem;">
+                                    @c.PrisonerName
+                                    @if (!string.IsNullOrEmpty(c.NationalId))
+                                    { <div class="text-muted" style="font-size:0.7rem;">@c.NationalId</div> }
+                                </td>
+                                <td class="d-none d-xl-table-cell" style="font-size:0.82rem;">@c.Prison?.PrisonName</td>
+                                <td class="d-none d-lg-table-cell" style="font-size:0.82rem;">@c.DateOfCrime.ToString("MMM dd, yyyy")</td>
+                                <td class="d-none d-md-table-cell">
+                                    @{
+                                        var invColor = c.InvestigationStatus switch {
+                                            "Ongoing"   => "text-warning",
+                                            "Completed" => "text-success",
+                                            "Suspended" => "text-secondary",
+                                            _           => "text-info"
+                                        };
+                                    }
+                                    <span class="@invColor" style="font-size:0.78rem;font-weight:600;">
+                                        <i class="fas fa-circle me-1" style="font-size:0.5rem;vertical-align:middle;"></i>@c.InvestigationStatus
+                                    </span>
+                                </td>
+                                <td>
+                                    @{
+                                        var safeStatus = c.CaseStatus.Replace(" ", "-");
+                                    }
+                                    <span class="case-badge case-status-@safeStatus">@c.CaseStatus</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a href="/CaseReports/Details/@c.Id" class="btn btn-xs btn-outline-info" style="padding:3px 7px;font-size:0.72rem;" title="View"><i class="fas fa-eye"></i></a>
+                                        <a href="/CaseReports/Edit/@c.Id" class="btn btn-xs btn-outline-primary" style="padding:3px 7px;font-size:0.72rem;" title="Edit"><i class="fas fa-edit"></i></a>
+                                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("PrisonAdministrator"))
+                                        {
+                                            <a href="/CaseReports/Delete/@c.Id" class="btn btn-xs btn-outline-danger" style="padding:3px 7px;font-size:0.72rem;" title="Delete"><i class="fas fa-trash"></i></a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("_Pagination")
+}

@@ -1,0 +1,136 @@
+@model PPMS.Models.Prisoner
+@{ ViewData["Title"] = "Register Prisoner"; }
+
+<div class="page-header">
+    <h2><i class="fas fa-user-plus me-2" style="color:#1565c0;"></i>Register New Prisoner</h2>
+</div>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-id-card me-2"></i>Personal Information</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Prisoner ID <span class="text-danger">*</span></label>
+                            <input asp-for="PrisonerId" class="form-control" placeholder="e.g. PRN-2024-001" />
+                            <span asp-validation-for="PrisonerId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                            <input asp-for="FullName" class="form-control" placeholder="Full legal name" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">National ID <span class="text-danger">*</span></label>
+                            <input asp-for="NationalId" class="form-control" placeholder="National ID number" />
+                            <span asp-validation-for="NationalId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Gender</label>
+                            <select asp-for="Gender" class="form-select">
+                                <option>Male</option><option>Female</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Date of Birth</label>
+                            <input asp-for="DateOfBirth" type="date" class="form-control" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Address</label>
+                            <input asp-for="Address" class="form-control" placeholder="Last known address" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Emergency Contact</label>
+                            <input asp-for="EmergencyContact" class="form-control" placeholder="Name and phone number" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-gavel me-2"></i>Criminal Information</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Crime Type <span class="text-danger">*</span></label>
+                            <input asp-for="CrimeType" class="form-control" placeholder="e.g. Armed Robbery" />
+                            <span asp-validation-for="CrimeType" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Sentence (Months) <span class="text-danger">*</span></label>
+                            <input asp-for="SentenceDurationMonths" type="number" class="form-control" min="1" id="sentenceMonths" />
+                            <span asp-validation-for="SentenceDurationMonths" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Criminal Status</label>
+                            <select asp-for="CriminalStatus" class="form-select">
+                                <option>Active</option><option>Released</option><option>Transferred</option><option>Escaped</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Entry Date <span class="text-danger">*</span></label>
+                            <input asp-for="EntryDate" type="date" class="form-control" id="entryDate" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Release Date (Auto-calculated)</label>
+                            <input asp-for="ReleaseDate" type="date" class="form-control" id="releaseDate" readonly style="background:#f8fafc;" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Assigned Prison <span class="text-danger">*</span></label>
+                            @Html.DropDownList("PrisonId", ViewBag.Prisons as SelectList, "-- Select Prison --", new { @class="form-select" })
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Fingerprint Data (Placeholder)</label>
+                            <textarea asp-for="FingerprintData" class="form-control" rows="2" placeholder="Fingerprint reference or biometric ID"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-camera me-2"></i>Prisoner Photo</div>
+                <div class="card-body text-center">
+                    <div id="photoPreview" style="width:160px;height:180px;border:2px dashed #cbd5e1;border-radius:8px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#f8fafc;">
+                        <i class="fas fa-user" style="font-size:3rem;color:#cbd5e1;"></i>
+                    </div>
+                    <input type="file" name="photo" class="form-control form-control-sm" accept="image/*" id="photoInput" onchange="previewPhoto(this)" />
+                    <small class="text-muted d-block mt-1">JPG, PNG (max 5MB)</small>
+                </div>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Register Prisoner</button>
+                <a href="/Prisoners" class="btn btn-outline-secondary"><i class="fas fa-times me-2"></i>Cancel</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+<script>
+function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('photoPreview').innerHTML = '<img src="'+e.target.result+'" style="width:100%;height:100%;object-fit:cover;" />';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+function calcRelease() {
+    var entry = document.getElementById('entryDate').value;
+    var months = parseInt(document.getElementById('sentenceMonths').value) || 0;
+    if (entry && months > 0) {
+        var d = new Date(entry);
+        d.setMonth(d.getMonth() + months);
+        document.getElementById('releaseDate').value = d.toISOString().split('T')[0];
+    }
+}
+document.getElementById('entryDate').addEventListener('change', calcRelease);
+document.getElementById('sentenceMonths').addEventListener('input', calcRelease);
+</script>
+}

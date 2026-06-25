@@ -1,0 +1,59 @@
+## ASP.NET Core / .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+*.swp
+
+## Publish output
+publish/
+out/
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Rider / JetBrains
+.idea/
+*.sln.iml
+
+## OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.AppleDouble
+.LSOverride
+
+## Uploads (runtime data — not source code)
+PPMS/wwwroot/uploads/
+
+## Local secrets / overrides
+# appsettings.Development.json is kept (only has localdb connection string)
+# appsettings.Production.json would go here if it existed
+appsettings.local.json
+secrets.json
+.env
+*.env
+
+## Docker
+docker-compose.override.yml
+
+## EF Core migrations snapshot only — keep migrations
+# (no exclusions needed)
+
+## Test results
+TestResults/
+*.trx
+*.coveragexml
+coverage/

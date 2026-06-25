@@ -1,0 +1,403 @@
+@using Microsoft.AspNetCore.Http
+@{
+    var theme = Context.Request.Cookies["ppms_theme"] ?? "light";
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var isAuth = User.Identity?.IsAuthenticated == true;
+}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="@theme">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>@ViewData["Title"] — PPMS</title>
+    <link rel="icon" href="/images/spf-logo.png" type="image/png" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+
+    <style>
+        :root {
+            --navy: #0d1b2a; --navy-light: #1b2e44; --navy-mid: #162338;
+            --accent: #1565c0; --accent2: #1976d2;
+            --sidebar-width: 265px;
+            --topbar-height: 64px;
+        }
+        /* ── Sidebar ─────────────────────────────── */
+        #sidebar {
+            width: var(--sidebar-width); background: var(--navy);
+            min-height: 100vh; position: fixed; top: 0; left: 0;
+            z-index: 1050; display: flex; flex-direction: column;
+            transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+            overflow-y: auto; overflow-x: hidden;
+        }
+        #sidebar .brand {
+            background: var(--navy-mid); padding: 16px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            display: flex; align-items: center; gap: 12px;
+            min-height: var(--topbar-height);
+        }
+        #sidebar .brand .brand-logo {
+            width: 50px; height: 50px; flex-shrink: 0;
+            background: #fff; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        #sidebar .brand .brand-logo img {
+            width: 100%; height: 100%; object-fit: contain; border-radius: 50%;
+        }
+        #sidebar .brand h5 { color: #fff; font-weight: 800; font-size: 0.95rem; margin: 0; }
+        #sidebar .brand small { color: #8eafd4; font-size: 0.65rem; line-height: 1; }
+        .nav-section {
+            padding: 10px 18px 4px; color: #4d7aad;
+            font-size: 0.65rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1.2px; margin-top: 4px;
+        }
+        #sidebar .nav-link {
+            color: #94b8d8; padding: 9px 18px;
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.865rem; border-left: 3px solid transparent;
+            transition: all 0.18s ease; margin: 1px 0; border-radius: 0;
+        }
+        #sidebar .nav-link:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; border-left-color: rgba(21,101,192,0.5); }
+        #sidebar .nav-link.active { background: rgba(21,101,192,0.2); color: #fff; border-left-color: #1565c0; font-weight: 600; }
+        #sidebar .nav-link .nav-icon { width: 20px; text-align: center; font-size: 0.88rem; }
+        #sidebar .nav-badge { margin-left: auto; font-size: 0.65rem; padding: 2px 7px; border-radius: 20px; }
+        /* ── Topbar ──────────────────────────────── */
+        #topbar {
+            position: fixed; top: 0; left: var(--sidebar-width); right: 0;
+            height: var(--topbar-height); background: var(--bs-body-bg);
+            border-bottom: 1px solid var(--bs-border-color);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; z-index: 1040; transition: left 0.3s;
+        }
+        /* ── Main content ───────────────────────── */
+        #main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--topbar-height);
+            padding: 28px; min-height: calc(100vh - var(--topbar-height));
+        }
+        /* ── Stat cards ─────────────────────────── */
+        .stat-card {
+            border-radius: 14px; padding: 22px;
+            border-left: 4px solid; transition: transform 0.18s, box-shadow 0.18s;
+            background: var(--bs-body-bg);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .stat-card .val { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+        .stat-card .lbl { color: var(--bs-secondary-color); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 3px; }
+        /* ── Cards ───────────────────────────────── */
+        .card { border: 1px solid var(--bs-border-color); border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .card-header { background: var(--navy); color: #fff !important; border-radius: 14px 14px 0 0 !important; padding: 13px 20px; font-weight: 600; font-size: 0.9rem; }
+        /* ── Page header ─────────────────────────── */
+        .page-header { border-bottom: 2px solid var(--bs-border-color); padding-bottom: 14px; margin-bottom: 28px; }
+        .page-header h2 { font-weight: 800; font-size: 1.4rem; color: var(--bs-emphasis-color); margin: 0; }
+        /* ── Tables ──────────────────────────────── */
+        .table th { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; white-space: nowrap; }
+        /* ── Buttons ────────────────────────────── */
+        .btn-primary { background: var(--accent); border-color: var(--accent); }
+        .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+        /* ── Dark mode extras ───────────────────── */
+        [data-bs-theme="dark"] { --navy: #050d18; --navy-mid: #0a1628; --navy-light: #0d1f38; }
+        [data-bs-theme="dark"] #sidebar { border-right: 1px solid rgba(255,255,255,0.06); }
+        [data-bs-theme="dark"] .stat-card { box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+        /* ── Risk / status badges ───────────────── */
+        .risk-critical { color: #dc2626; font-weight: 700; }
+        .risk-high { color: #ea580c; font-weight: 600; }
+        .risk-medium { color: #d97706; font-weight: 600; }
+        .risk-low { color: #16a34a; }
+        /* ── Responsive ─────────────────────────── */
+        @@media (max-width: 991px) {
+            #sidebar { transform: translateX(-100%); }
+            #sidebar.show { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+            #topbar { left: 0; }
+            #main-content { margin-left: 0; }
+        }
+        /* ── Sidebar overlay on mobile ──────────── */
+        #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1049; }
+        #sidebar-overlay.show { display: block; }
+        /* ── Notification bell ───────────────────── */
+        .notif-badge { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; border-radius: 9px; background: #dc2626; color: #fff; font-size: 0.62rem; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+        /* ── Activity timeline ─────────────────── */
+        .timeline-item { padding-left: 28px; position: relative; padding-bottom: 12px; }
+        .timeline-item::before { content: ''; position: absolute; left: 10px; top: 6px; bottom: 0; width: 1px; background: var(--bs-border-color); }
+        .timeline-item::after { content: ''; position: absolute; left: 6px; top: 6px; width: 9px; height: 9px; border-radius: 50%; background: #1565c0; border: 2px solid var(--bs-body-bg); }
+        /* ── Skeleton loader ─────────────────────── */
+        .skeleton { background: linear-gradient(90deg, var(--bs-border-color) 25%, var(--bs-secondary-bg) 50%, var(--bs-border-color) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+        @@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    </style>
+</head>
+<body>
+
+@if (isAuth)
+{
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+        <div class="brand">
+            <div class="brand-logo">
+                <img src="/images/spf-logo.png" alt="PPMS Logo" onerror="this.parentElement.innerHTML='🏛️'" />
+            </div>
+            <div>
+                <h5>PPMS</h5>
+                <small>Puntland Prison Management</small>
+            </div>
+        </div>
+
+        <nav style="flex:1;padding-bottom:20px;">
+            <div class="nav-section">Main</div>
+            <a href="/" class="nav-link @(controller=="Home"?"active":"")">
+                <i class="fas fa-tachometer-alt nav-icon"></i> Dashboard
+            </a>
+
+            <div class="nav-section">Prisoner Operations</div>
+            <a href="/Prisoners" class="nav-link @(controller=="Prisoners"?"active":"")">
+                <i class="fas fa-user-lock nav-icon"></i> Prisoner Records
+            </a>
+            <a href="/FormerPrisoners" class="nav-link @(controller=="FormerPrisoners"?"active":"")">
+                <i class="fas fa-archive nav-icon"></i> Former Prisoners Archive
+            </a>
+            <a href="/Search" class="nav-link @(controller=="Search"?"active":"")">
+                <i class="fas fa-fingerprint nav-icon"></i> Criminal Search
+            </a>
+            <a href="/WantedCriminals" class="nav-link @(controller=="WantedCriminals"?"active":"")">
+                <i class="fas fa-exclamation-triangle nav-icon"></i> Wanted Criminals
+                @{
+                    var wantedCountCookie = Context.Request.Cookies["ppms_wanted_count"];
+                }
+            </a>
+
+            <div class="nav-section">Administration</div>
+            <a href="/Prisons" class="nav-link @(controller=="Prisons"?"active":"")">
+                <img src="/images/spf-logo.png" class="nav-icon" style="width:22px;height:22px;object-fit:contain;background:#fff;border-radius:50%;padding:2px;" /> Prisons
+            </a>
+            <a href="/Staff" class="nav-link @(controller=="Staff"?"active":"")">
+                <i class="fas fa-users-cog nav-icon"></i> Staff
+            </a>
+            <a href="/Alerts" class="nav-link @(controller=="Alerts"?"active":"")">
+                <i class="fas fa-bell nav-icon"></i> Alerts
+                <span class="nav-badge bg-danger" id="sidebar-alert-count" style="display:none;"></span>
+            </a>
+
+            <div class="nav-section">Reports</div>
+            <a href="/Reports" class="nav-link @(controller=="Reports" && (action==""||action=="Index")?"active":"")">
+                <i class="fas fa-chart-bar nav-icon"></i> Reports Overview
+            </a>
+            <a href="/Reports/Prisoners" class="nav-link @(controller=="Reports" && action=="Prisoners"?"active":"")" style="padding-left:30px;font-size:0.82rem;">
+                <i class="fas fa-user-lock nav-icon" style="font-size:0.78rem;"></i> Prisoner Reports
+            </a>
+            <a href="/Reports/Staff" class="nav-link @(controller=="Reports" && action=="Staff"?"active":"")" style="padding-left:30px;font-size:0.82rem;">
+                <i class="fas fa-users-cog nav-icon" style="font-size:0.78rem;"></i> Staff Reports
+            </a>
+            <a href="/Reports/Prisons" class="nav-link @(controller=="Reports" && action=="Prisons"?"active":"")" style="padding-left:30px;font-size:0.82rem;">
+                <i class="fas fa-building nav-icon" style="font-size:0.78rem;"></i> Prison Reports
+            </a>
+            <a href="/Reports/WantedCriminals" class="nav-link @(controller=="Reports" && action=="WantedCriminals"?"active":"")" style="padding-left:30px;font-size:0.82rem;">
+                <i class="fas fa-exclamation-triangle nav-icon" style="font-size:0.78rem;"></i> Wanted Criminal Reports
+            </a>
+            <a href="/Reports/Security" class="nav-link @(controller=="Reports" && action=="Security"?"active":"")" style="padding-left:30px;font-size:0.82rem;">
+                <i class="fas fa-shield-alt nav-icon" style="font-size:0.78rem;"></i> Security Reports
+            </a>
+
+            <div class="nav-section">Case Reports &amp; Crime Analytics</div>
+            <a href="/CaseReports" class="nav-link @(controller=="CaseReports" && action!="Analytics" && action!="Create"?"active":"")">
+                <i class="fas fa-folder-open nav-icon"></i> Case Reports
+            </a>
+            <a href="/CaseReports/Create" class="nav-link @(controller=="CaseReports" && action=="Create"?"active":"")" style="padding-left:30px;font-size:0.82rem;">
+                <i class="fas fa-plus-circle nav-icon" style="font-size:0.78rem;"></i> Register New Case
+            </a>
+            <a href="/CaseReports/Analytics" class="nav-link @(controller=="CaseReports" && action=="Analytics"?"active":"")">
+                <i class="fas fa-chart-bar nav-icon"></i> Crime Analytics
+            </a>
+            @if (User.IsInRole("SuperAdmin"))
+            {
+                <a href="/Users" class="nav-link @(controller=="Users"?"active":"")">
+                    <i class="fas fa-user-shield nav-icon"></i> User Management
+                </a>
+            }
+
+            <div class="nav-section">Account</div>
+            <a href="/Settings" class="nav-link @(controller=="Settings"?"active":"")">
+                <i class="fas fa-cog nav-icon"></i> Settings
+            </a>
+            <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="nav-link w-100 text-start border-0"
+                        style="background:transparent;cursor:pointer;color:#94b8d8;">
+                    <i class="fas fa-sign-out-alt nav-icon"></i> Sign Out
+                </button>
+            </form>
+        </nav>
+
+        <div style="padding:12px 18px;border-top:1px solid rgba(255,255,255,0.07);">
+            <div style="font-size:0.65rem;color:#4d7aad;text-align:center;">
+                PPMS v1.0 &mdash; &copy; @DateTime.Now.Year
+            </div>
+        </div>
+    </div>
+
+    <!-- TOPBAR -->
+    <div id="topbar">
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-sm border-0 d-lg-none" onclick="toggleSidebar()" style="color:var(--bs-body-color);">
+                <i class="fas fa-bars fa-lg"></i>
+            </button>
+            <div id="live-clock" class="d-none d-md-flex align-items-center gap-2" style="font-size:0.78rem;color:var(--bs-secondary-color);font-weight:500;">
+                <i class="fas fa-clock" style="color:#1565c0;"></i>
+                <span id="clock-text"></span>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <!-- Dark mode toggle -->
+            <button class="btn btn-sm border" id="themeToggle" title="Toggle dark/light mode"
+                    style="width:36px;height:36px;border-radius:10px;padding:0;display:flex;align-items:center;justify-content:center;">
+                <i class="fas @(theme=="dark"?"fa-sun text-warning":"fa-moon")" id="themeIcon"></i>
+            </button>
+
+            <!-- Notifications bell -->
+            <a href="/Alerts" class="btn btn-sm border position-relative"
+               style="width:36px;height:36px;border-radius:10px;padding:0;display:flex;align-items:center;justify-content:center;" title="Alerts">
+                <i class="fas fa-bell"></i>
+                <span class="notif-badge" id="notif-badge" style="display:none;"></span>
+            </a>
+
+            <!-- Refresh -->
+            <button class="btn btn-sm border" onclick="window.location.reload()"
+                    style="width:36px;height:36px;border-radius:10px;padding:0;display:flex;align-items:center;justify-content:center;" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+
+            <!-- User profile dropdown -->
+            @await Component.InvokeAsync("UserProfile")
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main-content">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" style="border-radius:12px;border-left:4px solid #16a34a;">
+                <i class="fas fa-check-circle text-success"></i>
+                <span>@TempData["Success"]</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4" style="border-radius:12px;border-left:4px solid #dc2626;">
+                <i class="fas fa-exclamation-circle text-danger"></i>
+                <span>@TempData["Error"]</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @RenderBody()
+    </div>
+}
+else
+{
+    @RenderBody()
+}
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// ── Live clock ───────────────────────────────────────────
+(function tick() {
+    var el = document.getElementById('clock-text');
+    if (el) el.textContent = new Date().toLocaleString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+    setTimeout(tick, 1000);
+})();
+
+// ── Sidebar toggle ────────────────────────────────────────
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('show');
+    document.getElementById('sidebar-overlay').classList.toggle('show');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('show');
+    document.getElementById('sidebar-overlay').classList.remove('show');
+}
+
+// ── Theme toggle ──────────────────────────────────────────
+document.getElementById('themeToggle')?.addEventListener('click', function () {
+    var html = document.documentElement;
+    var current = html.getAttribute('data-bs-theme') || 'light';
+    var next = current === 'dark' ? 'light' : 'dark';
+
+    $.post('/Settings/UpdateTheme', {
+        theme: next,
+        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
+    }, function () {
+        html.setAttribute('data-bs-theme', next);
+        var icon = document.getElementById('themeIcon');
+        if (icon) {
+            icon.className = next === 'dark' ? 'fas fa-sun text-warning' : 'fas fa-moon';
+        }
+    });
+});
+
+// ── Notifications polling ─────────────────────────────────
+function pollNotifications() {
+    $.getJSON('/api/charts/notifications', function (data) {
+        var badge = document.getElementById('notif-badge');
+        var sidebarBadge = document.getElementById('sidebar-alert-count');
+        if (data.count > 0) {
+            if (badge) { badge.textContent = data.count > 99 ? '99+' : data.count; badge.style.display = 'flex'; }
+            if (sidebarBadge) { sidebarBadge.textContent = data.count; sidebarBadge.style.display = 'inline'; }
+        } else {
+            if (badge) badge.style.display = 'none';
+            if (sidebarBadge) sidebarBadge.style.display = 'none';
+        }
+    });
+}
+pollNotifications();
+setInterval(pollNotifications, 60000);
+
+// ── DataTables init ───────────────────────────────────────
+$(function () {
+    if ($('.auto-dt').length) {
+        $('.auto-dt').DataTable({
+            pageLength: 15, responsive: true,
+            language: { search: 'Filter:', lengthMenu: 'Show _MENU_' },
+            dom: '<"d-flex justify-content-between align-items-center mb-2"lf>t<"d-flex justify-content-between align-items-center mt-2"ip>'
+        });
+    }
+});
+
+// ── Prevent back after logout ─────────────────────────────
+if (window.history && window.history.pushState) {
+    window.history.pushState(null, '', window.location.href);
+}
+</script>
+
+@await RenderSectionAsync("Scripts", required: false)
+<script>
+// Fallback for SPF logo images that have no inline onerror
+document.querySelectorAll('img[src="/images/spf-logo.png"]').forEach(function(img) {
+    if (!img.getAttribute('onerror')) {
+        img.onerror = function() {
+            var icon = document.createElement('i');
+            icon.className = 'fas fa-building';
+            if (this.classList.contains('nav-icon')) icon.classList.add('nav-icon');
+            icon.style.cssText = 'color:#d97706;font-size:1.1rem;';
+            this.parentNode.replaceChild(icon, this);
+        };
+    }
+});
+</script>
+</body>
+</html>

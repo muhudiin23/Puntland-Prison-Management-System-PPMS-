@@ -1,0 +1,199 @@
+@model PPMS.Models.CaseReport
+@{ ViewData["Title"] = "Register Case Report"; }
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-plus-circle me-2" style="color:#dc2626;"></i>Register New Case Report</h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">Document a new criminal case for investigation and tracking</p>
+    </div>
+    <a href="/CaseReports" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back to Cases</a>
+</div>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <div class="row g-4">
+        <div class="col-lg-8">
+
+            <!-- Case Identification -->
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-id-badge me-2"></i>Case Identification</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Case ID <small class="text-muted fw-normal">(auto-generated)</small></label>
+                            <input asp-for="CaseId" class="form-control fw-bold" readonly style="background:#f8fafc;font-family:monospace;" />
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Case Title <span class="text-danger">*</span></label>
+                            <input asp-for="CaseTitle" class="form-control" placeholder="Brief descriptive title for this case" />
+                            <span asp-validation-for="CaseTitle" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Crime Type <span class="text-danger">*</span></label>
+                            <select asp-for="CrimeType" class="form-select" required>
+                                <option value="">— Select Crime Type —</option>
+                                @foreach (var t in (ViewBag.Categories as string[]) ?? Array.Empty<string>())
+                                { <option value="@t">@t</option> }
+                            </select>
+                            <span asp-validation-for="CrimeType" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Date of Crime <span class="text-danger">*</span></label>
+                            <input asp-for="DateOfCrime" type="date" class="form-control" />
+                            <span asp-validation-for="DateOfCrime" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Date Reported <span class="text-danger">*</span></label>
+                            <input asp-for="DateReported" type="date" class="form-control" />
+                            <span asp-validation-for="DateReported" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Crime Description <span class="text-danger">*</span></label>
+                            <textarea asp-for="CrimeDescription" class="form-control" rows="4"
+                                      placeholder="Provide a detailed description of the crime, circumstances, and any known facts..."></textarea>
+                            <span asp-validation-for="CrimeDescription" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suspect / Prisoner Information -->
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-user-lock me-2"></i>Suspect / Prisoner Information</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Prisoner / Suspect Name</label>
+                            <input asp-for="PrisonerName" class="form-control" placeholder="Full name of suspect or prisoner" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">National ID</label>
+                            <input asp-for="NationalId" class="form-control" placeholder="National ID No." />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Prison Location</label>
+                            @Html.DropDownList("PrisonId", ViewBag.Prisons as Microsoft.AspNetCore.Mvc.Rendering.SelectList,
+                                "— Select Prison —", new { @class = "form-select" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Case Status & Investigation -->
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-gavel me-2"></i>Case Status &amp; Investigation</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Investigation Status <span class="text-danger">*</span></label>
+                            <select asp-for="InvestigationStatus" class="form-select">
+                                @foreach (var s in (ViewBag.InvestigationStatuses as string[]) ?? Array.Empty<string>())
+                                { <option value="@s">@s</option> }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Case Status <span class="text-danger">*</span></label>
+                            <select asp-for="CaseStatus" class="form-select">
+                                @foreach (var s in (ViewBag.CaseStatuses as string[]) ?? Array.Empty<string>())
+                                { <option value="@s">@s</option> }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Officer in Charge</label>
+                            <input asp-for="OfficerInCharge" class="form-control" placeholder="Assigned investigating officer" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Notes &amp; Observations</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"
+                                      placeholder="Additional notes, observations, or remarks about the case..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- File Uploads -->
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-paperclip me-2"></i>Supporting Files</div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Supporting Documents</label>
+                        <div class="upload-zone p-3 text-center mb-2"
+                             style="border:2px dashed #cbd5e1;border-radius:10px;background:#f8fafc;cursor:pointer;"
+                             onclick="document.getElementById('docInput').click()">
+                            <i class="fas fa-file-alt fa-2x mb-2" style="color:#94a3b8;"></i>
+                            <div style="font-size:0.82rem;color:#64748b;">Click to upload document</div>
+                            <div style="font-size:0.7rem;color:#94a3b8;">PDF, DOC, DOCX, TXT</div>
+                        </div>
+                        <input type="file" name="document" id="docInput" class="d-none"
+                               accept=".pdf,.doc,.docx,.txt" onchange="showFileName(this,'docName')" />
+                        <div id="docName" class="text-success small d-none">
+                            <i class="fas fa-check-circle me-1"></i><span></span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold">Evidence Files</label>
+                        <div class="upload-zone p-3 text-center mb-2"
+                             style="border:2px dashed #fecaca;border-radius:10px;background:#fff5f5;cursor:pointer;"
+                             onclick="document.getElementById('evidenceInput').click()">
+                            <i class="fas fa-fingerprint fa-2x mb-2" style="color:#fca5a5;"></i>
+                            <div style="font-size:0.82rem;color:#64748b;">Click to upload evidence</div>
+                            <div style="font-size:0.7rem;color:#94a3b8;">Images, PDF, DOC</div>
+                        </div>
+                        <input type="file" name="evidence" id="evidenceInput" class="d-none"
+                               accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx"
+                               onchange="showFileName(this,'evidenceName')" />
+                        <div id="evidenceName" class="text-success small d-none">
+                            <i class="fas fa-check-circle me-1"></i><span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Reference -->
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-info-circle me-2"></i>Crime Categories</div>
+                <div class="card-body p-3">
+                    @foreach (var cat in (ViewBag.Categories as string[]) ?? Array.Empty<string>())
+                    {
+                        var col = cat switch {
+                            "Murder"           => "#dc2626",
+                            "Terrorism"        => "#7f1d1d",
+                            "Drug Trafficking" => "#7c3aed",
+                            "Human Trafficking"=> "#be123c",
+                            "Robbery"          => "#ea580c",
+                            "Assault"          => "#d97706",
+                            "Theft"            => "#0891b2",
+                            "Fraud"            => "#059669",
+                            "Cybercrime"       => "#2563eb",
+                            _                  => "#6b7280"
+                        };
+                        <span style="display:inline-block;margin:2px;background:@col;color:#fff;font-size:0.66rem;font-weight:700;padding:2px 8px;border-radius:10px;">@cat</span>
+                    }
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-danger fw-bold">
+                    <i class="fas fa-save me-2"></i>Register Case Report
+                </button>
+                <a href="/CaseReports" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+<script>
+function showFileName(input, divId) {
+    var div = document.getElementById(divId);
+    if (input.files && input.files[0]) {
+        div.classList.remove('d-none');
+        div.querySelector('span').textContent = input.files[0].name;
+    }
+}
+</script>
+}

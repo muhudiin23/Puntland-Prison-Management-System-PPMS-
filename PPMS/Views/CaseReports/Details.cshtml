@@ -1,0 +1,205 @@
+@model PPMS.Models.CaseReport
+@{
+    ViewData["Title"] = $"Case {Model.CaseId}";
+    var crimeColor = Model.CrimeType switch {
+        "Murder"           => "#dc2626",
+        "Terrorism"        => "#7f1d1d",
+        "Drug Trafficking" => "#7c3aed",
+        "Human Trafficking"=> "#be123c",
+        "Robbery"          => "#ea580c",
+        "Assault"          => "#d97706",
+        "Theft"            => "#0891b2",
+        "Fraud"            => "#059669",
+        "Cybercrime"       => "#2563eb",
+        _                  => "#6b7280"
+    };
+    var statusBadge = Model.CaseStatus switch {
+        "Open"         => ("bg-warning text-dark"),
+        "Under Review" => ("bg-info text-dark"),
+        "Closed"       => ("bg-success"),
+        _              => ("bg-secondary")
+    };
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-folder-open me-2" style="color:@crimeColor;"></i>Case <code>@Model.CaseId</code></h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">@Model.CaseTitle</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="fas fa-print me-1"></i>Print</button>
+        <a href="/CaseReports/Edit/@Model.Id" class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</a>
+        <a href="/CaseReports" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back</a>
+    </div>
+</div>
+
+<!-- Status banner -->
+<div class="alert d-flex align-items-center gap-3 mb-4"
+     style="background:linear-gradient(135deg,@crimeColor+'22',@crimeColor+'11');border:1px solid @crimeColor;border-left:5px solid @crimeColor;border-radius:12px;padding:14px 20px;">
+    <span style="background:@crimeColor;color:#fff;font-size:0.72rem;font-weight:800;padding:4px 12px;border-radius:20px;flex-shrink:0;">@Model.CrimeType</span>
+    <div class="flex-grow-1">
+        <strong style="color:@crimeColor;">@Model.CaseTitle</strong>
+        <div class="text-muted" style="font-size:0.8rem;">Reported on @Model.DateReported.ToString("MMMM dd, yyyy")</div>
+    </div>
+    <span class="badge @statusBadge" style="font-size:0.8rem;padding:6px 14px;">@Model.CaseStatus</span>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <!-- Crime details -->
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-gavel me-2"></i>Crime Details</div>
+            <div class="card-body">
+                <div class="row g-3" style="font-size:0.87rem;">
+                    <div class="col-md-4">
+                        <div class="text-muted mb-1">Date of Crime</div>
+                        <strong>@Model.DateOfCrime.ToString("MMMM dd, yyyy")</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted mb-1">Date Reported</div>
+                        <strong>@Model.DateReported.ToString("MMMM dd, yyyy")</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted mb-1">Prison / Location</div>
+                        <strong>@(Model.Prison?.PrisonName ?? "—")</strong>
+                    </div>
+                    <div class="col-12">
+                        <div class="text-muted mb-2">Crime Description</div>
+                        <p style="background:var(--bs-secondary-bg);padding:14px;border-radius:8px;line-height:1.6;margin:0;">
+                            @Model.CrimeDescription
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suspect / Prisoner -->
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-user-lock me-2"></i>Suspect / Prisoner Information</div>
+            <div class="card-body">
+                <div class="row g-3" style="font-size:0.87rem;">
+                    <div class="col-md-6">
+                        <div class="text-muted mb-1">Prisoner / Suspect Name</div>
+                        <strong>@(string.IsNullOrEmpty(Model.PrisonerName) ? "—" : Model.PrisonerName)</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-muted mb-1">National ID</div>
+                        <strong>@(string.IsNullOrEmpty(Model.NationalId) ? "—" : Model.NationalId)</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-muted mb-1">Prison</div>
+                        <strong>@(Model.Prison?.PrisonName ?? "—")</strong>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.NationalId))
+                    {
+                        <div class="col-md-4">
+                            <a href="/Search?query=@Model.NationalId&searchType=nationalid"
+                               class="btn btn-outline-info btn-sm"><i class="fas fa-search me-1"></i>Search in Prisoner Records</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Investigation -->
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-search me-2"></i>Investigation Details</div>
+            <div class="card-body">
+                <div class="row g-3" style="font-size:0.87rem;">
+                    <div class="col-md-4">
+                        <div class="text-muted mb-1">Investigation Status</div>
+                        @{
+                            var invColor = Model.InvestigationStatus switch {
+                                "Ongoing"   => "#d97706",
+                                "Completed" => "#16a34a",
+                                "Suspended" => "#6b7280",
+                                _           => "#0891b2"
+                            };
+                        }
+                        <span style="font-weight:700;color:@invColor;">
+                            <i class="fas fa-circle me-1" style="font-size:0.55rem;vertical-align:middle;"></i>@Model.InvestigationStatus
+                        </span>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted mb-1">Case Status</div>
+                        <span class="badge @statusBadge" style="font-size:0.78rem;">@Model.CaseStatus</span>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted mb-1">Officer in Charge</div>
+                        <strong><i class="fas fa-user-tie me-1" style="color:#1565c0;"></i>@(string.IsNullOrEmpty(Model.OfficerInCharge) ? "—" : Model.OfficerInCharge)</strong>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="col-12">
+                            <div class="text-muted mb-1">Notes</div>
+                            <p style="background:var(--bs-secondary-bg);padding:12px;border-radius:8px;margin:0;font-size:0.85rem;">@Model.Notes</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Supporting files -->
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-paperclip me-2"></i>Supporting Files</div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.DocumentPath))
+                {
+                    <div class="d-flex align-items-center gap-2 p-3 mb-3"
+                         style="background:var(--bs-secondary-bg);border-radius:8px;border:1px solid var(--bs-border-color);">
+                        <i class="fas fa-file-alt fa-2x" style="color:#1565c0;"></i>
+                        <div>
+                            <div class="fw-semibold" style="font-size:0.84rem;">Supporting Document</div>
+                            <a href="@Model.DocumentPath" target="_blank" class="btn btn-xs btn-outline-primary mt-1" style="font-size:0.72rem;padding:2px 8px;">
+                                <i class="fas fa-download me-1"></i>Download
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted small">No supporting document attached.</p>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.EvidencePath))
+                {
+                    <div class="d-flex align-items-center gap-2 p-3"
+                         style="background:#fff5f5;border-radius:8px;border:1px solid #fecaca;">
+                        <i class="fas fa-fingerprint fa-2x" style="color:#dc2626;"></i>
+                        <div>
+                            <div class="fw-semibold" style="font-size:0.84rem;">Evidence File</div>
+                            <a href="@Model.EvidencePath" target="_blank" class="btn btn-xs btn-outline-danger mt-1" style="font-size:0.72rem;padding:2px 8px;">
+                                <i class="fas fa-download me-1"></i>Download
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">No evidence file attached.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Audit -->
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-history me-2"></i>Audit Trail</div>
+            <div class="card-body" style="font-size:0.83rem;">
+                <div class="mb-2"><span class="text-muted">Created:</span> <strong>@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</strong></div>
+                <div class="mb-2"><span class="text-muted">By:</span> <strong>@(Model.CreatedBy ?? "System")</strong></div>
+                <div><span class="text-muted">Last Updated:</span> <strong>@Model.UpdatedAt.ToString("MMM dd, yyyy HH:mm")</strong></div>
+            </div>
+        </div>
+
+        @if (User.IsInRole("SuperAdmin") || User.IsInRole("PrisonAdministrator"))
+        {
+            <div class="d-grid">
+                <a href="/CaseReports/Delete/@Model.Id" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-trash me-1"></i>Delete Case
+                </a>
+            </div>
+        }
+    </div>
+</div>

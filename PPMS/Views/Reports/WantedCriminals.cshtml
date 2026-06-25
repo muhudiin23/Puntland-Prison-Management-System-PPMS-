@@ -1,0 +1,33 @@
+@model IEnumerable<PPMS.Models.WantedCriminal>
+@{ ViewData["Title"] = "Wanted Criminals Report"; }
+<div class="page-header d-flex justify-content-between align-items-center no-print">
+    <h2><i class="fas fa-exclamation-triangle me-2 text-danger"></i>Wanted Criminals Report</h2>
+    <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="fas fa-print me-1"></i>Print</button>
+        <a href="/Reports" class="btn btn-outline-secondary btn-sm">Back</a>
+    </div>
+</div>
+<div class="card mb-3 no-print"><div class="card-body py-2">
+    <form method="get" class="d-flex gap-2 align-items-center">
+        <select name="riskLevel" class="form-select form-select-sm" style="max-width:200px;"><option value="">All Risk Levels</option><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select>
+        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    </form>
+</div></div>
+<div class="card">
+    <div class="card-header d-flex justify-content-between"><span>Wanted Criminals &mdash; @DateTime.Now.ToString("MMMM dd, yyyy")</span><span>Total: @Model.Count()</span></div>
+    <div class="card-body p-0">
+        <table class="table mb-0">
+            <thead><tr><th>#</th><th>Name</th><th>National ID</th><th>Crime</th><th>Last Location</th><th>Risk</th><th>Date Added</th><th>Status</th></tr></thead>
+            <tbody>
+                @{ int i=1; }
+                @foreach (var w in Model) {
+                    <tr><td>@i++</td><td><strong>@w.CriminalName</strong></td><td>@w.NationalId</td><td>@w.CrimeDescription</td><td>@w.LastKnownLocation</td>
+                    <td><span class="badge @(w.RiskLevel=="Critical"?"bg-danger":w.RiskLevel=="High"?"bg-warning text-dark":"bg-secondary")">@w.RiskLevel</span></td>
+                    <td>@w.DateAdded.ToString("MMM dd, yyyy")</td>
+                    <td><span class="badge @(w.IsActive?"bg-danger":"bg-secondary")">@(w.IsActive?"WANTED":"Inactive")</span></td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>@@media print { .no-print{display:none!important;} #sidebar,#topbar{display:none!important;} #main-content{margin-left:0!important;} }</style>

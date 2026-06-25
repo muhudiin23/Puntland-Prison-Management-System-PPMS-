@@ -1,0 +1,97 @@
+@{ ViewData["Title"] = "Reports"; }
+
+<div class="page-header">
+    <h2><i class="fas fa-chart-bar me-2" style="color:#1565c0;"></i>Reports &amp; Analytics</h2>
+    <p class="text-muted mb-0" style="font-size:0.8rem;">Operational reports for all prison management modules — export to Excel or print directly</p>
+</div>
+
+<div class="row g-4">
+    <!-- Prisoner Reports -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header" style="background:linear-gradient(135deg,#0a3170,#1565c0);">
+                <i class="fas fa-user-lock me-2"></i>Prisoner Reports
+            </div>
+            <div class="card-body">
+                <p class="text-muted" style="font-size:0.85rem;">View and export all active prisoner records with filters by prison, crime type, and date range.</p>
+                <a href="/Reports/Prisoners" class="btn btn-primary w-100 mb-2"><i class="fas fa-eye me-1"></i>View Prisoner Report</a>
+                <a href="/Reports/ExportPrisonersExcel" class="btn btn-outline-success w-100 mb-2"><i class="fas fa-file-excel me-1"></i>Export to Excel</a>
+                <button onclick="window.open('/Reports/Prisoners')" class="btn btn-outline-secondary w-100"><i class="fas fa-print me-1"></i>Print Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Reports -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header" style="background:linear-gradient(135deg,#1b4332,#1a7a45);">
+                <i class="fas fa-users-cog me-2"></i>Staff Reports
+            </div>
+            <div class="card-body">
+                <p class="text-muted" style="font-size:0.85rem;">View and export staff records filtered by prison location, role, and employment status.</p>
+                <a href="/Reports/Staff" class="btn btn-success w-100 mb-2"><i class="fas fa-eye me-1"></i>View Staff Report</a>
+                <a href="/Reports/ExportStaffExcel" class="btn btn-outline-success w-100 mb-2"><i class="fas fa-file-excel me-1"></i>Export to Excel</a>
+                <button onclick="window.open('/Reports/Staff')" class="btn btn-outline-secondary w-100"><i class="fas fa-print me-1"></i>Print Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prison Reports -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header" style="background:linear-gradient(135deg,#7c3a00,#c06000);">
+                <img src="/images/spf-logo.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;background:#fff;border-radius:50%;padding:1px;" class="me-2" />Prison Reports
+            </div>
+            <div class="card-body">
+                <p class="text-muted" style="font-size:0.85rem;">Overview of all prisons including capacity, current population, security levels, and occupancy rates.</p>
+                <a href="/Reports/Prisons" class="btn btn-warning text-dark fw-bold w-100 mb-2"><i class="fas fa-eye me-1"></i>View Prison Report</a>
+                <button onclick="window.open('/Reports/Prisons')" class="btn btn-outline-secondary w-100"><i class="fas fa-print me-1"></i>Print Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Former Prisoners Archive -->
+    <div class="col-md-4">
+        <div class="card h-100" style="border-color:#d97706;">
+            <div class="card-header" style="background:linear-gradient(135deg,#78350f,#d97706);">
+                <i class="fas fa-archive me-2"></i>Former Prisoners Archive Report
+            </div>
+            <div class="card-body">
+                <p class="text-muted" style="font-size:0.85rem;">Historical records of all archived prisoners — Released, Transferred, Deceased, or Administratively removed.</p>
+                <a href="/Reports/FormerPrisoners" class="btn btn-warning w-100 mb-2 text-dark fw-bold"><i class="fas fa-eye me-1"></i>View Archive Report</a>
+                <a href="/Reports/ExportFormerPrisonersExcel" class="btn btn-outline-success w-100 mb-2"><i class="fas fa-file-excel me-1"></i>Export to Excel</a>
+                <button onclick="window.open('/Reports/FormerPrisoners')" class="btn btn-outline-secondary w-100"><i class="fas fa-print me-1"></i>Print Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wanted Criminals -->
+    <div class="col-md-4">
+        <div class="card h-100" style="border-color:#dc2626;">
+            <div class="card-header" style="background:linear-gradient(135deg,#7f0000,#c62828);">
+                <i class="fas fa-exclamation-triangle me-2"></i>Wanted Criminals Report
+            </div>
+            <div class="card-body">
+                <p class="text-muted" style="font-size:0.85rem;">View and export wanted criminal records, filtered by risk level (Critical, High, Medium, Low).</p>
+                <a href="/Reports/WantedCriminals" class="btn btn-danger w-100 mb-2"><i class="fas fa-eye me-1"></i>View Wanted Report</a>
+                <a href="/Reports/ExportWantedCriminalsExcel" class="btn btn-outline-success w-100 mb-2"><i class="fas fa-file-excel me-1"></i>Export to Excel</a>
+                <button onclick="window.open('/Reports/WantedCriminals')" class="btn btn-outline-secondary w-100"><i class="fas fa-print me-1"></i>Print Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Reports -->
+    <div class="col-md-4">
+        <div class="card h-100" style="border-color:#4a1d96;">
+            <div class="card-header" style="background:linear-gradient(135deg,#1e1b4b,#4a1d96);">
+                <i class="fas fa-shield-alt me-2"></i>Security Reports
+            </div>
+            <div class="card-body">
+                <p class="text-muted" style="font-size:0.85rem;">Facility security overview — active alerts, high-risk prisoners, wanted criminals by risk level, and security incidents.</p>
+                <a href="/Reports/Security" class="btn w-100 mb-2 text-white fw-bold" style="background:#4a1d96;"><i class="fas fa-eye me-1"></i>View Security Report</a>
+                <a href="/Reports/ExportSecurityExcel" class="btn btn-outline-success w-100 mb-2"><i class="fas fa-file-excel me-1"></i>Export to Excel</a>
+                <button onclick="window.open('/Reports/Security')" class="btn btn-outline-secondary w-100"><i class="fas fa-print me-1"></i>Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>

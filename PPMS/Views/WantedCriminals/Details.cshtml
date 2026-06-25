@@ -1,0 +1,32 @@
+@model PPMS.Models.WantedCriminal
+@{ ViewData["Title"] = "Wanted Criminal Details"; }
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2><i class="fas fa-user-secret me-2 text-danger"></i>Wanted Criminal Profile</h2>
+    <div>
+        <a href="/WantedCriminals/Edit/@Model.Id" class="btn btn-warning btn-sm"><i class="fas fa-edit me-1"></i>Edit</a>
+        <a href="/WantedCriminals" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back</a>
+    </div>
+</div>
+<div class="row g-4" style="max-width:800px;">
+    <div class="col-md-3">
+        @if (!string.IsNullOrEmpty(Model.PhotoPath)) { <img src="@Model.PhotoPath" style="width:100%;border-radius:10px;border:3px solid #fca5a5;" /> }
+        else { <div style="width:100%;padding-top:120%;border-radius:10px;border:3px solid #fca5a5;background:#fef2f2;position:relative;"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:5rem;color:#fca5a5;">?</div></div> }
+    </div>
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h4 class="mb-0">@Model.CriminalName</h4>
+                    <span class="badge @(Model.RiskLevel=="Critical"?"bg-danger":Model.RiskLevel=="High"?"bg-warning text-dark":"bg-secondary") fs-6">@Model.RiskLevel RISK</span>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6"><small class="text-muted d-block">National ID</small><strong>@(string.IsNullOrEmpty(Model.NationalId)?"Unknown":Model.NationalId)</strong></div>
+                    <div class="col-md-6"><small class="text-muted d-block">Status</small><span class="badge @(Model.IsActive?"bg-danger":"bg-secondary")">@(Model.IsActive?"WANTED":"Inactive")</span></div>
+                    <div class="col-12"><small class="text-muted d-block">Crime Description</small><p class="mb-0">@Model.CrimeDescription</p></div>
+                    <div class="col-md-6"><small class="text-muted d-block">Last Known Location</small><strong>@(string.IsNullOrEmpty(Model.LastKnownLocation)?"Unknown":Model.LastKnownLocation)</strong></div>
+                    <div class="col-md-6"><small class="text-muted d-block">Date Added</small><strong>@Model.DateAdded.ToString("MMM dd, yyyy")</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

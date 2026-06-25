@@ -1,0 +1,213 @@
+@{ ViewData["Title"] = "Security Report"; }
+
+<style>
+.sec-stat { border-radius:14px; padding:18px 20px; position:relative; overflow:hidden; }
+.sec-stat .val { font-size:2.4rem; font-weight:900; color:#fff; line-height:1; }
+.sec-stat .lbl { font-size:0.68rem; font-weight:800; color:rgba(255,255,255,0.75); text-transform:uppercase; letter-spacing:1.5px; margin-top:4px; }
+.sec-stat .ico { position:absolute; right:14px; bottom:10px; font-size:2.8rem; opacity:0.13; color:#fff; }
+@@media print {
+    .no-print { display:none !important; }
+    .card { border:1px solid #ccc !important; box-shadow:none !important; break-inside:avoid; }
+}
+</style>
+
+<div class="page-header d-flex justify-content-between align-items-center no-print">
+    <div>
+        <h2><i class="fas fa-shield-alt me-2" style="color:#4a1d96;"></i>Security Report</h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">Facility security overview — alerts, high-risk prisoners, and wanted criminals</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/Reports/ExportSecurityExcel" class="btn btn-outline-success btn-sm"><i class="fas fa-file-excel me-1"></i>Export Excel</a>
+        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="fas fa-print me-1"></i>Print</button>
+        <a href="/Reports" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back to Reports</a>
+    </div>
+</div>
+
+<!-- Summary stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-2">
+        <div class="sec-stat" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);box-shadow:0 6px 18px rgba(127,29,29,.4);">
+            <div class="val">@ViewBag.ActiveAlerts</div>
+            <div class="lbl">Active Alerts</div>
+            <i class="fas fa-bell ico"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="sec-stat" style="background:linear-gradient(135deg,#1e1b4b,#4a1d96);box-shadow:0 6px 18px rgba(74,29,150,.4);">
+            <div class="val">@ViewBag.TotalWanted</div>
+            <div class="lbl">Wanted Criminals</div>
+            <i class="fas fa-exclamation-triangle ico"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="sec-stat" style="background:linear-gradient(135deg,#7f0000,#b91c1c);box-shadow:0 6px 18px rgba(127,0,0,.4);">
+            <div class="val">@ViewBag.CriticalWanted</div>
+            <div class="lbl">Critical Risk</div>
+            <i class="fas fa-skull ico"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="sec-stat" style="background:linear-gradient(135deg,#78350f,#d97706);box-shadow:0 6px 18px rgba(120,53,15,.4);">
+            <div class="val">@ViewBag.HighRiskPrisoners</div>
+            <div class="lbl">High-Risk Prisoners</div>
+            <i class="fas fa-user-lock ico"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="sec-stat" style="background:linear-gradient(135deg,#0a3170,#1565c0);box-shadow:0 6px 18px rgba(13,71,161,.4);">
+            <div class="val">@ViewBag.TotalPrisoners</div>
+            <div class="lbl">Active Prisoners</div>
+            <i class="fas fa-users ico"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="sec-stat" style="background:linear-gradient(135deg,#166534,#16a34a);box-shadow:0 6px 18px rgba(22,101,52,.4);">
+            <div class="val">@ViewBag.TotalPrisons</div>
+            <div class="lbl">Total Facilities</div>
+            <i class="fas fa-building ico"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Wanted by risk + Alerts -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header" style="background:linear-gradient(135deg,#1e1b4b,#4a1d96);">
+                <i class="fas fa-chart-bar me-2"></i>Wanted Criminals by Risk Level
+            </div>
+            <div class="card-body">
+                @{
+                    int total    = (int)(ViewBag.TotalWanted    ?? 0);
+                    int critical = (int)(ViewBag.CriticalWanted ?? 0);
+                    int high     = (int)(ViewBag.HighWanted     ?? 0);
+                    int medium   = (int)(ViewBag.MediumWanted   ?? 0);
+                    int low      = (int)(ViewBag.LowWanted      ?? 0);
+                    Func<int,int,double> pct = (n, t) => t > 0 ? Math.Round((double)n / t * 100, 1) : 0;
+                }
+                @foreach (var item in new[] {
+                    new { label="Critical", count=critical, color="#dc2626" },
+                    new { label="High",     count=high,     color="#ea580c" },
+                    new { label="Medium",   count=medium,   color="#d97706" },
+                    new { label="Low",      count=low,      color="#16a34a" }
+                })
+                {
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1" style="font-size:0.84rem;">
+                            <span class="fw-semibold" style="color:@item.color;">@item.label Risk</span>
+                            <span><strong>@item.count</strong> <span class="text-muted">(@pct(item.count, total)%)</span></span>
+                        </div>
+                        <div style="background:#e2e8f0;border-radius:4px;height:10px;">
+                            <div style="background:@item.color;height:10px;border-radius:4px;width:@pct(item.count,total)%;"></div>
+                        </div>
+                    </div>
+                }
+                <div class="mt-3 pt-3 border-top d-flex justify-content-between" style="font-size:0.84rem;">
+                    <strong>Total Wanted</strong><strong>@total</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-header" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);">
+                <i class="fas fa-bell me-2"></i>Active Alerts
+                <span class="badge bg-light text-dark ms-2" style="font-size:0.7rem;">@ViewBag.ActiveAlerts active</span>
+            </div>
+            <div class="card-body p-0">
+                @{
+                    var alerts = ViewBag.RecentAlerts as List<PPMS.Models.Alert>;
+                }
+                @if (alerts != null && alerts.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0" style="font-size:0.83rem;">
+                            <thead>
+                                <tr>
+                                    <th style="padding-left:16px;">Alert Type</th>
+                                    <th>Message</th>
+                                    <th>Severity</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var a in alerts)
+                                {
+                                    var sevColor = a.Severity switch {
+                                        "Critical" => "danger",
+                                        "High"     => "warning text-dark",
+                                        "Medium"   => "info text-dark",
+                                        _          => "secondary"
+                                    };
+                                    <tr>
+                                        <td style="padding-left:16px;white-space:nowrap;"><span class="fw-semibold">@a.AlertType</span></td>
+                                        <td style="max-width:280px;">
+                                            <div class="text-truncate" style="max-width:280px;">@a.Message</div>
+                                        </td>
+                                        <td><span class="badge bg-@sevColor" style="font-size:0.7rem;">@a.Severity</span></td>
+                                        <td class="text-muted" style="white-space:nowrap;">@a.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                        <p class="mb-0">No active alerts at this time.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Critical Wanted Criminals -->
+@{
+    var critWanted = ViewBag.WantedByCritical as List<PPMS.Models.WantedCriminal>;
+}
+@if (critWanted != null && critWanted.Any())
+{
+    <div class="card">
+        <div class="card-header" style="background:linear-gradient(135deg,#7f0000,#b91c1c);">
+            <i class="fas fa-skull me-2"></i>Critical Risk — Wanted Criminals
+            <span class="badge bg-light text-danger ms-2" style="font-size:0.7rem;">Requires Immediate Action</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0" style="font-size:0.83rem;">
+                    <thead>
+                        <tr>
+                            <th style="padding-left:16px;">Name</th>
+                            <th>National ID</th>
+                            <th>Crime Description</th>
+                            <th>Last Known Location</th>
+                            <th>Date Added</th>
+                            <th class="no-print">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var w in critWanted)
+                        {
+                            <tr>
+                                <td style="padding-left:16px;"><span class="fw-bold text-danger">@w.CriminalName</span></td>
+                                <td class="text-muted">@(string.IsNullOrEmpty(w.NationalId) ? "—" : w.NationalId)</td>
+                                <td style="max-width:220px;">
+                                    <div class="text-truncate" style="max-width:220px;">@w.CrimeDescription</div>
+                                </td>
+                                <td class="text-muted">@(string.IsNullOrEmpty(w.LastKnownLocation) ? "Unknown" : w.LastKnownLocation)</td>
+                                <td class="text-muted" style="white-space:nowrap;">@w.DateAdded.ToString("MMM dd, yyyy")</td>
+                                <td class="no-print">
+                                    <a href="/WantedCriminals/Details/@w.Id" class="btn btn-outline-danger btn-sm" style="font-size:0.7rem;padding:2px 8px;">View</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

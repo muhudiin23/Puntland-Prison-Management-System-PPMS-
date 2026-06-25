@@ -1,0 +1,87 @@
+@model IEnumerable<PPMS.Models.ApplicationUser>
+@{ ViewData["Title"] = "User Management"; }
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-user-shield me-2" style="color:#7c3aed;"></i>User Management</h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">Manage system accounts, roles and access control</p>
+    </div>
+    <a href="/Users/Create" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Add User</a>
+</div>
+<div class="card mb-4"><div class="card-body py-3">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-4"><div class="input-group input-group-sm"><span class="input-group-text"><i class="fas fa-search"></i></span><input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by name, username or email..." /></div></div>
+        <div class="col-md-3"><select name="role" class="form-select form-select-sm"><option value="">All Roles</option><option value="SuperAdmin" selected="@(ViewBag.Role as string == "SuperAdmin" ? "selected" : null)">Super Admin</option><option value="PrisonAdministrator" selected="@(ViewBag.Role as string == "PrisonAdministrator" ? "selected" : null)">Prison Administrator</option><option value="StaffUser" selected="@(ViewBag.Role as string == "StaffUser" ? "selected" : null)">Staff User</option></select></div>
+        <div class="col-md-2"><button type="submit" class="btn btn-primary btn-sm w-100"><i class="fas fa-filter me-1"></i>Filter</button></div>
+    </form>
+</div></div>
+<div class="card"><div class="card-body p-0">
+    <table class="table table-hover align-middle mb-0">
+        <thead><tr><th>User</th><th class="d-none d-md-table-cell">Email</th><th>Role</th><th class="d-none d-lg-table-cell">Prison</th><th class="d-none d-md-table-cell">Last Login</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            @if (!string.IsNullOrEmpty(u.ProfilePhotoPath))
+                            { <img src="@u.ProfilePhotoPath" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" /> }
+                            else
+                            { <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.85rem;">@(u.FullName.Length > 0 ? u.FullName[0].ToString().ToUpper() : "?")</div> }
+                            <div>
+                                <div class="fw-semibold" style="font-size:0.875rem;">@u.FullName</div>
+                                <div class="text-muted" style="font-size:0.72rem;">@@@u.UserName</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="d-none d-md-table-cell text-muted" style="font-size:0.84rem;">@u.Email</td>
+                    <td><span class="badge" style="font-size:0.7rem;background:@(u.Role=="SuperAdmin"?"#dc2626":u.Role=="PrisonAdministrator"?"#d97706":"#0891b2");">@u.Role</span></td>
+                    <td class="d-none d-lg-table-cell text-muted" style="font-size:0.84rem;">@(u.PrisonAssigned ?? "—")</td>
+                    <td class="d-none d-md-table-cell text-muted" style="font-size:0.78rem;">@(u.LastLoginAt?.ToString("MMM dd, HH:mm") ?? "Never")</td>
+                    <td><span class="badge @(u.IsActive?"bg-success":"bg-secondary")">@(u.IsActive?"Active":"Disabled")</span></td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="/Users/Edit/@u.Id" class="btn btn-outline-primary" style="padding:3px 7px;font-size:0.72rem;"><i class="fas fa-edit"></i></a>
+                            <form asp-action="Disable" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button type="submit" class="btn @(u.IsActive?"btn-outline-warning":"btn-outline-success")" style="padding:3px 7px;font-size:0.72rem;" title="@(u.IsActive?"Disable":"Enable")">
+                                    <i class="fas @(u.IsActive?"fa-ban":"fa-check")"></i>
+                                </button>
+                            </form>
+                            <button class="btn btn-outline-secondary" style="padding:3px 7px;font-size:0.72rem;" title="Reset Password" data-bs-toggle="modal" data-bs-target="#resetModal" data-uid="@u.Id" data-name="@u.FullName"><i class="fas fa-key"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div></div>
+@await Html.PartialAsync("_Pagination")
+
+<div class="modal fade" id="resetModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header"><h6 class="modal-title"><i class="fas fa-key me-2"></i>Reset Password</h6><button class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form asp-action="ResetPassword" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="resetUserName"></p>
+                    <input type="hidden" name="id" id="resetUserId" />
+                    <label class="form-label fw-semibold">New Password</label>
+                    <input type="password" name="newPassword" class="form-control" minlength="8" required placeholder="Min 8 characters" />
+                    <div class="form-text">Must be at least 8 characters.</div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-danger btn-sm">Reset Password</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$('#resetModal').on('show.bs.modal', function(e) {
+    document.getElementById('resetUserId').value = e.relatedTarget.dataset.uid;
+    document.getElementById('resetUserName').textContent = 'Resetting password for: ' + e.relatedTarget.dataset.name;
+});
+</script>
+}

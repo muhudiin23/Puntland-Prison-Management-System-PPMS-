@@ -1,0 +1,31 @@
+@model PPMS.Models.Alert
+@{ ViewData["Title"] = "Create Alert"; }
+<div class="page-header"><h2><i class="fas fa-bell me-2 text-warning"></i>Create New Alert</h2></div>
+<div class="card" style="max-width:600px;">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Alert Type *</label>
+                    <select asp-for="AlertType" class="form-select">
+                        <option>Escape Alert</option><option>Security Alert</option><option>Wanted Criminal Alert</option><option>Prison Capacity Alert</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Severity</label>
+                    <select asp-for="Severity" class="form-select"><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Alert Message *</label>
+                    <textarea asp-for="Message" class="form-control" rows="4" placeholder="Describe the alert details..."></textarea>
+                    <span asp-validation-for="Message" class="text-danger small"></span>
+                </div>
+                <div class="col-12 d-flex gap-2 mt-2">
+                    <button type="submit" class="btn btn-warning text-dark"><i class="fas fa-bell me-1"></i>Create Alert</button>
+                    <a href="/Alerts" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

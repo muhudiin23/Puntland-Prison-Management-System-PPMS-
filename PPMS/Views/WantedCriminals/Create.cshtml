@@ -1,0 +1,42 @@
+@model PPMS.Models.WantedCriminal
+@{ ViewData["Title"] = "Add Wanted Criminal"; }
+<div class="page-header"><h2><i class="fas fa-user-secret me-2 text-danger"></i>Add Wanted Criminal</h2></div>
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">Criminal Information</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label fw-semibold">Full Name *</label><input asp-for="CriminalName" class="form-control" /><span asp-validation-for="CriminalName" class="text-danger small"></span></div>
+                        <div class="col-md-6"><label class="form-label fw-semibold">National ID</label><input asp-for="NationalId" class="form-control" /></div>
+                        <div class="col-12"><label class="form-label fw-semibold">Crime Description *</label><textarea asp-for="CrimeDescription" class="form-control" rows="3"></textarea><span asp-validation-for="CrimeDescription" class="text-danger small"></span></div>
+                        <div class="col-md-6"><label class="form-label fw-semibold">Last Known Location</label><input asp-for="LastKnownLocation" class="form-control" /></div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Risk Level</label>
+                            <select asp-for="RiskLevel" class="form-select"><option>Low</option><option selected>Medium</option><option>High</option><option>Critical</option></select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Status</label>
+                            <div class="form-check mt-2"><input asp-for="IsActive" class="form-check-input" type="checkbox" checked /><label class="form-check-label">Active / Wanted</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">Photo</div>
+                <div class="card-body text-center">
+                    <div id="pp" style="width:150px;height:170px;border:2px dashed #fca5a5;border-radius:8px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fef2f2;font-size:3rem;color:#fca5a5;">?</div>
+                    <input type="file" name="photo" class="form-control form-control-sm" accept="image/*" onchange="var r=new FileReader();r.onload=function(e){document.getElementById('pp').innerHTML='<img src=\''+e.target.result+'\' style=\'width:100%;height:100%;object-fit:cover;\'/>';};r.readAsDataURL(this.files[0]);" />
+                </div>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-danger"><i class="fas fa-save me-2"></i>Add Wanted Criminal</button>
+                <a href="/WantedCriminals" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+</form>

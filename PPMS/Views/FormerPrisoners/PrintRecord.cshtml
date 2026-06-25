@@ -1,0 +1,163 @@
+@model PPMS.Models.Prisoner
+@{ ViewData["Title"] = $"Archive Record — {Model.FullName}"; Layout = null; }
+@{
+    var reason      = Model.ArchiveReason ?? "Administrative";
+    var reasonColor = reason switch {
+        "Released"    => "#166534",
+        "Transferred" => "#1e40af",
+        "Deceased"    => "#374151",
+        _             => "#92400e"
+    };
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Archive Record — @Model.FullName — PPMS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        body { font-family:'Segoe UI',sans-serif; font-size:13px; color:#111; background:#fff; }
+        .header { background:#0d1b2a; color:#fff; padding:20px 28px; display:flex; align-items:center; gap:16px; }
+        .header img { width:60px;height:60px;border-radius:50%;background:#fff;padding:4px;object-fit:contain; }
+        .header .logo-circle { width:60px;height:60px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0; }
+        .section-title { background:#1b3a6b; color:#fff; padding:6px 14px; font-weight:700; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; margin-top:16px; border-radius:4px; }
+        .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 20px; padding:10px 0; }
+        .info-item .lbl { font-size:0.7rem; color:#6b7280; text-transform:uppercase; letter-spacing:0.8px; }
+        .info-item .val { font-weight:600; color:#111; }
+        .archive-banner { border:2px solid @reasonColor; border-left:6px solid @reasonColor; border-radius:6px; padding:10px 14px; margin:14px 0; background:@(reason=="Released"?"#f0fdf4":reason=="Transferred"?"#eff6ff":reason=="Deceased"?"#f9fafb":"#fffbeb"); }
+        .photo-box { width:100px;height:100px;border-radius:8px;object-fit:cover;border:2px solid #e2e8f0; }
+        .photo-initials { width:100px;height:100px;border-radius:8px;background:linear-gradient(135deg,#94a3b8,#64748b);display:flex;align-items:center;justify-content:center;color:#fff;font-size:2.5rem;font-weight:700; }
+        .footer { border-top:2px solid #e2e8f0; margin-top:24px; padding-top:10px; font-size:0.7rem; color:#6b7280; display:flex; justify-content:space-between; }
+        .no-print { display:none; }
+        @@media print {
+            .no-print { display:none!important; }
+            body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+            .header { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        }
+        @@media screen {
+            .no-print { display:block; margin-bottom:16px; }
+            body { max-width:800px; margin:0 auto; padding:16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="no-print">
+    <div style="background:#1565c0;color:#fff;padding:10px 16px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+        <span><i class="fas fa-print me-2"></i>Former Prisoners Archive — Official Record</span>
+        <button onclick="window.print()" style="background:#fff;color:#1565c0;border:none;padding:6px 18px;border-radius:6px;font-weight:700;cursor:pointer;">
+            <i class="fas fa-print me-1"></i>Print / Save as PDF
+        </button>
+    </div>
+</div>
+
+<!-- Letterhead -->
+<div class="header">
+    <div class="logo-circle">
+        <img src="/images/spf-logo.png" alt="SPF" onerror="this.style.display='none'" style="width:52px;height:52px;object-fit:contain;" />
+    </div>
+    <div>
+        <div style="font-weight:900;font-size:1.1rem;letter-spacing:1px;">PUNTLAND PRISON MANAGEMENT SYSTEM</div>
+        <div style="font-size:0.78rem;color:#94a3b8;margin-top:2px;">Government of Puntland — Former Prisoners Archive</div>
+        <div style="font-size:0.72rem;color:#64748b;margin-top:1px;">OFFICIAL DOCUMENT — Confidential</div>
+    </div>
+    <div style="margin-left:auto;text-align:right;">
+        <div style="font-size:0.75rem;color:#94a3b8;">Printed on</div>
+        <div style="font-weight:700;">@DateTime.Now.ToString("MMMM dd, yyyy HH:mm")</div>
+        <div style="font-size:0.72rem;color:#64748b;margin-top:3px;">Record ID: @Model.Id</div>
+    </div>
+</div>
+
+<div style="padding:0 4px;">
+    <!-- Archive status banner -->
+    <div class="archive-banner">
+        <strong style="color:@reasonColor;font-size:0.85rem;">
+            @(reason == "Released" ? "✓ RELEASED" : reason == "Transferred" ? "→ TRANSFERRED" : reason == "Deceased" ? "✝ DECEASED" : "⊡ ADMINISTRATIVE ARCHIVE")
+        </strong>
+        <span style="margin-left:12px;font-size:0.8rem;color:#374151;">
+            Archived on @(Model.ArchivedAt?.ToString("MMMM dd, yyyy") ?? "—")
+            by @(Model.ArchivedBy ?? "System")
+        </span>
+        @if (!string.IsNullOrEmpty(Model.ArchiveNotes))
+        {
+            <div style="margin-top:5px;font-size:0.78rem;color:#374151;">Notes: @Model.ArchiveNotes</div>
+        }
+    </div>
+
+    <!-- Identity -->
+    <div class="section-title">Identification</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;padding:10px 0;">
+        @if (!string.IsNullOrEmpty(Model.PhotoPath))
+        {
+            <img src="@Model.PhotoPath" class="photo-box" />
+        }
+        else
+        {
+            <div class="photo-initials">@(Model.FullName.Length > 0 ? Model.FullName[0].ToString().ToUpper() : "?")</div>
+        }
+        <div class="info-grid" style="flex:1;">
+            <div class="info-item"><div class="lbl">Full Name</div><div class="val">@Model.FullName</div></div>
+            <div class="info-item"><div class="lbl">Prisoner ID</div><div class="val">@Model.PrisonerId</div></div>
+            <div class="info-item"><div class="lbl">National ID</div><div class="val">@Model.NationalId</div></div>
+            <div class="info-item"><div class="lbl">Gender</div><div class="val">@Model.Gender</div></div>
+            <div class="info-item"><div class="lbl">Date of Birth</div><div class="val">@Model.DateOfBirth.ToString("MMMM dd, yyyy")</div></div>
+            <div class="info-item"><div class="lbl">Prison Facility</div><div class="val">@(Model.Prison?.PrisonName ?? "—") @(!string.IsNullOrEmpty(Model.Prison?.City) ? $"— {Model.Prison.City}" : "")</div></div>
+        </div>
+    </div>
+
+    <!-- Criminal record -->
+    <div class="section-title">Criminal Record</div>
+    <div class="info-grid" style="padding:10px 0;">
+        <div class="info-item"><div class="lbl">Crime Type</div><div class="val">@Model.CrimeType</div></div>
+        <div class="info-item"><div class="lbl">Sentence</div><div class="val">@Model.SentenceDurationMonths months</div></div>
+        <div class="info-item"><div class="lbl">Entry Date</div><div class="val">@Model.EntryDate.ToString("MMMM dd, yyyy")</div></div>
+        <div class="info-item"><div class="lbl">Scheduled Release</div><div class="val">@Model.ReleaseDate.ToString("MMMM dd, yyyy")</div></div>
+        <div class="info-item"><div class="lbl">Final Status</div><div class="val">@Model.CriminalStatus</div></div>
+        @if (!string.IsNullOrEmpty(Model.FingerprintData))
+        {
+            <div class="info-item"><div class="lbl">Fingerprint Ref.</div><div class="val">@Model.FingerprintData</div></div>
+        }
+    </div>
+
+    <!-- Personal -->
+    @if (!string.IsNullOrEmpty(Model.Address) || !string.IsNullOrEmpty(Model.EmergencyContact))
+    {
+        <div class="section-title">Personal Details</div>
+        <div class="info-grid" style="padding:10px 0;">
+            @if (!string.IsNullOrEmpty(Model.Address))
+            { <div class="info-item"><div class="lbl">Address</div><div class="val">@Model.Address</div></div> }
+            @if (!string.IsNullOrEmpty(Model.EmergencyContact))
+            { <div class="info-item"><div class="lbl">Emergency Contact</div><div class="val">@Model.EmergencyContact</div></div> }
+        </div>
+    }
+
+    <!-- Archive audit -->
+    <div class="section-title">Archive Audit Trail</div>
+    <div class="info-grid" style="padding:10px 0;">
+        <div class="info-item"><div class="lbl">Archive Reason</div><div class="val" style="color:@reasonColor;">@reason</div></div>
+        <div class="info-item"><div class="lbl">Archived By</div><div class="val">@(Model.ArchivedBy ?? "System")</div></div>
+        <div class="info-item"><div class="lbl">Archive Date</div><div class="val">@(Model.ArchivedAt?.ToString("MMMM dd, yyyy HH:mm") ?? "—")</div></div>
+        <div class="info-item"><div class="lbl">Record Created</div><div class="val">@Model.CreatedAt.ToString("MMMM dd, yyyy")</div></div>
+        @if (!string.IsNullOrEmpty(Model.ArchiveNotes))
+        {
+            <div class="info-item" style="grid-column:1/-1;"><div class="lbl">Notes</div><div class="val">@Model.ArchiveNotes</div></div>
+        }
+    </div>
+</div>
+
+<div class="footer">
+    <span>PPMS — Puntland Prison Management System &copy; @DateTime.Now.Year</span>
+    <span>This document is an official government record. Unauthorized reproduction is prohibited.</span>
+    <span>Ref: PPMS-ARCH-@Model.Id-@DateTime.Now.Year</span>
+</div>
+
+<script>
+    // Auto-trigger print in print-mode pages
+    window.addEventListener('load', function() {
+        // Don't auto-print — let user decide via button
+    });
+</script>
+</body>
+</html>

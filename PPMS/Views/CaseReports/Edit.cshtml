@@ -1,0 +1,156 @@
+@model PPMS.Models.CaseReport
+@{ ViewData["Title"] = $"Edit Case — {Model.CaseId}"; }
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-edit me-2" style="color:#1565c0;"></i>Edit Case — <code>@Model.CaseId</code></h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">Update case details, status, and investigation information</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/CaseReports/Details/@Model.Id" class="btn btn-outline-info btn-sm"><i class="fas fa-eye me-1"></i>View Case</a>
+        <a href="/CaseReports" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back</a>
+    </div>
+</div>
+
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-id-badge me-2"></i>Case Identification</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Case ID</label>
+                            <input asp-for="CaseId" class="form-control" readonly style="background:#f8fafc;font-family:monospace;font-weight:700;" />
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Case Title <span class="text-danger">*</span></label>
+                            <input asp-for="CaseTitle" class="form-control" />
+                            <span asp-validation-for="CaseTitle" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Crime Type <span class="text-danger">*</span></label>
+                            <select asp-for="CrimeType" class="form-select">
+                                @foreach (var t in (ViewBag.Categories as string[]) ?? Array.Empty<string>())
+                                { <option value="@t">@t</option> }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Date of Crime</label>
+                            <input asp-for="DateOfCrime" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Date Reported</label>
+                            <input asp-for="DateReported" type="date" class="form-control" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Crime Description</label>
+                            <textarea asp-for="CrimeDescription" class="form-control" rows="4"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-user-lock me-2"></i>Suspect / Prisoner Information</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Prisoner / Suspect Name</label>
+                            <input asp-for="PrisonerName" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">National ID</label>
+                            <input asp-for="NationalId" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Prison Location</label>
+                            @Html.DropDownList("PrisonId", ViewBag.Prisons as Microsoft.AspNetCore.Mvc.Rendering.SelectList,
+                                "— Select Prison —", new { @class = "form-select" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-gavel me-2"></i>Case Status &amp; Investigation</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Investigation Status</label>
+                            <select asp-for="InvestigationStatus" class="form-select">
+                                @foreach (var s in (ViewBag.InvestigationStatuses as string[]) ?? Array.Empty<string>())
+                                { <option value="@s">@s</option> }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Case Status</label>
+                            <select asp-for="CaseStatus" class="form-select">
+                                @foreach (var s in (ViewBag.CaseStatuses as string[]) ?? Array.Empty<string>())
+                                { <option value="@s">@s</option> }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Officer in Charge</label>
+                            <input asp-for="OfficerInCharge" class="form-control" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Notes</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-paperclip me-2"></i>Update Files</div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.DocumentPath))
+                    {
+                        <div class="alert alert-info py-2 px-3 mb-3" style="font-size:0.8rem;">
+                            <i class="fas fa-file-alt me-1"></i>
+                            Current: <a href="@Model.DocumentPath" target="_blank" class="alert-link">View Document</a>
+                        </div>
+                    }
+                    <label class="form-label fw-semibold">Replace Supporting Document</label>
+                    <input type="file" name="document" class="form-control form-control-sm mb-3"
+                           accept=".pdf,.doc,.docx,.txt" />
+
+                    @if (!string.IsNullOrEmpty(Model.EvidencePath))
+                    {
+                        <div class="alert alert-warning py-2 px-3 mb-3" style="font-size:0.8rem;">
+                            <i class="fas fa-fingerprint me-1"></i>
+                            Current: <a href="@Model.EvidencePath" target="_blank" class="alert-link">View Evidence</a>
+                        </div>
+                    }
+                    <label class="form-label fw-semibold">Replace Evidence File</label>
+                    <input type="file" name="evidence" class="form-control form-control-sm"
+                           accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx" />
+                    <small class="text-muted d-block mt-2">Leave blank to keep existing files.</small>
+                </div>
+            </div>
+
+            <div class="card mb-4" style="font-size:0.82rem;">
+                <div class="card-header"><i class="fas fa-info-circle me-2"></i>Case Metadata</div>
+                <div class="card-body">
+                    <div class="mb-2"><span class="text-muted">Created:</span> <strong>@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</strong></div>
+                    <div class="mb-2"><span class="text-muted">By:</span> <strong>@(Model.CreatedBy ?? "System")</strong></div>
+                    <div><span class="text-muted">Last Updated:</span> <strong>@Model.UpdatedAt.ToString("MMM dd, yyyy HH:mm")</strong></div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary fw-bold">
+                    <i class="fas fa-save me-2"></i>Save Changes
+                </button>
+                <a href="/CaseReports/Details/@Model.Id" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</form>

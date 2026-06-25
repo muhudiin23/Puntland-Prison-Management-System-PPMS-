@@ -1,0 +1,38 @@
+@model IEnumerable<PPMS.Models.Prison>
+@{ ViewData["Title"] = "Prison Report"; }
+<div class="page-header d-flex justify-content-between align-items-center no-print">
+    <h2><img src="/images/spf-logo.png" style="width:32px;height:32px;object-fit:contain;vertical-align:middle;" class="me-2" />Prison Statistics Report</h2>
+    <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="fas fa-print me-1"></i>Print</button>
+        <a href="/Reports" class="btn btn-outline-secondary btn-sm">Back</a>
+    </div>
+</div>
+<div class="card mb-3">
+    <div class="card-header">Prison Summary &mdash; @DateTime.Now.ToString("MMMM dd, yyyy")</div>
+    <div class="card-body p-0">
+        <table class="table mb-0">
+            <thead><tr><th>Prison Name</th><th>City</th><th>Security</th><th>Capacity</th><th>Population</th><th>Occupancy</th><th>Staff</th><th>Contact</th></tr></thead>
+            <tbody>
+                @foreach (var p in Model) {
+                    var pct = p.Capacity > 0 ? (int)((double)p.CurrentPopulation/p.Capacity*100) : 0;
+                    <tr>
+                        <td><strong>@p.PrisonName</strong></td>
+                        <td>@p.City</td>
+                        <td><span class="badge @(p.SecurityLevel=="Maximum"?"bg-danger":p.SecurityLevel=="Medium"?"bg-warning text-dark":"bg-success")">@p.SecurityLevel</span></td>
+                        <td>@p.Capacity</td>
+                        <td>@p.CurrentPopulation</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height:8px;"><div class="progress-bar @(pct>=90?"bg-danger":pct>=70?"bg-warning":"bg-success")" style="width:@pct%"></div></div>
+                                <small>@pct%</small>
+                            </div>
+                        </td>
+                        <td>@p.Staff.Count</td>
+                        <td>@p.ContactNumber</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>@@media print { .no-print{display:none!important;} #sidebar,#topbar{display:none!important;} #main-content{margin-left:0!important;} }</style>

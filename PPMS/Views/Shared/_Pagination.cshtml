@@ -1,0 +1,61 @@
+@{
+    var pageIndex = (int)(ViewBag.PageIndex ?? 1);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var totalCount = (int)(ViewBag.TotalCount ?? 0);
+
+    if (totalPages <= 1) return;
+
+    var queryParams = Context.Request.Query
+        .Where(kv => kv.Key != "page")
+        .Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value.ToString())}");
+    var baseQuery = string.Join("&", queryParams);
+    string PageUrl(int p) => $"?{(string.IsNullOrEmpty(baseQuery) ? "" : baseQuery + "&")}page={p}";
+
+    int rangeStart = Math.Max(1, pageIndex - 2);
+    int rangeEnd = Math.Min(totalPages, pageIndex + 2);
+}
+
+<div class="d-flex justify-content-between align-items-center mt-3 px-1">
+    <small class="text-muted">
+        Page <strong>@pageIndex</strong> of <strong>@totalPages</strong>
+        &mdash; <strong>@totalCount</strong> total records
+    </small>
+    <nav>
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item @(pageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link" href="@PageUrl(1)" title="First">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item @(pageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link" href="@PageUrl(pageIndex - 1)">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            @if (rangeStart > 1)
+            {
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            }
+            @for (int p = rangeStart; p <= rangeEnd; p++)
+            {
+                <li class="page-item @(p == pageIndex ? "active" : "")">
+                    <a class="page-link" href="@PageUrl(p)">@p</a>
+                </li>
+            }
+            @if (rangeEnd < totalPages)
+            {
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            }
+            <li class="page-item @(pageIndex >= totalPages ? "disabled" : "")">
+                <a class="page-link" href="@PageUrl(pageIndex + 1)">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item @(pageIndex >= totalPages ? "disabled" : "")">
+                <a class="page-link" href="@PageUrl(totalPages)" title="Last">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
