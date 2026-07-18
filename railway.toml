@@ -1,5 +1,5 @@
 [build]
-dockerfilePath = "PPMS/Dockerfile"
+dockerfilePath = "Dockerfile.railway"
 buildCommand = ""
 
 [deploy]
