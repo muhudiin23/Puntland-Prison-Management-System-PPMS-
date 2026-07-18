@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PPMS System Architecture</title>
+<style>
+  body { margin: 0; background: #f0f4f8; font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 16px; }
+  h3 { color: #1e293b; font-size: .85rem; letter-spacing: 1px; margin-bottom: 8px; text-align: center; }
+  svg { max-width: 1100px; width: 100%; }
+</style>
+</head>
+<body>
+<h3>PPMS — Puntland Prison Management System · System Architecture Diagram · 2026</h3>
+<svg viewBox="0 0 1100 700" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <!-- Arrowhead markers -->
+  <marker id="arr"  markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#64748b"/></marker>
+  <marker id="arrB" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3b82f6"/></marker>
+  <marker id="arrG" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#059669"/></marker>
+  <marker id="arrO" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d97706"/></marker>
+  <marker id="arrP" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#7c3aed"/></marker>
+  <filter id="sh"><feDropShadow dx="1" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.12)"/></filter>
+  <filter id="sh2"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="rgba(0,0,0,0.08)"/></filter>
+</defs>
+
+<!-- ══ BACKGROUND ══ -->
+<rect width="1100" height="700" fill="#f0f4f8"/>
+
+<!-- ══ TOP LABEL: Application Events ══ -->
+<text x="550" y="18" text-anchor="middle" fill="#94a3b8" font-size="9.5" letter-spacing=".5">Application Events &amp; HTTP Requests</text>
+<line x1="160" y1="22" x2="430" y2="22" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,3"/>
+<line x1="670" y1="22" x2="950" y2="22" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,3"/>
+
+<!-- ══════════════════════════════════════════════
+     MAIN REGION: Railway Cloud / Docker
+══════════════════════════════════════════════ -->
+<rect x="155" y="35" width="900" height="640" rx="10" fill="rgba(219,234,254,0.25)" stroke="#93c5fd" stroke-width="1.8" stroke-dasharray="8,4"/>
+<!-- Region label -->
+<rect x="155" y="35" width="190" height="20" rx="5" fill="#1e3a8a"/>
+<text x="165" y="49" fill="white" font-size="9" font-weight="700">☁ Railway Cloud Platform</text>
+
+<!-- ══════════════════════════════════════════════
+     SUB-REGION: Application Services
+══════════════════════════════════════════════ -->
+<rect x="310" y="95" width="490" height="295" rx="8" fill="rgba(237,233,254,0.4)" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="6,4"/>
+<rect x="310" y="95" width="180" height="18" rx="4" fill="#5b21b6"/>
+<text x="320" y="108" fill="white" font-size="8.5" font-weight="700">⚙ Application Services</text>
+
+<!-- ══════════════════════════════════════════════
+     SUB-REGION: Data Layer
+══════════════════════════════════════════════ -->
+<rect x="310" y="415" width="490" height="200" rx="8" fill="rgba(254,243,199,0.35)" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6,4"/>
+<rect x="310" y="415" width="130" height="18" rx="4" fill="#92400e"/>
+<text x="320" y="428" fill="white" font-size="8.5" font-weight="700">🗄 Data Layer</text>
+
+<!-- ══════════════════════════════════════════════
+     LEFT: EXTERNAL ENTITIES
+══════════════════════════════════════════════ -->
+
+<!-- Government Authority / External Reports -->
+<rect x="12" y="100" width="118" height="70" rx="8" fill="white" stroke="#cbd5e1" stroke-width="1.2" filter="url(#sh2)"/>
+<rect x="12" y="100" width="118" height="70" rx="8" fill="none" stroke="#e2e8f0" stroke-width="1"/>
+<!-- icon -->
+<rect x="25" y="110" width="34" height="34" rx="6" fill="#0f172a"/>
+<text x="42" y="132" text-anchor="middle" fill="white" font-size="18">🏛</text>
+<text x="80" y="122" fill="#0f172a" font-size="8.5" font-weight="700">Systems of</text>
+<text x="80" y="133" fill="#0f172a" font-size="8.5" font-weight="700">Record</text>
+<text x="80" y="145" fill="#64748b" font-size="7.5">Govt Authority</text>
+<text x="80" y="156" fill="#64748b" font-size="7.5">External Reports</text>
+
+<!-- Users block -->
+<rect x="12" y="290" width="118" height="100" rx="8" fill="white" stroke="#cbd5e1" stroke-width="1.2" filter="url(#sh2)"/>
+<!-- 3 user icons stacked -->
+<circle cx="42" cy="317" r="11" fill="#3b82f6"/>
+<text x="42" y="322" text-anchor="middle" fill="white" font-size="13">👤</text>
+<text x="78" y="313" fill="#0f172a" font-size="8.5" font-weight="700">Super Admin</text>
+<circle cx="42" cy="345" r="11" fill="#7c3aed"/>
+<text x="42" y="350" text-anchor="middle" fill="white" font-size="13">👤</text>
+<text x="78" y="341" fill="#0f172a" font-size="8.5" font-weight="700">Prison Admin</text>
+<circle cx="42" cy="373" r="11" fill="#059669"/>
+<text x="42" y="378" text-anchor="middle" fill="white" font-size="13">👤</text>
+<text x="78" y="369" fill="#0f172a" font-size="8.5" font-weight="700">Staff User</text>
+<text x="65" y="384" text-anchor="middle" fill="#64748b" font-size="7.5">Users (3 Roles)</text>
+
+<!-- GitHub -->
+<rect x="20" y="540" width="100" height="72" rx="8" fill="white" stroke="#cbd5e1" stroke-width="1.2" filter="url(#sh2)"/>
+<rect x="38" y="551" width="34" height="34" rx="6" fill="#24292e"/>
+<text x="55" y="573" text-anchor="middle" fill="white" font-size="18">🐙</text>
+<text x="70" y="596" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">GitHub</text>
+<text x="70" y="607" text-anchor="middle" fill="#64748b" font-size="7.5">muhudiin23/PPMS</text>
+
+<!-- ══════════════════════════════════════════════
+     INSIDE MAIN REGION LEFT: ASP.NET Auth + Gateway
+══════════════════════════════════════════════ -->
+
+<!-- ASP.NET Core label box -->
+<rect x="168" y="58" width="126" height="22" rx="5" fill="white" stroke="#cbd5e1" stroke-width="1"/>
+<text x="231" y="73" text-anchor="middle" fill="#7c3aed" font-size="9" font-weight="700">ASP.NET Core 10 MVC</text>
+
+<!-- Auth / Identity icon -->
+<g transform="translate(231, 195)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#dc2626"/>
+  <!-- lock shape -->
+  <rect x="-9" y="-3" width="18" height="14" rx="3" fill="white"/>
+  <path d="M-6,-3 L-6,-9 Q-6,-16 0,-16 Q6,-16 6,-9 L6,-3" fill="none" stroke="white" stroke-width="2.5"/>
+  <circle cx="0" cy="4" r="3" fill="#dc2626"/>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">Auth &amp; Identity</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="8">ASP.NET Identity</text>
+</g>
+
+<!-- API Gateway / Router icon -->
+<g transform="translate(231, 345)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#e11d48"/>
+  <!-- API symbol: </> -->
+  <text x="0" y="6" text-anchor="middle" fill="white" font-size="18" font-weight="800">&lt;/&gt;</text>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">REST / MVC</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="8">Request Router</text>
+</g>
+
+<!-- Bootstrap / CloudFront style label -->
+<rect x="168" y="630" width="126" height="30" rx="6" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+<text x="231" y="641" text-anchor="middle" fill="#475569" font-size="8.5" font-weight="700">Bootstrap 5.3 · Chart.js 4.4</text>
+<text x="231" y="653" text-anchor="middle" fill="#94a3b8" font-size="7.5">Frontend Libraries · Razor Views</text>
+
+<!-- ══════════════════════════════════════════════
+     APP SERVICES — Row 1 (y=195)
+══════════════════════════════════════════════ -->
+
+<!-- Prisoner Management -->
+<g transform="translate(370, 195)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#065f46"/>
+  <text x="0" y="5" text-anchor="middle" fill="white" font-size="22">🔒</text>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">Prisoner</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="8">Management</text>
+</g>
+
+<!-- Staff Management -->
+<g transform="translate(480, 195)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#0e7490"/>
+  <text x="0" y="5" text-anchor="middle" fill="white" font-size="22">👮</text>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">Staff &amp; Prison</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="8">Management</text>
+</g>
+
+<!-- Security & Alerts -->
+<g transform="translate(590, 195)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#b91c1c"/>
+  <text x="0" y="5" text-anchor="middle" fill="white" font-size="22">🛡</text>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">Security</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="8">&amp; Alerts</text>
+</g>
+
+<!-- Wanted Criminals -->
+<g transform="translate(700, 195)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#7c2d12"/>
+  <text x="0" y="5" text-anchor="middle" fill="white" font-size="22">🕵</text>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">Wanted</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="8">Criminals</text>
+</g>
+
+<!-- ══ APP SERVICES — Row 2 (y=315) ══ -->
+
+<!-- Case Reports -->
+<g transform="translate(370, 320)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#b45309"/>
+  <text x="0" y="5" text-anchor="middle" fill="white" font-size="22">📋</text>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">Case Reports</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="8">&amp; Analytics</text>
+</g>
+
+<!-- Report Generation -->
+<g transform="translate(480, 320)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#15803d"/>
+  <text x="0" y="5" text-anchor="middle" fill="white" font-size="22">📊</text>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">Report</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="8">Generation</text>
+</g>
+
+<!-- EF Core ORM -->
+<g transform="translate(590, 320)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#4338ca"/>
+  <!-- DB layers icon -->
+  <ellipse cx="0" cy="-8" rx="13" ry="4" fill="rgba(255,255,255,.9)"/>
+  <rect x="-13" y="-8" width="26" height="14" fill="rgba(255,255,255,.6)"/>
+  <ellipse cx="0" cy="6" rx="13" ry="4" fill="white"/>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">EF Core 9.0.5</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="8">ORM · Migrations</text>
+</g>
+
+<!-- Former Prisoners -->
+<g transform="translate(700, 320)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#0f766e"/>
+  <text x="0" y="5" text-anchor="middle" fill="white" font-size="22">🚪</text>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">Former</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="8">Prisoners</text>
+</g>
+
+<!-- ══════════════════════════════════════════════
+     DATA LAYER ICONS (y=510)
+══════════════════════════════════════════════ -->
+
+<!-- SQL Server / PPMS_DB -->
+<g transform="translate(390, 510)" filter="url(#sh2)">
+  <rect x="-36" y="-33" width="72" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-26" y="-23" width="52" height="46" rx="7" fill="#b45309"/>
+  <!-- cylinder -->
+  <ellipse cx="0" cy="-8" rx="14" ry="5" fill="rgba(255,255,255,.9)"/>
+  <rect x="-14" y="-8" width="28" height="16" fill="rgba(255,255,255,.6)"/>
+  <ellipse cx="0" cy="8" rx="14" ry="5" fill="white"/>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">SQL Server</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="7.5">PPMS_DB · 15 Tables</text>
+</g>
+
+<!-- Prisoners DB -->
+<g transform="translate(500, 510)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#065f46"/>
+  <ellipse cx="0" cy="-8" rx="13" ry="4.5" fill="rgba(255,255,255,.9)"/>
+  <rect x="-13" y="-8" width="26" height="15" fill="rgba(255,255,255,.6)"/>
+  <ellipse cx="0" cy="7" rx="13" ry="4.5" fill="white"/>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">Prisoners DB</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="7.5">Records · Photos</text>
+</g>
+
+<!-- Reports File Store -->
+<g transform="translate(610, 510)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#15803d"/>
+  <!-- folder icon -->
+  <path d="M-14,-12 L-14,12 Q-14,16 -10,16 L10,16 Q14,16 14,12 L14,-8 Q14,-12 10,-12 L0,-12 L-4,-16 L-14,-16 Q-14,-16 -14,-12 Z" fill="rgba(255,255,255,.85)"/>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">Reports Store</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="7.5">wwwroot · .xlsx</text>
+</g>
+
+<!-- Activity Logs -->
+<g transform="translate(720, 510)" filter="url(#sh2)">
+  <rect x="-33" y="-33" width="66" height="66" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="-23" y="-23" width="46" height="46" rx="7" fill="#4338ca"/>
+  <!-- list icon -->
+  <line x1="-10" y1="-10" x2="10" y2="-10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="-10" y1="-2" x2="10" y2="-2" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="-10" y1="6" x2="10" y2="6" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="-14" cy="-10" r="2.5" fill="white"/>
+  <circle cx="-14" cy="-2" r="2.5" fill="white"/>
+  <circle cx="-14" cy="6" r="2.5" fill="white"/>
+  <text x="0" y="46" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">Activity Logs</text>
+  <text x="0" y="57" text-anchor="middle" fill="#64748b" font-size="7.5">Audit Trail</text>
+</g>
+
+<!-- ══════════════════════════════════════════════
+     RIGHT ENTITIES
+══════════════════════════════════════════════ -->
+
+<!-- Write arrow label right -->
+<text x="1000" y="135" text-anchor="middle" fill="#94a3b8" font-size="8.5">Write</text>
+<line x1="1000" y1="142" x2="1000" y2="100" stroke="#94a3b8" stroke-width="1" marker-end="url(#arr)"/>
+
+<!-- Systems of Record (right) -->
+<rect x="958" y="58" width="126" height="42" rx="8" fill="white" stroke="#cbd5e1" stroke-width="1.2" filter="url(#sh2)"/>
+<rect x="968" y="65" width="30" height="28" rx="5" fill="#0f172a"/>
+<text x="983" y="84" text-anchor="middle" fill="white" font-size="16">🏛</text>
+<text x="1025" y="75" fill="#0f172a" font-size="9" font-weight="700">Systems of</text>
+<text x="1025" y="87" fill="#0f172a" font-size="9" font-weight="700">Record</text>
+
+<!-- Report Consumer / Govt Authority -->
+<rect x="958" y="280" width="126" height="72" rx="8" fill="white" stroke="#cbd5e1" stroke-width="1.2" filter="url(#sh2)"/>
+<rect x="968" y="290" width="34" height="34" rx="6" fill="#1e3a8a"/>
+<text x="985" y="312" text-anchor="middle" fill="white" font-size="20">📋</text>
+<text x="1030" y="305" fill="#0f172a" font-size="9" font-weight="700">Government</text>
+<text x="1030" y="317" fill="#0f172a" font-size="9" font-weight="700">Authority</text>
+<text x="1030" y="330" fill="#64748b" font-size="7.5">Report Consumer</text>
+<text x="1030" y="341" fill="#64748b" font-size="7.5">CQRS Write</text>
+
+<!-- ══ LEGEND ICONS RIGHT ══ -->
+<rect x="860" y="440" width="196" height="120" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#sh2)"/>
+<text x="958" y="458" text-anchor="middle" fill="#475569" font-size="9" font-weight="700">Legend</text>
+<rect x="875" y="465" width="12" height="12" rx="2" fill="#3b82f6"/>
+<text x="895" y="475" fill="#475569" font-size="8">Auth &amp; Gateway</text>
+<rect x="875" y="482" width="12" height="12" rx="2" fill="#7c3aed"/>
+<text x="895" y="492" fill="#475569" font-size="8">Business Logic</text>
+<rect x="875" y="499" width="12" height="12" rx="2" fill="#059669"/>
+<text x="895" y="509" fill="#475569" font-size="8">CRUD Services</text>
+<rect x="875" y="516" width="12" height="12" rx="2" fill="#b45309"/>
+<text x="895" y="526" fill="#475569" font-size="8">Data Stores</text>
+<line x1="875" y1="538" x2="887" y2="538" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="895" y="542" fill="#475569" font-size="8">Data Flow</text>
+<line x1="875" y1="552" x2="887" y2="552" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrB)"/>
+<text x="895" y="556" fill="#475569" font-size="8">Query / Response</text>
+
+<!-- ══════════════════════════════════════════════
+     ARROWS / FLOWS
+══════════════════════════════════════════════ -->
+
+<!-- Users → REST/MVC Gateway -->
+<line x1="130" y1="340" x2="196" y2="345" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="163" y="336" text-anchor="middle" fill="#94a3b8" font-size="8">HTTPS</text>
+
+<!-- Auth → REST Gateway (vertical) -->
+<line x1="231" y1="228" x2="231" y2="312" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arrP)"/>
+<text x="241" y="272" fill="#94a3b8" font-size="7.5">Verify</text>
+
+<!-- REST Gateway → App Services -->
+<line x1="264" y1="345" x2="337" y2="257" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="293" y="298" fill="#94a3b8" font-size="7.5">Route</text>
+
+<!-- App Services → Data Layer (vertical connector) -->
+<line x1="430" y1="388" x2="430" y2="430" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrO)"/>
+<line x1="530" y1="388" x2="530" y2="430" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrO)"/>
+<line x1="630" y1="388" x2="630" y2="430" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrO)"/>
+
+<!-- Data query labels -->
+<rect x="440" y="402" width="40" height="13" rx="3" fill="#fef3c7"/>
+<text x="460" y="412" text-anchor="middle" fill="#92400e" font-size="7.5">Query</text>
+<rect x="540" y="402" width="40" height="13" rx="3" fill="#fef3c7"/>
+<text x="560" y="412" text-anchor="middle" fill="#92400e" font-size="7.5">Write</text>
+
+<!-- Auth ↔ SQL Server (dashed query) -->
+<path d="M231,228 Q231,160 390,160 Q440,160 440,477" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+<rect x="290" y="152" width="72" height="14" rx="4" fill="#f8fafc"/>
+<text x="326" y="162" text-anchor="middle" fill="#94a3b8" font-size="7.5">Verify Credentials</text>
+
+<!-- Report Gen → Govt Authority -->
+<path d="M513,287 Q513,316 855,316" fill="none" stroke="#15803d" stroke-width="1.5" marker-end="url(#arrG)"/>
+<rect x="640" y="308" width="88" height="14" rx="4" fill="#f0fdf4"/>
+<text x="684" y="318" text-anchor="middle" fill="#15803d" font-size="7.5">CQRS Write · Reports</text>
+
+<!-- Users → External Systems (top) -->
+<path d="M70,100 Q70,68 955,68" fill="none" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="370" y="58" width="80" height="13" rx="3" fill="#f8fafc"/>
+<text x="410" y="68" text-anchor="middle" fill="#94a3b8" font-size="7.5">Application Events</text>
+
+<!-- External Systems → Systems of Record (right) -->
+<line x1="985" y1="79" x2="958" y2="79" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<!-- GitHub → Railway (CI/CD) -->
+<path d="M70,552 Q70,645 200,645" fill="none" stroke="#24292e" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+<rect x="88" y="635" width="76" height="14" rx="4" fill="#f8fafc"/>
+<text x="126" y="645" text-anchor="middle" fill="#24292e" font-size="7.5">CI/CD Deploy</text>
+
+<!-- Railway Deploy badge -->
+<rect x="172" y="630" width="128" height="36" rx="6" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+<text x="196" y="642" fill="#7c3aed" font-size="13">☁</text>
+<text x="212" y="642" fill="#0f172a" font-size="8.5" font-weight="700">Railway Deploy</text>
+<text x="212" y="655" fill="#64748b" font-size="7.5">Auto-deploy · Port 8080</text>
+
+<!-- ══ FLOW LABELS ══ -->
+<!-- Sync/Async labels on side -->
+<text x="1068" y="200" fill="#94a3b8" font-size="8" transform="rotate(90,1068,200)">CQRS Events</text>
+<line x1="1080" y1="150" x2="1080" y2="420" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3"/>
+
+<!-- Bottom caption -->
+<text x="550" y="692" text-anchor="middle" fill="#94a3b8" font-size="9">Figure 4.3 — System Architecture Diagram · Puntland Prison Management System (PPMS) · ASP.NET Core 10 · Railway Cloud · 2026</text>
+
+</svg>
+</body>
+</html>

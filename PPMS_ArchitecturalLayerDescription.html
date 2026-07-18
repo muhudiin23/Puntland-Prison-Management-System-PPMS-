@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PPMS — Architectural Layer Description</title>
+<style>
+  @media print {
+    body { background: white !important; color: black !important; }
+    .no-print { display: none; }
+    .page-break { page-break-before: always; }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #f8fafc;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 11.5pt;
+    color: #1e293b;
+    padding: 40px 20px;
+    line-height: 1.8;
+  }
+  .page {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 60px 70px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+  }
+
+  /* ── header ── */
+  .doc-header {
+    text-align: center;
+    border-bottom: 2.5px solid #1e3a8a;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+  }
+  .doc-header .uni { font-size: 9.5pt; color: #64748b; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .doc-header h1 { font-size: 15pt; font-weight: bold; color: #0f172a; margin-bottom: 4px; }
+  .doc-header h2 { font-size: 13pt; font-weight: normal; color: #1e3a8a; margin-bottom: 8px; }
+  .doc-header .meta { font-size: 9pt; color: #94a3b8; }
+
+  /* ── section titles ── */
+  .chapter-title {
+    font-size: 13pt;
+    font-weight: bold;
+    color: #0f172a;
+    margin: 28px 0 6px;
+    padding-bottom: 4px;
+    border-bottom: 1.5px solid #e2e8f0;
+  }
+  .section-title {
+    font-size: 11.5pt;
+    font-weight: bold;
+    color: #1e3a8a;
+    margin: 22px 0 8px;
+  }
+  .sub-title {
+    font-size: 10.5pt;
+    font-weight: bold;
+    color: #334155;
+    margin: 14px 0 5px;
+  }
+
+  /* ── body text ── */
+  p { margin-bottom: 10px; text-align: justify; }
+  .intro { color: #334155; font-style: italic; margin-bottom: 16px; }
+
+  /* ── layer boxes ── */
+  .layer-box {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 18px 0;
+    border-left: 5px solid;
+  }
+  .l1 { background: #eff6ff; border-color: #3b82f6; }
+  .l2 { background: #f0fdf4; border-color: #16a34a; }
+  .l3 { background: #faf5ff; border-color: #7c3aed; }
+  .l4 { background: #ecfeff; border-color: #0891b2; }
+  .l5 { background: #fffbeb; border-color: #d97706; }
+  .l6 { background: #f8fafc; border-color: #64748b; }
+
+  .layer-box .layer-num {
+    font-size: 8pt;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .l1 .layer-num { color: #3b82f6; }
+  .l2 .layer-num { color: #16a34a; }
+  .l3 .layer-num { color: #7c3aed; }
+  .l4 .layer-num { color: #0891b2; }
+  .l5 .layer-num { color: #d97706; }
+  .l6 .layer-num { color: #64748b; }
+
+  .layer-box .layer-name {
+    font-size: 12pt;
+    font-weight: bold;
+    color: #0f172a;
+    margin-bottom: 8px;
+  }
+  .layer-box p { margin-bottom: 6px; font-size: 10.5pt; }
+
+  /* ── components list ── */
+  .comp-list {
+    margin: 8px 0 10px 18px;
+    font-size: 10.5pt;
+  }
+  .comp-list li {
+    margin-bottom: 5px;
+    color: #334155;
+  }
+  .comp-list li strong { color: #0f172a; }
+
+  /* ── table ── */
+  .layer-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 10pt;
+  }
+  .layer-table th {
+    background: #0f172a;
+    color: white;
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 9pt;
+    letter-spacing: .5px;
+  }
+  .layer-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+    color: #334155;
+  }
+  .layer-table tr:nth-child(even) td { background: #f8fafc; }
+
+  /* ── figure ref ── */
+  .fig-ref {
+    text-align: center;
+    font-size: 9pt;
+    color: #64748b;
+    font-style: italic;
+    margin: 10px 0 20px;
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #f8fafc;
+  }
+
+  /* ── footer ── */
+  .doc-footer {
+    text-align: center;
+    font-size: 8.5pt;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 14px;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ═══ HEADER ═══ -->
+<div class="doc-header">
+  <div class="uni">Puntland State of Somalia — Ministry of Justice</div>
+  <h1>Puntland Prison Management System</h1>
+  <h2>Chapter 4 — System Design</h2>
+  <div class="meta">Section 4.2 &nbsp;|&nbsp; Architectural Layer Description &nbsp;|&nbsp; Academic Year 2025/2026</div>
+</div>
+
+<!-- ═══ INTRODUCTION ═══ -->
+<div class="chapter-title">4.2 &nbsp; Architectural Layer Description</div>
+
+<p class="intro">
+  This section provides a detailed description of the system architecture of the Puntland Prison Management System (PPMS). The architecture follows a classic multi-tier design pattern, structuring the application into six distinct layers, each with well-defined responsibilities and boundaries. This separation of concerns ensures maintainability, scalability, and security of the system.
+</p>
+
+<p>
+  The PPMS architecture is designed as a <strong>5-Tier Web Application</strong> built on the <strong>ASP.NET Core 10 MVC</strong> framework. The system separates concerns across clearly defined layers, from the end-user interface down to persistent data storage and cloud deployment infrastructure. Figure 4.3 illustrates the complete system architecture, showing all layers, their internal components, and the data flows connecting them.
+</p>
+
+<div class="fig-ref">
+  Figure 4.3 — System Architecture Diagram: Puntland Prison Management System (PPMS)<br>
+  Showing Client, Presentation, Application, Data Access, Database, and Infrastructure Layers
+</div>
+
+<!-- ══════════════════════════════════════
+     LAYER 1
+══════════════════════════════════════ -->
+<div class="layer-box l1">
+  <div class="layer-num">Layer 1</div>
+  <div class="layer-name">Client / User Layer</div>
+  <p>
+    The Client Layer represents the external users and devices that interact with the PPMS through a standard web browser. No software installation is required on the client side; all interaction occurs through a web interface accessible via any modern browser such as Google Chrome, Microsoft Edge, or Mozilla Firefox. The system supports access from desktop computers, laptops, and mobile devices, as the user interface is fully responsive using Bootstrap 5.3.
+  </p>
+  <p>
+    The system defines three distinct user roles, each with different levels of access and permission:
+  </p>
+  <ul class="comp-list">
+    <li><strong>Super Administrator:</strong> Has full system access including user management, system configuration, access to all reports and dashboards across all prisons, and the ability to create or deactivate other user accounts.</li>
+    <li><strong>Prison Administrator:</strong> Has operational control over a specific prison facility, including managing prisoner records, staff information, security alerts, wanted criminals, case reports, and generating Excel reports.</li>
+    <li><strong>Staff User:</strong> Has limited, read-oriented access, primarily for searching prisoner records, submitting alerts, and viewing assigned case information within their assigned prison.</li>
+  </ul>
+  <p>
+    All client requests are transmitted over <strong>HTTPS</strong> to the server, ensuring encrypted and secure communication at all times.
+  </p>
+</div>
+
+<!-- ══════════════════════════════════════
+     LAYER 2
+══════════════════════════════════════ -->
+<div class="layer-box l2">
+  <div class="layer-num">Layer 2</div>
+  <div class="layer-name">Presentation Layer</div>
+  <p>
+    The Presentation Layer is responsible for rendering the user interface and delivering an interactive, visually consistent experience to the end user. This layer is implemented using <strong>Razor View Engine (.cshtml)</strong>, which allows dynamic HTML generation on the server side by embedding C# code within HTML templates. All views are rendered server-side and sent to the client as complete HTML responses.
+  </p>
+  <p>
+    The Presentation Layer consists of the following key components:
+  </p>
+  <ul class="comp-list">
+    <li><strong>Razor Views (.cshtml):</strong> Each functional area of PPMS — Dashboard, Prisoners, Staff, Prisons, Security, Case Reports, Reports — has a dedicated set of Razor View files that define the HTML structure and dynamic data display.</li>
+    <li><strong>Shared Layout (_Layout.cshtml):</strong> A master layout template provides the consistent sidebar navigation, top bar, notification area, and page structure used across all views. The layout includes a dark navy enterprise theme with glassmorphism card styling and an animated canvas background.</li>
+    <li><strong>Bootstrap 5.3:</strong> The Bootstrap CSS framework provides a responsive grid system, pre-built UI components (modals, buttons, forms, tables, dropdowns), and utility classes for rapid, consistent interface development across all screen sizes.</li>
+    <li><strong>Chart.js 4.4.0:</strong> Used to render interactive bar charts, doughnut charts, and line charts on the main dashboard, visualizing prisoner statistics, case report trends, and crime type distributions.</li>
+    <li><strong>Font Awesome 6.5:</strong> Provides a comprehensive icon library used throughout the interface for navigation icons, action buttons, and status indicators.</li>
+    <li><strong>jQuery 3.7 &amp; Select2:</strong> jQuery provides DOM manipulation and AJAX support; Select2 enhances dropdown select elements with search functionality.</li>
+  </ul>
+</div>
+
+<!-- ══════════════════════════════════════
+     LAYER 3
+══════════════════════════════════════ -->
+<div class="layer-box l3">
+  <div class="layer-num">Layer 3</div>
+  <div class="layer-name">Application / Services Layer</div>
+  <p>
+    The Application Layer contains the core business logic and request-handling mechanisms of PPMS. It is built using the <strong>Model-View-Controller (MVC)</strong> design pattern provided by ASP.NET Core 10. This layer receives HTTP requests from the Presentation Layer, applies business rules, interacts with the Data Access Layer, and returns appropriate responses.
+  </p>
+
+  <div class="sub-title">4.2.3.1 &nbsp; MVC Controllers</div>
+  <p>
+    PPMS implements eight controllers, each responsible for a specific functional area of the system. The controllers handle HTTP GET and POST requests, apply authorization checks, invoke data operations through the AppDbContext, and return View results with the appropriate ViewModel data.
+  </p>
+  <ul class="comp-list">
+    <li><strong>HomeController:</strong> Manages the main dashboard, aggregating statistics (total prisoners, staff, prisons, alerts) and chart data for display.</li>
+    <li><strong>PrisonerController:</strong> Handles CRUD operations for prisoner records including registration, search, status updates, photo upload, and soft-delete (IsArchived flag).</li>
+    <li><strong>StaffController:</strong> Manages staff records including hiring, assignment to prisons, status management, and staff search.</li>
+    <li><strong>PrisonController:</strong> Manages prison facility records including capacity, location, type, and director information.</li>
+    <li><strong>SecurityController:</strong> Handles alerts (creation, resolution, priority) and wanted criminal records including risk level and reward information.</li>
+    <li><strong>CaseReportController:</strong> Manages case reports with auto-generated Case IDs in the format <em>CASE-YYYY-NNNN</em>, crime categorization, and analytics.</li>
+    <li><strong>ReportController:</strong> Generates and exports Excel reports (.xlsx) using ClosedXML 0.104.2 for prisoners, staff, security, and case data.</li>
+    <li><strong>AccountController:</strong> Handles user login, logout, profile management, and password operations.</li>
+  </ul>
+
+  <div class="sub-title">4.2.3.2 &nbsp; Authentication &amp; Role-Based Access Control (RBAC)</div>
+  <p>
+    PPMS uses <strong>ASP.NET Identity</strong> to manage user authentication and authorization. All passwords are securely hashed using BCrypt before storage. Authentication is session-based using encrypted cookies. Authorization is enforced using the <code>[Authorize(Roles = "...")]</code> attribute on controller actions, ensuring each user can only access functions permitted by their assigned role. The three roles — SuperAdmin, PrisonAdministrator, and StaffUser — define a clear access hierarchy throughout the system.
+  </p>
+
+  <div class="sub-title">4.2.3.3 &nbsp; Core Business Services</div>
+  <ul class="comp-list">
+    <li><strong>Prisoner Management Service:</strong> Enforces auto Case ID generation, manages photo file uploads to wwwroot/uploads, and applies soft-delete logic using the IsArchived boolean flag instead of permanent deletion.</li>
+    <li><strong>Report Generation Service (ClosedXML):</strong> Dynamically builds Excel workbooks from live database data, formats columns and headers, and saves the output file to the server's file system for download.</li>
+    <li><strong>Former Prisoner Service:</strong> Handles the archival process for released, pardoned, or transferred prisoners, moving them from the active prisoner table to the FormerPrisoners archive.</li>
+  </ul>
+</div>
+
+<!-- ══════════════════════════════════════
+     LAYER 4
+══════════════════════════════════════ -->
+<div class="layer-box l4">
+  <div class="layer-num">Layer 4</div>
+  <div class="layer-name">Data Access Layer — Entity Framework Core</div>
+  <p>
+    The Data Access Layer (DAL) acts as an abstraction between the Application Layer and the physical database. PPMS uses <strong>Entity Framework Core 9.0.5</strong>, a modern Object-Relational Mapper (ORM), to interact with the SQL Server database. This eliminates the need for hand-written SQL in most scenarios and allows the application to work with the database using standard C# objects and LINQ queries.
+  </p>
+  <ul class="comp-list">
+    <li><strong>AppDbContext:</strong> The central database context class that inherits from <em>IdentityDbContext</em>. It exposes all entity sets (DbSet&lt;T&gt;) representing the 15 database tables and serves as the entry point for all data operations.</li>
+    <li><strong>Code-First Migrations:</strong> The database schema is defined entirely in C# model classes. EF Core migrations track schema changes and apply them automatically on application startup using <code>db.Database.Migrate()</code> in Program.cs, eliminating manual database setup.</li>
+    <li><strong>LINQ Queries:</strong> All data retrieval uses Language Integrated Query (LINQ), supporting filtering, sorting, pagination, and eager loading of related entities using the <em>.Include()</em> method.</li>
+    <li><strong>Change Tracking:</strong> EF Core automatically tracks changes to entity objects in memory, applying only the necessary INSERT, UPDATE, or DELETE operations when <em>SaveChangesAsync()</em> is called.</li>
+    <li><strong>Seed Data:</strong> Migrations include seed logic to create default roles (SuperAdmin, PrisonAdministrator, StaffUser) and an initial Super Administrator account on first deployment.</li>
+  </ul>
+</div>
+
+<!-- ══════════════════════════════════════
+     LAYER 5
+══════════════════════════════════════ -->
+<div class="layer-box l5">
+  <div class="layer-num">Layer 5</div>
+  <div class="layer-name">Database Layer — SQL Server / PPMS_DB</div>
+  <p>
+    The Database Layer provides persistent storage for all PPMS data. The system uses <strong>Microsoft SQL Server</strong> as the relational database management system (RDBMS), accessed through the connection string targeting <em>(localdb)\MSSQLLocalDB</em> in the development environment and a full SQL Server instance in production on Railway Cloud. The database is named <strong>PPMS_DB</strong> and contains 15 tables.
+  </p>
+  <p>
+    The following table summarizes the key database tables, their purpose, and primary fields:
+  </p>
+
+  <table class="layer-table">
+    <thead>
+      <tr><th>Table Name</th><th>Purpose</th><th>Key Fields</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Prisoners</strong></td><td>Stores all active prisoner records</td><td>PrisonerId, FullName, NationalId, CrimeType, Sentence, Status, IsArchived, PhotoPath, PrisonId</td></tr>
+      <tr><td><strong>Staff</strong></td><td>Stores prison staff records</td><td>StaffId, FullName, Position, Department, HireDate, Status, PrisonId</td></tr>
+      <tr><td><strong>Prisons</strong></td><td>Stores prison facility information</td><td>PrisonId, Name, Location, Capacity, Type, Director, EstablishedDate</td></tr>
+      <tr><td><strong>Alerts</strong></td><td>Stores security alerts and incidents</td><td>AlertId, Title, Message, AlertType, Priority, IsResolved, CreatedAt, PrisonId</td></tr>
+      <tr><td><strong>WantedCriminals</strong></td><td>Tracks wanted criminal profiles</td><td>WantedId, FullName, CrimeType, DangerLevel, Status, PhotoPath, Reward</td></tr>
+      <tr><td><strong>CaseReports</strong></td><td>Stores criminal case records</td><td>CaseId, CaseNumber (CASE-YYYY-NNNN), CrimeType, Status, Description, PrisonerId</td></tr>
+      <tr><td><strong>FormerPrisoners</strong></td><td>Archive of released/pardoned prisoners</td><td>FormerId, FullName, ReleaseDate, Reason (Released/Pardoned/Transferred)</td></tr>
+      <tr><td><strong>ActivityLogs</strong></td><td>Audit trail for all system actions</td><td>LogId, UserId, Action, Entity, Details, Timestamp, IpAddress</td></tr>
+      <tr><td><strong>AspNetUsers</strong></td><td>ASP.NET Identity user accounts</td><td>Id, UserName, Email, PasswordHash, FullName, PrisonId, LastLogin</td></tr>
+      <tr><td><strong>AspNetRoles</strong></td><td>System roles for RBAC</td><td>SuperAdmin, PrisonAdministrator, StaffUser</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    All tables use integer or GUID primary keys, foreign key constraints to enforce referential integrity, and appropriate indexes on frequently searched columns such as FullName, NationalId, and Status. The soft-delete pattern (IsArchived) is applied to the Prisoners table to preserve historical data without hard deletion.
+  </p>
+</div>
+
+<!-- ══════════════════════════════════════
+     LAYER 6
+══════════════════════════════════════ -->
+<div class="layer-box l6">
+  <div class="layer-num">Layer 6</div>
+  <div class="layer-name">Infrastructure &amp; Deployment Layer</div>
+  <p>
+    The Infrastructure Layer covers the hosting environment, deployment pipeline, and development tools used to build and operate the PPMS system. This layer sits outside the application code itself but is essential for the system's availability, continuous delivery, and maintainability.
+  </p>
+  <ul class="comp-list">
+    <li><strong>Railway Cloud Platform:</strong> PPMS is deployed on Railway, a Platform-as-a-Service (PaaS) cloud provider. Railway handles server provisioning, automatic HTTPS, environment variable management, and zero-downtime deployments. The application listens on port 8080 in the production environment.</li>
+    <li><strong>GitHub (Version Control &amp; CI/CD):</strong> The source code is maintained in a GitHub repository at <em>github.com/muhudiin23/PPMS</em> on the <em>main</em> branch. Railway is integrated with GitHub to automatically trigger a new deployment whenever code is pushed to the main branch, implementing a basic Continuous Deployment (CD) pipeline.</li>
+    <li><strong>Visual Studio 2022 (Development Environment):</strong> The system is developed using Visual Studio 2022 on Windows, with the application running on ports 7116 (HTTPS) and 5073 (HTTP) during local development. The local SQL Server instance uses <em>(localdb)\MSSQLLocalDB</em>.</li>
+    <li><strong>NuGet Package Manager:</strong> All third-party dependencies (Entity Framework Core, ClosedXML, ASP.NET Identity, Bootstrap) are managed via NuGet and declared in the project's <em>.csproj</em> file for reproducible builds.</li>
+  </ul>
+</div>
+
+<!-- ══════════════════════════════════════
+     SUMMARY TABLE
+══════════════════════════════════════ -->
+<div class="chapter-title" style="margin-top:32px">4.2.7 &nbsp; Layer Summary</div>
+<p>
+  The following table provides a concise summary of all architectural layers, their primary technologies, and their responsibilities within the PPMS system:
+</p>
+
+<table class="layer-table">
+  <thead>
+    <tr><th>#</th><th>Layer</th><th>Technology</th><th>Responsibility</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><strong>Client Layer</strong></td>
+      <td>Web Browser (Chrome, Edge, Firefox)</td>
+      <td>End-user interface access via HTTPS; three roles: SuperAdmin, Prison Admin, Staff</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><strong>Presentation Layer</strong></td>
+      <td>Razor Views, Bootstrap 5.3, Chart.js 4.4, Font Awesome 6.5</td>
+      <td>Server-side HTML rendering, responsive UI, interactive charts, dark theme</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><strong>Application Layer</strong></td>
+      <td>ASP.NET Core 10 MVC, ASP.NET Identity, ClosedXML</td>
+      <td>Request routing, RBAC authentication, business rules, Excel report generation</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><strong>Data Access Layer</strong></td>
+      <td>Entity Framework Core 9.0.5, AppDbContext, LINQ</td>
+      <td>ORM-based database operations, migrations, change tracking, query optimization</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><strong>Database Layer</strong></td>
+      <td>SQL Server, PPMS_DB</td>
+      <td>Persistent relational data storage; 15 tables with referential integrity</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><strong>Infrastructure Layer</strong></td>
+      <td>Railway Cloud, GitHub, Visual Studio 2022</td>
+      <td>Cloud hosting, CI/CD deployment pipeline, version control, development environment</td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="margin-top:16px">
+  The layered architecture of PPMS ensures that each component of the system has a single, well-defined responsibility. Changes to one layer — such as updating the user interface or switching the database — can be made with minimal impact on other layers. This separation of concerns is a fundamental principle of robust software engineering and makes the PPMS system maintainable, testable, and scalable for future enhancements.
+</p>
+
+<!-- ═══ FOOTER ═══ -->
+<div class="doc-footer">
+  Puntland Prison Management System (PPMS) &nbsp;·&nbsp; Chapter 4: System Design &nbsp;·&nbsp;
+  Section 4.2: Architectural Layer Description &nbsp;·&nbsp; 2026
+</div>
+
+</div><!-- end .page -->
+</body>
+</html>

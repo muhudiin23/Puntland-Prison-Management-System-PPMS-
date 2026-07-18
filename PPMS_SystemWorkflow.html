@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PPMS — System Workflow</title>
+<style>
+  body { margin: 0; background: #f0f4f8; font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 16px; }
+  p { color: #64748b; font-size: .78rem; margin-bottom: 10px; text-align: center; }
+  svg { max-width: 860px; width: 100%; }
+</style>
+</head>
+<body>
+<p>Figure 4.4 — System Workflow Diagram · Puntland Prison Management System (PPMS) · 2026</p>
+
+<svg viewBox="0 0 860 640" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="a" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#64748b"/></marker>
+  <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#dc2626"/></marker>
+  <marker id="ag" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#16a34a"/></marker>
+  <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="rgba(0,0,0,0.10)"/></filter>
+</defs>
+
+<!-- background -->
+<rect width="860" height="640" fill="#f0f4f8" rx="10"/>
+
+<!-- ══════════════════════════════════
+     ROW 1  —  START → BROWSER → LOGIN
+══════════════════════════════════ -->
+
+<!-- START -->
+<ellipse cx="66" cy="58" rx="52" ry="24" fill="#0f172a" filter="url(#s)"/>
+<text x="66" y="63" text-anchor="middle" fill="white" font-size="11" font-weight="700">START</text>
+
+<!-- arrow -->
+<line x1="118" y1="58" x2="152" y2="58" stroke="#64748b" stroke-width="1.5" marker-end="url(#a)"/>
+
+<!-- Open Browser -->
+<rect x="153" y="40" width="120" height="36" rx="8" fill="#1e3a8a" filter="url(#s)"/>
+<text x="213" y="55" text-anchor="middle" fill="white" font-size="10" font-weight="700">🌐 Open Browser</text>
+<text x="213" y="68" text-anchor="middle" fill="#93c5fd" font-size="8">Access PPMS URL</text>
+
+<!-- arrow -->
+<line x1="273" y1="58" x2="308" y2="58" stroke="#64748b" stroke-width="1.5" marker-end="url(#a)"/>
+
+<!-- Login Form -->
+<rect x="309" y="40" width="120" height="36" rx="8" fill="#1d4ed8" filter="url(#s)"/>
+<text x="369" y="55" text-anchor="middle" fill="white" font-size="10" font-weight="700">🔑 Login Form</text>
+<text x="369" y="68" text-anchor="middle" fill="#bfdbfe" font-size="8">Enter Credentials</text>
+
+<!-- arrow -->
+<line x1="429" y1="58" x2="464" y2="58" stroke="#64748b" stroke-width="1.5" marker-end="url(#a)"/>
+
+<!-- Auth Check diamond -->
+<polygon points="530,34 606,58 530,82 454,58" fill="#d97706" filter="url(#s)"/>
+<text x="530" y="54" text-anchor="middle" fill="white" font-size="9" font-weight="700">Auth</text>
+<text x="530" y="66" text-anchor="middle" fill="white" font-size="9" font-weight="700">Check</text>
+
+<!-- YES label -->
+<text x="556" y="52" fill="#15803d" font-size="8" font-weight="700">YES</text>
+
+<!-- arrow right from diamond (yes) -->
+<line x1="606" y1="58" x2="642" y2="58" stroke="#16a34a" stroke-width="1.5" marker-end="url(#ag)"/>
+
+<!-- NO label + arrow going down then left back to login -->
+<text x="530" y="96" text-anchor="middle" fill="#dc2626" font-size="8" font-weight="700">NO</text>
+<path d="M530,82 L530,110 L340,110 L340,76" fill="none" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#ar)"/>
+<!-- Error label -->
+<rect x="390" y="115" width="84" height="16" rx="4" fill="#fee2e2"/>
+<text x="432" y="126" text-anchor="middle" fill="#dc2626" font-size="8" font-weight="600">❌ Invalid — Retry</text>
+
+<!-- ══════════════════════════════════
+     ROLE CHECK
+══════════════════════════════════ -->
+
+<!-- Role Check diamond -->
+<polygon points="760,34 836,58 760,82 684,58" fill="#7c3aed" filter="url(#s)"/>
+<text x="760" y="54" text-anchor="middle" fill="white" font-size="9" font-weight="700">Role</text>
+<text x="760" y="66" text-anchor="middle" fill="white" font-size="9" font-weight="700">Check</text>
+
+<!-- arrow from Auth YES to Role Check -->
+<line x1="642" y1="58" x2="684" y2="58" stroke="#16a34a" stroke-width="1.5" marker-end="url(#ag)"/>
+
+<!-- ══════════════════════════════════
+     THREE ROLE PATHS (down from Role Check)
+══════════════════════════════════ -->
+
+<!-- SuperAdmin path (left) -->
+<line x1="700" y1="80" x2="178" y2="150" stroke="#3b82f6" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#a)"/>
+<rect x="106" y="140" width="144" height="30" rx="6" fill="#1e3a8a"/>
+<text x="178" y="153" text-anchor="middle" fill="white" font-size="9" font-weight="700">👤 Super Admin</text>
+<text x="178" y="164" text-anchor="middle" fill="#93c5fd" font-size="7.5">Full system access</text>
+
+<!-- Prison Admin path (center) -->
+<line x1="760" y1="82" x2="430" y2="145" stroke="#7c3aed" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#a)"/>
+<rect x="358" y="140" width="144" height="30" rx="6" fill="#5b21b6"/>
+<text x="430" y="153" text-anchor="middle" fill="white" font-size="9" font-weight="700">🏛 Prison Admin</text>
+<text x="430" y="164" text-anchor="middle" fill="#ddd6fe" font-size="7.5">Operational control</text>
+
+<!-- Staff path (right) -->
+<line x1="820" y1="80" x2="682" y2="150" stroke="#059669" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#a)"/>
+<rect x="610" y="140" width="144" height="30" rx="6" fill="#065f46"/>
+<text x="682" y="153" text-anchor="middle" fill="white" font-size="9" font-weight="700">👥 Staff User</text>
+<text x="682" y="164" text-anchor="middle" fill="#a7f3d0" font-size="7.5">Limited access</text>
+
+<!-- ══════════════════════════════════
+     ALL MERGE → DASHBOARD
+══════════════════════════════════ -->
+
+<line x1="178" y1="170" x2="350" y2="225" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+<line x1="430" y1="170" x2="430" y2="215" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+<line x1="682" y1="170" x2="510" y2="225" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+
+<!-- Dashboard -->
+<rect x="300" y="216" width="260" height="40" rx="10" fill="#0c1a3a" stroke="#3b82f6" stroke-width="2" filter="url(#s)"/>
+<text x="430" y="233" text-anchor="middle" fill="white" font-size="11" font-weight="800">📊 PPMS Dashboard</text>
+<text x="430" y="248" text-anchor="middle" fill="#60a5fa" font-size="8.5">Statistics · Charts · Notifications</text>
+
+<!-- ══════════════════════════════════
+     5 MODULE BRANCHES
+══════════════════════════════════ -->
+
+<!-- Fan out arrows from dashboard -->
+<line x1="320" y1="256" x2="104" y2="320" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+<line x1="365" y1="256" x2="258" y2="320" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+<line x1="430" y1="256" x2="430" y2="320" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+<line x1="495" y1="256" x2="602" y2="320" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+<line x1="540" y1="256" x2="756" y2="320" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+
+<!-- Module 1: Prisoner Management -->
+<rect x="30" y="320" width="148" height="56" rx="8" fill="#065f46" filter="url(#s)"/>
+<text x="104" y="340" text-anchor="middle" fill="white" font-size="10" font-weight="700">🔒 Prisoner</text>
+<text x="104" y="353" text-anchor="middle" fill="#a7f3d0" font-size="9">Management</text>
+<text x="104" y="366" text-anchor="middle" fill="#6ee7b7" font-size="7.5">Add · Edit · Search · Archive</text>
+
+<!-- Module 2: Staff Management -->
+<rect x="184" y="320" width="148" height="56" rx="8" fill="#0e7490" filter="url(#s)"/>
+<text x="258" y="340" text-anchor="middle" fill="white" font-size="10" font-weight="700">👮 Staff &amp; Prison</text>
+<text x="258" y="353" text-anchor="middle" fill="#a5f3fc" font-size="9">Management</text>
+<text x="258" y="366" text-anchor="middle" fill="#67e8f9" font-size="7.5">Staff · Facilities · Assign</text>
+
+<!-- Module 3: Security & Alerts -->
+<rect x="356" y="320" width="148" height="56" rx="8" fill="#b91c1c" filter="url(#s)"/>
+<text x="430" y="340" text-anchor="middle" fill="white" font-size="10" font-weight="700">🛡 Security</text>
+<text x="430" y="353" text-anchor="middle" fill="#fca5a5" font-size="9">&amp; Alerts</text>
+<text x="430" y="366" text-anchor="middle" fill="#fecaca" font-size="7.5">Alerts · Wanted Criminals</text>
+
+<!-- Module 4: Case Reports -->
+<rect x="528" y="320" width="148" height="56" rx="8" fill="#b45309" filter="url(#s)"/>
+<text x="602" y="340" text-anchor="middle" fill="white" font-size="10" font-weight="700">📋 Case Reports</text>
+<text x="602" y="353" text-anchor="middle" fill="#fde68a" font-size="9">&amp; Analytics</text>
+<text x="602" y="366" text-anchor="middle" fill="#fef3c7" font-size="7.5">CASE-YYYY-NNNN · Charts</text>
+
+<!-- Module 5: Report Generation -->
+<rect x="682" y="320" width="148" height="56" rx="8" fill="#15803d" filter="url(#s)"/>
+<text x="756" y="340" text-anchor="middle" fill="white" font-size="10" font-weight="700">📊 Report</text>
+<text x="756" y="353" text-anchor="middle" fill="#bbf7d0" font-size="9">Generation</text>
+<text x="756" y="366" text-anchor="middle" fill="#d1fae5" font-size="7.5">Excel Export · ClosedXML</text>
+
+<!-- ══════════════════════════════════
+     ALL MODULES → SQL SERVER
+══════════════════════════════════ -->
+
+<line x1="104" y1="376" x2="322" y2="455" stroke="#64748b" stroke-width="1.2" marker-end="url(#a)"/>
+<line x1="258" y1="376" x2="358" y2="455" stroke="#64748b" stroke-width="1.2" marker-end="url(#a)"/>
+<line x1="430" y1="376" x2="430" y2="455" stroke="#64748b" stroke-width="1.2" marker-end="url(#a)"/>
+<line x1="602" y1="376" x2="502" y2="455" stroke="#64748b" stroke-width="1.2" marker-end="url(#a)"/>
+
+<!-- Report Gen → Excel Output (separate path) -->
+<line x1="756" y1="376" x2="756" y2="450" stroke="#15803d" stroke-width="1.4" marker-end="url(#ag)"/>
+
+<!-- ══════════════════════════════════
+     SQL SERVER DATABASE
+══════════════════════════════════ -->
+
+<!-- Cylinder shape -->
+<ellipse cx="430" cy="462" rx="120" ry="18" fill="#92400e" filter="url(#s)"/>
+<rect x="310" y="462" width="240" height="52" fill="#78350f"/>
+<ellipse cx="430" cy="514" rx="120" ry="18" fill="#92400e"/>
+<!-- top ellipse again (on top) -->
+<ellipse cx="430" cy="462" rx="120" ry="18" fill="#b45309"/>
+<!-- text -->
+<text x="430" y="490" text-anchor="middle" fill="white" font-size="11" font-weight="800">🗄 SQL Server</text>
+<text x="430" y="504" text-anchor="middle" fill="#fde68a" font-size="8.5">PPMS_DB · 15 Tables</text>
+
+<!-- ══════════════════════════════════
+     EXCEL OUTPUT BOX
+══════════════════════════════════ -->
+<rect x="680" y="450" width="148" height="48" rx="8" fill="#15803d" filter="url(#s)"/>
+<text x="754" y="470" text-anchor="middle" fill="white" font-size="10" font-weight="700">📁 Excel Report</text>
+<text x="754" y="483" text-anchor="middle" fill="#bbf7d0" font-size="8">ClosedXML · .xlsx file</text>
+<text x="754" y="494" text-anchor="middle" fill="#a7f3d0" font-size="7.5">Download for Govt / Admin</text>
+
+<!-- ══════════════════════════════════
+     DB → END
+══════════════════════════════════ -->
+<line x1="430" y1="532" x2="430" y2="570" stroke="#64748b" stroke-width="1.5" marker-end="url(#a)"/>
+
+<!-- END -->
+<ellipse cx="430" cy="594" rx="52" ry="24" fill="#0f172a" filter="url(#s)"/>
+<text x="430" y="599" text-anchor="middle" fill="white" font-size="11" font-weight="700">END</text>
+
+<!-- ══════════════════════════════════
+     LEGEND
+══════════════════════════════════ -->
+<rect x="20" y="468" width="230" height="118" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#s)"/>
+<text x="135" y="485" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">Legend</text>
+<!-- items -->
+<ellipse cx="40" cy="500" rx="22" ry="11" fill="#0f172a"/>
+<text x="40" y="504" text-anchor="middle" fill="white" font-size="7.5">Start/End</text>
+<text x="100" y="504" fill="#334155" font-size="8">Start / End point</text>
+
+<rect x="28" y="516" width="44" height="18" rx="5" fill="#1e3a8a"/>
+<text x="50" y="529" text-anchor="middle" fill="white" font-size="7.5">Process</text>
+<text x="100" y="528" fill="#334155" font-size="8">Process / Action</text>
+
+<polygon points="50,546 68,556 50,566 32,556" fill="#d97706"/>
+<text x="50" y="560" text-anchor="middle" fill="white" font-size="7">Decision</text>
+<text x="100" y="559" fill="#334155" font-size="8">Decision point</text>
+
+<line x1="32" y1="578" x2="70" y2="578" stroke="#64748b" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="100" y="581" fill="#334155" font-size="8">Normal flow</text>
+<line x1="32" y1="595" x2="70" y2="595" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#ar)"/>
+<text x="100" y="598" fill="#334155" font-size="8">Error / redirect flow</text>
+
+<!-- ══════════════════════════════════
+     FLOW LABELS on arrows
+══════════════════════════════════ -->
+<rect x="430" y="384" width="54" height="14" rx="4" fill="#f0f4f8"/>
+<text x="457" y="394" text-anchor="middle" fill="#64748b" font-size="7.5">Read/Write</text>
+
+</svg>
+</body>
+</html>

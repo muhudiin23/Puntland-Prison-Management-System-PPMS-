@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPMS — System Architecture Diagram</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0f1e;color:#e2e8f0;font-family:'Segoe UI',Arial,sans-serif;padding:22px 18px 40px;min-width:800px}
+
+/* ── Header ── */
+.hdr{text-align:center;background:linear-gradient(135deg,#0d1e3c 0%,#1e3a8a 100%);border-radius:14px;padding:22px 20px;margin-bottom:22px;border:1px solid rgba(96,165,250,.3)}
+.hdr .tag{font-size:.6rem;letter-spacing:3px;text-transform:uppercase;color:#60a5fa;font-weight:700;margin-bottom:6px}
+.hdr h1{font-size:1.65rem;font-weight:800;color:#f1f5f9}
+.hdr p{color:#94a3b8;font-size:.82rem;margin-top:4px}
+
+/* ── Arch wrapper ── */
+.arch{display:flex;flex-direction:column;gap:0;position:relative}
+
+/* ── Each tier ── */
+.tier{border-radius:12px;padding:14px 16px;border:1.5px solid;position:relative}
+.tier-label{font-size:.6rem;letter-spacing:2.5px;text-transform:uppercase;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.tier-label::after{content:'';flex:1;height:1px;background:currentColor;opacity:.2}
+.tier-row{display:flex;flex-wrap:wrap;gap:8px}
+
+/* ── Tier colors ── */
+.t-client  {background:rgba(30,58,138,.18);border-color:rgba(59,130,246,.4)}
+.t-client  .tier-label{color:#60a5fa}
+.t-present {background:rgba(5,150,105,.12);border-color:rgba(16,185,129,.35)}
+.t-present .tier-label{color:#34d399}
+.t-app     {background:rgba(109,40,217,.12);border-color:rgba(139,92,246,.35)}
+.t-app     .tier-label{color:#a78bfa}
+.t-dal     {background:rgba(14,116,144,.14);border-color:rgba(6,182,212,.35)}
+.t-dal     .tier-label{color:#22d3ee}
+.t-db      {background:rgba(146,64,14,.18);border-color:rgba(245,158,11,.4)}
+.t-db      .tier-label{color:#fbbf24}
+.t-infra   {background:rgba(100,116,139,.1);border-color:rgba(148,163,184,.25)}
+.t-infra   .tier-label{color:#94a3b8}
+
+/* ── Component cards ── */
+.card{border-radius:8px;padding:9px 12px;border:1px solid;flex:1;min-width:130px}
+.card-title{font-size:.72rem;font-weight:700;margin-bottom:5px}
+.card-items{font-size:.68rem;color:#94a3b8;line-height:1.7}
+.card-items span{display:block}
+
+/* card variants */
+.c-blue  {background:rgba(29,78,216,.25);border-color:rgba(59,130,246,.35)}
+.c-blue  .card-title{color:#93c5fd}
+.c-green {background:rgba(5,150,105,.2);border-color:rgba(16,185,129,.35)}
+.c-green .card-title{color:#6ee7b7}
+.c-purple{background:rgba(109,40,217,.25);border-color:rgba(167,139,250,.35)}
+.c-purple .card-title{color:#c4b5fd}
+.c-teal  {background:rgba(14,116,144,.25);border-color:rgba(6,182,212,.35)}
+.c-teal  .card-title{color:#67e8f9}
+.c-amber {background:rgba(146,64,14,.25);border-color:rgba(245,158,11,.4)}
+.c-amber .card-title{color:#fde68a}
+.c-red   {background:rgba(185,28,28,.25);border-color:rgba(248,113,113,.35)}
+.c-red   .card-title{color:#fca5a5}
+.c-gray  {background:rgba(51,65,85,.35);border-color:rgba(148,163,184,.3)}
+.c-gray  .card-title{color:#cbd5e1}
+.c-indigo{background:rgba(55,48,163,.25);border-color:rgba(129,140,248,.35)}
+.c-indigo .card-title{color:#a5b4fc}
+
+/* ── connector arrows ── */
+.connector{display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 0;position:relative;z-index:1}
+.conn-line{flex:1;height:1px;background:rgba(148,163,184,.2)}
+.conn-badge{background:#0f172a;border:1px solid rgba(148,163,184,.25);border-radius:20px;padding:3px 14px;font-size:.68rem;color:#64748b;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.conn-arrow{color:#60a5fa;font-size:.9rem}
+
+/* ── DB table grid ── */
+.db-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px;margin-top:2px}
+.dbtable{background:rgba(120,53,15,.2);border:1px solid rgba(245,158,11,.3);border-radius:6px;padding:7px 10px}
+.dbt-title{font-size:.7rem;font-weight:700;color:#fde68a;margin-bottom:3px}
+.dbt-fields{font-size:.63rem;color:#92400e;line-height:1.65}
+.dbt-fields span{display:block;padding-left:6px}
+.dbt-fields span::before{content:'▸ ';color:#b45309}
+
+/* ── Infra boxes ── */
+.infra-row{display:flex;flex-wrap:wrap;gap:8px}
+.infra-box{background:rgba(30,41,59,.4);border:1px solid rgba(148,163,184,.2);border-radius:8px;padding:9px 14px;flex:1;min-width:160px;display:flex;align-items:center;gap:10px}
+.infra-icon{font-size:1.4rem;flex-shrink:0}
+.infra-name{font-size:.78rem;font-weight:700;color:#e2e8f0}
+.infra-desc{font-size:.65rem;color:#64748b;margin-top:2px}
+
+/* ── SVG connector ── */
+.svg-conn{display:block;margin:0 auto;overflow:visible}
+
+/* ── Legend ── */
+.legend{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-top:18px}
+.leg{display:flex;align-items:center;gap:6px;font-size:.7rem;color:#64748b}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+.foot{text-align:center;color:#1e3a8a;font-size:.72rem;margin-top:16px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+<div class="hdr">
+  <div class="tag">Thesis Project · Chapter 4 · System Design</div>
+  <h1>System Architecture Diagram — PPMS</h1>
+  <p>Puntland Prison Management System &nbsp;|&nbsp; ASP.NET Core 10 MVC &nbsp;·&nbsp; 5-Tier Architecture</p>
+</div>
+
+<div class="arch">
+
+<!-- ═══════════════════════════ TIER 1: CLIENT ═══════════════════════════ -->
+<div class="tier t-client">
+  <div class="tier-label">&#9432; Layer 1 &mdash; Client / User Layer</div>
+  <div class="tier-row">
+
+    <div class="card c-blue">
+      <div class="card-title">&#128100; Super Administrator</div>
+      <div class="card-items">
+        <span>Full system access</span>
+        <span>User management</span>
+        <span>All reports &amp; dashboards</span>
+        <span>Role: SuperAdmin</span>
+      </div>
+    </div>
+
+    <div class="card c-blue">
+      <div class="card-title">&#127963; Prison Administrator</div>
+      <div class="card-items">
+        <span>Operational control</span>
+        <span>Prisoner &amp; staff management</span>
+        <span>Security &amp; alerts</span>
+        <span>Role: PrisonAdministrator</span>
+      </div>
+    </div>
+
+    <div class="card c-blue">
+      <div class="card-title">&#128101; Staff User</div>
+      <div class="card-items">
+        <span>Limited read access</span>
+        <span>Prisoner search</span>
+        <span>Alert submission</span>
+        <span>Role: StaffUser</span>
+      </div>
+    </div>
+
+    <div class="card c-gray">
+      <div class="card-title">&#127760; Web Browser (Client)</div>
+      <div class="card-items">
+        <span>Chrome / Edge / Firefox</span>
+        <span>Desktop &amp; Mobile</span>
+        <span>Responsive Bootstrap UI</span>
+        <span>No app install needed</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- connector -->
+<div class="connector">
+  <div class="conn-line"></div>
+  <div class="conn-badge"><span class="conn-arrow">&#8597;</span> HTTPS Requests &amp; HTML Responses &nbsp;·&nbsp; Port 8080 (Railway) / 7116 (Dev)</div>
+  <div class="conn-line"></div>
+</div>
+
+<!-- ═══════════════════════════ TIER 2: PRESENTATION ═══════════════════════════ -->
+<div class="tier t-present">
+  <div class="tier-label">&#127912; Layer 2 &mdash; Presentation Layer (Razor Views)</div>
+  <div class="tier-row">
+
+    <div class="card c-green">
+      <div class="card-title">&#128196; Razor Views (.cshtml)</div>
+      <div class="card-items">
+        <span>Home / Dashboard</span>
+        <span>Prisoner Views</span>
+        <span>Staff Views</span>
+        <span>Security Views</span>
+        <span>Case Report Views</span>
+        <span>Report Views</span>
+      </div>
+    </div>
+
+    <div class="card c-green">
+      <div class="card-title">&#127775; Shared Layout</div>
+      <div class="card-items">
+        <span>_Layout.cshtml</span>
+        <span>Sidebar navigation</span>
+        <span>Top bar + notifications</span>
+        <span>Dark navy theme</span>
+        <span>Glassmorphism cards</span>
+      </div>
+    </div>
+
+    <div class="card c-teal">
+      <div class="card-title">&#127744; Bootstrap 5.3</div>
+      <div class="card-items">
+        <span>Responsive grid</span>
+        <span>Modals &amp; dropdowns</span>
+        <span>Form components</span>
+        <span>Utility classes</span>
+      </div>
+    </div>
+
+    <div class="card c-teal">
+      <div class="card-title">&#128200; Chart.js 4.4.0</div>
+      <div class="card-items">
+        <span>Bar charts</span>
+        <span>Doughnut charts</span>
+        <span>Line charts</span>
+        <span>Dashboard statistics</span>
+      </div>
+    </div>
+
+    <div class="card c-teal">
+      <div class="card-title">&#9881; Frontend Libraries</div>
+      <div class="card-items">
+        <span>Font Awesome 6.5 (icons)</span>
+        <span>Select2 (dropdowns)</span>
+        <span>jQuery 3.7</span>
+        <span>Canvas API (bg anim)</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- connector -->
+<div class="connector">
+  <div class="conn-line"></div>
+  <div class="conn-badge"><span class="conn-arrow">&#8597;</span> MVC Request Pipeline &nbsp;·&nbsp; Model Binding &nbsp;·&nbsp; ViewBag / ViewData</div>
+  <div class="conn-line"></div>
+</div>
+
+<!-- ═══════════════════════════ TIER 3: APPLICATION ═══════════════════════════ -->
+<div class="tier t-app">
+  <div class="tier-label">&#9881;&#65039; Layer 3 &mdash; Application / Business Logic Layer</div>
+  <div class="tier-row">
+
+    <div class="card c-purple" style="min-width:190px">
+      <div class="card-title">&#128257; MVC Controllers</div>
+      <div class="card-items">
+        <span>HomeController</span>
+        <span>PrisonerController</span>
+        <span>StaffController</span>
+        <span>PrisonController</span>
+        <span>SecurityController</span>
+        <span>CaseReportController</span>
+        <span>ReportController</span>
+        <span>AccountController</span>
+      </div>
+    </div>
+
+    <div class="card c-red">
+      <div class="card-title">&#128274; ASP.NET Identity</div>
+      <div class="card-items">
+        <span>Authentication (Login)</span>
+        <span>Cookie-based sessions</span>
+        <span>RBAC — 3 roles:</span>
+        <span>&nbsp;&nbsp;• SuperAdmin</span>
+        <span>&nbsp;&nbsp;• PrisonAdministrator</span>
+        <span>&nbsp;&nbsp;• StaffUser</span>
+        <span>[Authorize(Roles=...)]</span>
+        <span>Password hashing (BCrypt)</span>
+      </div>
+    </div>
+
+    <div class="card c-purple">
+      <div class="card-title">&#128203; Business Logic</div>
+      <div class="card-items">
+        <span>Prisoner registration</span>
+        <span>Auto Case ID (CASE-YYYY-NNNN)</span>
+        <span>Soft-delete (IsArchived)</span>
+        <span>Photo upload handling</span>
+        <span>Status transitions</span>
+        <span>Search &amp; filter logic</span>
+        <span>Analytics computation</span>
+      </div>
+    </div>
+
+    <div class="card c-indigo">
+      <div class="card-title">&#128202; Report Service</div>
+      <div class="card-items">
+        <span>ClosedXML 0.104.2</span>
+        <span>Excel workbook generation</span>
+        <span>Prisoner report</span>
+        <span>Staff report</span>
+        <span>Case report export</span>
+        <span>Security report export</span>
+        <span>wwwroot/uploads save</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- connector -->
+<div class="connector">
+  <div class="conn-line"></div>
+  <div class="conn-badge"><span class="conn-arrow">&#8597;</span> Entity Framework Core 9.0.5 &nbsp;·&nbsp; LINQ Queries &nbsp;·&nbsp; Change Tracking</div>
+  <div class="conn-line"></div>
+</div>
+
+<!-- ═══════════════════════════ TIER 4: DATA ACCESS ═══════════════════════════ -->
+<div class="tier t-dal">
+  <div class="tier-label">&#128279; Layer 4 &mdash; Data Access Layer (EF Core)</div>
+  <div class="tier-row">
+
+    <div class="card c-teal">
+      <div class="card-title">&#128220; AppDbContext</div>
+      <div class="card-items">
+        <span>Inherits IdentityDbContext</span>
+        <span>DbSet&lt;Prisoner&gt;</span>
+        <span>DbSet&lt;Staff&gt;</span>
+        <span>DbSet&lt;Prison&gt;</span>
+        <span>DbSet&lt;CaseReport&gt;</span>
+        <span>DbSet&lt;Alert&gt;</span>
+        <span>DbSet&lt;WantedCriminal&gt;</span>
+        <span>DbSet&lt;FormerPrisoner&gt;</span>
+        <span>+ 8 more DbSets</span>
+      </div>
+    </div>
+
+    <div class="card c-teal">
+      <div class="card-title">&#128260; EF Core Features</div>
+      <div class="card-items">
+        <span>Code-First approach</span>
+        <span>Auto migrations on startup</span>
+        <span>db.Database.Migrate()</span>
+        <span>Data annotations</span>
+        <span>Fluent API config</span>
+        <span>Navigation properties</span>
+        <span>Eager loading (.Include)</span>
+      </div>
+    </div>
+
+    <div class="card c-teal">
+      <div class="card-title">&#128196; Migrations</div>
+      <div class="card-items">
+        <span>Schema version control</span>
+        <span>Up() / Down() methods</span>
+        <span>Auto-applied at startup</span>
+        <span>Seed data (roles, admin)</span>
+        <span>Connection: localdb</span>
+        <span>MSSQLLocalDB (dev)</span>
+        <span>SQL Server (prod)</span>
+      </div>
+    </div>
+
+    <div class="card c-teal">
+      <div class="card-title">&#128736; Program.cs Config</div>
+      <div class="card-items">
+        <span>AddDbContext&lt;AppDbContext&gt;</span>
+        <span>AddIdentity configuration</span>
+        <span>AddAuthentication / Cookie</span>
+        <span>UseStaticFiles</span>
+        <span>UseRouting</span>
+        <span>UseAuthorization</span>
+        <span>MapControllerRoute (MVC)</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- connector -->
+<div class="connector">
+  <div class="conn-line"></div>
+  <div class="conn-badge"><span class="conn-arrow">&#8597;</span> ADO.NET / SQL Queries &nbsp;·&nbsp; TCP 1433 &nbsp;·&nbsp; Connection String</div>
+  <div class="conn-line"></div>
+</div>
+
+<!-- ═══════════════════════════ TIER 5: DATABASE ═══════════════════════════ -->
+<div class="tier t-db">
+  <div class="tier-label">&#128452; Layer 5 &mdash; Database Layer &nbsp;&mdash;&nbsp; SQL Server &middot; PPMS_DB &middot; 15 Tables</div>
+
+  <div class="db-grid">
+
+    <div class="dbtable">
+      <div class="dbt-title">&#128275; Prisoners</div>
+      <div class="dbt-fields">
+        <span>PrisonerId (PK)</span>
+        <span>FullName, NationalId</span>
+        <span>CrimeType, Sentence</span>
+        <span>Status, IsArchived</span>
+        <span>PhotoPath, PrisonId (FK)</span>
+      </div>
+    </div>
+
+    <div class="dbtable">
+      <div class="dbt-title">&#128101; Staff</div>
+      <div class="dbt-fields">
+        <span>StaffId (PK)</span>
+        <span>FullName, Position</span>
+        <span>Department, Phone</span>
+        <span>HireDate, Status</span>
+        <span>PrisonId (FK)</span>
+      </div>
+    </div>
+
+    <div class="dbtable">
+      <div class="dbt-title">&#127963; Prisons</div>
+      <div class="dbt-fields">
+        <span>PrisonId (PK)</span>
+        <span>Name, Location</span>
+        <span>Capacity, Type</span>
+        <span>Director, Phone</span>
+        <span>EstablishedDate</span>
+      </div>
+    </div>
+
+    <div class="dbtable">
+      <div class="dbt-title">&#128680; Alerts</div>
+      <div class="dbt-fields">
+        <span>AlertId (PK)</span>
+        <span>Title, Message</span>
+        <span>AlertType, Priority</span>
+        <span>IsResolved, CreatedAt</span>
+        <span>PrisonId (FK)</span>
+      </div>
+    </div>
+
+    <div class="dbtable">
+      <div class="dbt-title">&#128203; CaseReports</div>
+      <div class="dbt-fields">
+        <span>CaseId (PK)</span>
+        <span>CaseNumber (auto)</span>
+        <span>CrimeType, Status</span>
+        <span>Description, Date</span>
+        <span>PrisonerId (FK)</span>
+      </div>
+    </div>
+
+    <div class="dbtable">
+      <div class="dbt-title">&#128373; WantedCriminals</div>
+      <div class="dbt-fields">
+        <span>WantedId (PK)</span>
+        <span>FullName, CrimeType</span>
+        <span>DangerLevel, Status</span>
+        <span>PhotoPath, LastSeen</span>
+        <span>Reward, Description</span>
+      </div>
+    </div>
+
+    <div class="dbtable">
+      <div class="dbt-title">&#128722; FormerPrisoners</div>
+      <div class="dbt-fields">
+        <span>FormerId (PK)</span>
+        <span>FullName, NationalId</span>
+        <span>ReleaseDate, Reason</span>
+        <span>CrimeType, PrisonName</span>
+        <span>Status (Released/Pardoned)</span>
+      </div>
+    </div>
+
+    <div class="dbtable">
+      <div class="dbt-title">&#128274; AspNetUsers</div>
+      <div class="dbt-fields">
+        <span>Id (PK), UserName</span>
+        <span>Email, PasswordHash</span>
+        <span>FullName, PrisonId</span>
+        <span>Theme preference</span>
+        <span>LastLogin, IsActive</span>
+      </div>
+    </div>
+
+    <div class="dbtable">
+      <div class="dbt-title">&#128100; AspNetRoles</div>
+      <div class="dbt-fields">
+        <span>SuperAdmin</span>
+        <span>PrisonAdministrator</span>
+        <span>StaffUser</span>
+        <span>AspNetUserRoles (join)</span>
+        <span>AspNetRoleClaims</span>
+      </div>
+    </div>
+
+    <div class="dbtable">
+      <div class="dbt-title">&#128336; ActivityLogs</div>
+      <div class="dbt-fields">
+        <span>LogId (PK)</span>
+        <span>UserId (FK)</span>
+        <span>Action, Entity</span>
+        <span>Details, Timestamp</span>
+        <span>IpAddress</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- connector -->
+<div class="connector">
+  <div class="conn-line"></div>
+  <div class="conn-badge">&#9729;&#65039; Deployment Infrastructure</div>
+  <div class="conn-line"></div>
+</div>
+
+<!-- ═══════════════════════════ INFRASTRUCTURE ═══════════════════════════ -->
+<div class="tier t-infra">
+  <div class="tier-label">&#127760; Infrastructure &amp; Deployment Layer</div>
+  <div class="infra-row">
+
+    <div class="infra-box">
+      <div class="infra-icon">&#128040;</div>
+      <div>
+        <div class="infra-name">Docker Container</div>
+        <div class="infra-desc">Dockerfile · multi-stage build<br>ASP.NET Core runtime image<br>Port 8080 exposed</div>
+      </div>
+    </div>
+
+    <div class="infra-box">
+      <div class="infra-icon">&#9729;&#65039;</div>
+      <div>
+        <div class="infra-name">Railway Cloud Platform</div>
+        <div class="infra-desc">Cloud hosting (paas)<br>Auto-deploy from GitHub<br>Environment variables</div>
+      </div>
+    </div>
+
+    <div class="infra-box">
+      <div class="infra-icon">&#128008;</div>
+      <div>
+        <div class="infra-name">GitHub Repository</div>
+        <div class="infra-desc">github.com/muhudiin23/PPMS<br>Branch: main<br>Source version control</div>
+      </div>
+    </div>
+
+    <div class="infra-box">
+      <div class="infra-icon">&#128736;&#65039;</div>
+      <div>
+        <div class="infra-name">Development Environment</div>
+        <div class="infra-desc">Visual Studio 2022<br>(localdb)\MSSQLLocalDB<br>Ports 7116 / 5073</div>
+      </div>
+    </div>
+
+    <div class="infra-box">
+      <div class="infra-icon">&#128230;</div>
+      <div>
+        <div class="infra-name">NuGet Packages</div>
+        <div class="infra-desc">EF Core 9.0.5<br>ClosedXML 0.104.2<br>Identity + Bootstrap</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- end .arch -->
+
+<!-- ═══════════════════════════ TECHNOLOGY STACK ═══════════════════════════ -->
+<div style="margin-top:18px;padding:14px 16px;background:rgba(15,23,42,.7);border:1px solid rgba(255,255,255,.06);border-radius:10px">
+  <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:#60a5fa;font-weight:700;margin-bottom:10px">Full Technology Stack</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px">
+    <span style="background:rgba(29,78,216,.3);border:1px solid rgba(59,130,246,.4);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#93c5fd">ASP.NET Core 10 MVC</span>
+    <span style="background:rgba(29,78,216,.3);border:1px solid rgba(59,130,246,.4);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#93c5fd">C# 13</span>
+    <span style="background:rgba(5,150,105,.2);border:1px solid rgba(16,185,129,.35);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#6ee7b7">Entity Framework Core 9.0.5</span>
+    <span style="background:rgba(5,150,105,.2);border:1px solid rgba(16,185,129,.35);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#6ee7b7">SQL Server</span>
+    <span style="background:rgba(109,40,217,.2);border:1px solid rgba(139,92,246,.35);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#c4b5fd">ASP.NET Identity</span>
+    <span style="background:rgba(109,40,217,.2);border:1px solid rgba(139,92,246,.35);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#c4b5fd">RBAC (3 roles)</span>
+    <span style="background:rgba(14,116,144,.2);border:1px solid rgba(6,182,212,.35);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#67e8f9">Bootstrap 5.3</span>
+    <span style="background:rgba(14,116,144,.2);border:1px solid rgba(6,182,212,.35);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#67e8f9">Chart.js 4.4</span>
+    <span style="background:rgba(14,116,144,.2);border:1px solid rgba(6,182,212,.35);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#67e8f9">Font Awesome 6.5</span>
+    <span style="background:rgba(146,64,14,.2);border:1px solid rgba(245,158,11,.35);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#fde68a">ClosedXML 0.104.2</span>
+    <span style="background:rgba(146,64,14,.2);border:1px solid rgba(245,158,11,.35);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#fde68a">Razor Pages</span>
+    <span style="background:rgba(100,116,139,.15);border:1px solid rgba(148,163,184,.25);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#cbd5e1">Docker</span>
+    <span style="background:rgba(100,116,139,.15);border:1px solid rgba(148,163,184,.25);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#cbd5e1">Railway Cloud</span>
+    <span style="background:rgba(100,116,139,.15);border:1px solid rgba(148,163,184,.25);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#cbd5e1">GitHub</span>
+    <span style="background:rgba(100,116,139,.15);border:1px solid rgba(148,163,184,.25);border-radius:20px;padding:3px 11px;font-size:.7rem;color:#cbd5e1">jQuery 3.7</span>
+  </div>
+</div>
+
+<div class="foot" style="margin-top:14px">
+  Puntland Prison Management System — PPMS &nbsp;·&nbsp; Chapter 4: System Design &nbsp;·&nbsp; System Architecture Diagram &nbsp;·&nbsp; 2026
+</div>
+
+</body>
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPMS — Data Flow Diagram</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f0f4f8;color:#1e293b;font-family:'Segoe UI',Arial,sans-serif;padding:20px}
+
+.hdr{text-align:center;background:linear-gradient(135deg,#1e3a8a,#2563eb,#7c3aed);border-radius:14px;padding:24px;margin-bottom:22px;box-shadow:0 4px 20px rgba(37,99,235,.25)}
+.hdr .tag{font-size:.62rem;letter-spacing:3px;text-transform:uppercase;color:#bfdbfe;font-weight:700;margin-bottom:6px}
+.hdr h1{font-size:1.7rem;color:#fff;font-weight:800}
+.hdr p{color:#bfdbfe;font-size:.83rem;margin-top:4px}
+
+.sec{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:20px;overflow-x:auto;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.sec h2{font-size:.9rem;font-weight:800;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid;letter-spacing:.5px}
+.h-blue{color:#1d4ed8;border-color:#bfdbfe}
+.h-purple{color:#6d28d9;border-color:#ddd6fe}
+svg{display:block;margin:0 auto}
+
+/* legend */
+.legend{display:flex;flex-wrap:wrap;gap:10px;padding:14px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:18px}
+.legend-title{width:100%;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:#6d28d9;font-weight:800;margin-bottom:2px}
+.leg-item{display:flex;align-items:center;gap:7px;font-size:.75rem;color:#475569}
+.leg-box{width:20px;height:14px;border-radius:3px;flex-shrink:0}
+.leg-circle{width:16px;height:16px;border-radius:50%;flex-shrink:0}
+.leg-store{width:20px;height:14px;flex-shrink:0;border-top:2.5px solid #f59e0b;border-bottom:2.5px solid #f59e0b;border-right:2.5px solid #f59e0b}
+.leg-solid{width:28px;height:2.5px;flex-shrink:0;border-radius:2px}
+.leg-dash{width:28px;height:2px;flex-shrink:0;background:repeating-linear-gradient(90deg,#6d28d9 0,#6d28d9 5px,transparent 5px,transparent 9px)}
+
+/* table */
+table{width:100%;border-collapse:collapse;font-size:.76rem}
+th{background:#1e3a8a;color:#fff;padding:9px 12px;text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.6px}
+td{padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#334155;vertical-align:top}
+tr:nth-child(even) td{background:#f8fafc}
+tr:hover td{background:#eff6ff}
+.bi{background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:10px;font-size:.65rem;font-weight:700}
+.bo{background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:10px;font-size:.65rem;font-weight:700}
+.br{background:#fef9c3;color:#92400e;padding:2px 7px;border-radius:10px;font-size:.65rem;font-weight:700}
+.bw{background:#f3e8ff;color:#6d28d9;padding:2px 7px;border-radius:10px;font-size:.65rem;font-weight:700}
+.foot{text-align:center;color:#94a3b8;font-size:.7rem;margin-top:14px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="tag">Thesis Project · System Design · Chapter 4</div>
+  <h1>Data Flow Diagram — PPMS</h1>
+  <p>Puntland Prison Management System &nbsp;|&nbsp; Level 0 Context Diagram &amp; Level 1 Detailed DFD</p>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-title">Notation Key</div>
+  <div class="leg-item"><div class="leg-box" style="background:#dbeafe;border:2px solid #2563eb"></div>External Entity</div>
+  <div class="leg-item"><div class="leg-circle" style="background:linear-gradient(135deg,#0891b2,#0e7490)"></div>Process</div>
+  <div class="leg-item"><div class="leg-store"></div>Data Store</div>
+  <div class="leg-item"><div class="leg-solid" style="background:#2563eb"></div>Input Flow →</div>
+  <div class="leg-item"><div class="leg-dash"></div>Output Flow ⤑</div>
+</div>
+
+<!-- ═══════════ LEVEL 0 ═══════════ -->
+<div class="sec">
+  <h2 class="h-blue">Level 0 — Context Diagram</h2>
+<svg viewBox="0 0 960 520" width="100%" xmlns="http://www.w3.org/2000/svg" style="max-width:960px">
+<defs>
+  <marker id="a0b" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#2563eb"/></marker>
+  <marker id="a0g" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#16a34a"/></marker>
+  <marker id="a0p" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#7c3aed"/></marker>
+  <linearGradient id="cg0" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#1d4ed8"/><stop offset="100%" stop-color="#7c3aed"/>
+  </linearGradient>
+  <filter id="s0"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="rgba(0,0,0,0.12)"/></filter>
+</defs>
+
+<!-- white background -->
+<rect width="960" height="520" fill="white" rx="8"/>
+<!-- soft grid -->
+<g stroke="#f1f5f9" stroke-width="1">
+  <line x1="0" y1="104" x2="960" y2="104"/><line x1="0" y1="208" x2="960" y2="208"/>
+  <line x1="0" y1="312" x2="960" y2="312"/><line x1="0" y1="416" x2="960" y2="416"/>
+  <line x1="192" y1="0" x2="192" y2="520"/><line x1="384" y1="0" x2="384" y2="520"/>
+  <line x1="576" y1="0" x2="576" y2="520"/><line x1="768" y1="0" x2="768" y2="520"/>
+</g>
+<!-- soft glow behind center -->
+<ellipse cx="480" cy="260" rx="190" ry="140" fill="rgba(37,99,235,0.05)"/>
+
+<!-- ENTITIES -->
+<!-- E1: Super Admin (top-left) -->
+<rect x="28" y="44" width="185" height="64" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2" filter="url(#s0)"/>
+<rect x="28" y="44" width="185" height="22" rx="8" fill="#2563eb"/>
+<rect x="28" y="56" width="185" height="10" fill="#2563eb"/>
+<text x="120" y="59" text-anchor="middle" fill="#fff" font-size="10" font-weight="800">E1 — Super Administrator</text>
+<text x="120" y="82" text-anchor="middle" fill="#1d4ed8" font-size="9.5" font-weight="600">Full system access</text>
+<text x="120" y="97" text-anchor="middle" fill="#3b82f6" font-size="8.5">Role: SuperAdmin</text>
+
+<!-- E2: Prison Admin (top-right) -->
+<rect x="747" y="44" width="185" height="64" rx="8" fill="#f3e8ff" stroke="#7c3aed" stroke-width="2" filter="url(#s0)"/>
+<rect x="747" y="44" width="185" height="22" rx="8" fill="#7c3aed"/>
+<rect x="747" y="56" width="185" height="10" fill="#7c3aed"/>
+<text x="839" y="59" text-anchor="middle" fill="#fff" font-size="10" font-weight="800">E2 — Prison Administrator</text>
+<text x="839" y="82" text-anchor="middle" fill="#6d28d9" font-size="9.5" font-weight="600">Operational control</text>
+<text x="839" y="97" text-anchor="middle" fill="#8b5cf6" font-size="8.5">Role: PrisonAdministrator</text>
+
+<!-- E3: Staff User (bottom-left) -->
+<rect x="28" y="412" width="185" height="64" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="2" filter="url(#s0)"/>
+<rect x="28" y="412" width="185" height="22" rx="8" fill="#16a34a"/>
+<rect x="28" y="424" width="185" height="10" fill="#16a34a"/>
+<text x="120" y="427" text-anchor="middle" fill="#fff" font-size="10" font-weight="800">E3 — Staff User</text>
+<text x="120" y="450" text-anchor="middle" fill="#15803d" font-size="9.5" font-weight="600">Limited access</text>
+<text x="120" y="465" text-anchor="middle" fill="#16a34a" font-size="8.5">Role: StaffUser</text>
+
+<!-- E4: Government Authority (bottom-right) -->
+<rect x="747" y="412" width="185" height="64" rx="8" fill="#ffedd5" stroke="#ea580c" stroke-width="2" filter="url(#s0)"/>
+<rect x="747" y="412" width="185" height="22" rx="8" fill="#ea580c"/>
+<rect x="747" y="424" width="185" height="10" fill="#ea580c"/>
+<text x="839" y="427" text-anchor="middle" fill="#fff" font-size="10" font-weight="800">E4 — Government Authority</text>
+<text x="839" y="450" text-anchor="middle" fill="#c2410c" font-size="9.5" font-weight="600">Report consumer</text>
+<text x="839" y="465" text-anchor="middle" fill="#ea580c" font-size="8.5">Official statistics</text>
+
+<!-- CENTER PPMS OVAL -->
+<ellipse cx="480" cy="258" rx="148" ry="100" fill="url(#cg0)" filter="url(#s0)"/>
+<ellipse cx="480" cy="258" rx="148" ry="100" fill="none" stroke="white" stroke-width="2" opacity=".3"/>
+<text x="480" y="236" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9" letter-spacing="2" font-weight="700">PROCESS 0</text>
+<text x="480" y="257" text-anchor="middle" fill="#fff" font-size="18" font-weight="800">PPMS</text>
+<text x="480" y="276" text-anchor="middle" fill="#bfdbfe" font-size="9.5">Puntland Prison</text>
+<text x="480" y="291" text-anchor="middle" fill="#bfdbfe" font-size="9.5">Management System</text>
+
+<!-- FLOWS -->
+<!-- E1→PPMS -->
+<path d="M213,72 Q310,100 338,186" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#a0b)"/>
+<rect x="215" y="112" width="100" height="28" rx="5" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+<text x="265" y="124" text-anchor="middle" fill="#1d4ed8" font-size="8.5" font-weight="700">Login Credentials</text>
+<text x="265" y="135" text-anchor="middle" fill="#3b82f6" font-size="7.5">System Commands</text>
+
+<!-- PPMS→E1 -->
+<path d="M336,200 Q278,142 213,80" fill="none" stroke="#16a34a" stroke-width="1.8" stroke-dasharray="6,3" marker-end="url(#a0g)"/>
+<rect x="218" y="152" width="90" height="26" rx="5" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+<text x="263" y="164" text-anchor="middle" fill="#15803d" font-size="8.5" font-weight="700">Dashboards</text>
+<text x="263" y="174" text-anchor="middle" fill="#16a34a" font-size="7.5">Admin Reports</text>
+
+<!-- E2→PPMS -->
+<path d="M747,72 Q650,100 622,186" fill="none" stroke="#7c3aed" stroke-width="2" marker-end="url(#a0p)"/>
+<rect x="648" y="112" width="98" height="28" rx="5" fill="#f3e8ff" stroke="#c4b5fd" stroke-width="1"/>
+<text x="697" y="124" text-anchor="middle" fill="#6d28d9" font-size="8.5" font-weight="700">Prisoner / Staff</text>
+<text x="697" y="135" text-anchor="middle" fill="#7c3aed" font-size="7.5">Operational Data</text>
+
+<!-- PPMS→E2 -->
+<path d="M622,200 Q672,142 747,80" fill="none" stroke="#16a34a" stroke-width="1.8" stroke-dasharray="6,3" marker-end="url(#a0g)"/>
+<rect x="654" y="152" width="86" height="26" rx="5" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+<text x="697" y="164" text-anchor="middle" fill="#15803d" font-size="8.5" font-weight="700">Analytics</text>
+<text x="697" y="174" text-anchor="middle" fill="#16a34a" font-size="7.5">Operational Reports</text>
+
+<!-- E3→PPMS -->
+<path d="M213,422 Q310,398 338,342" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#a0b)"/>
+<rect x="218" y="368" width="96" height="28" rx="5" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+<text x="266" y="380" text-anchor="middle" fill="#1d4ed8" font-size="8.5" font-weight="700">Queries, Alerts</text>
+<text x="266" y="390" text-anchor="middle" fill="#3b82f6" font-size="7.5">Case Submissions</text>
+
+<!-- PPMS→E3 -->
+<path d="M336,330 Q272,372 213,415" fill="none" stroke="#16a34a" stroke-width="1.8" stroke-dasharray="6,3" marker-end="url(#a0g)"/>
+<rect x="218" y="406" width="84" height="26" rx="5" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+<text x="260" y="418" text-anchor="middle" fill="#15803d" font-size="8.5" font-weight="700">Records</text>
+<text x="260" y="428" text-anchor="middle" fill="#16a34a" font-size="7.5">Search Results</text>
+
+<!-- PPMS→E4 -->
+<path d="M622,330 Q688,376 747,420" fill="none" stroke="#ea580c" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#a0p)"/>
+<rect x="648" y="368" width="100" height="28" rx="5" fill="#ffedd5" stroke="#fdba74" stroke-width="1"/>
+<text x="698" y="380" text-anchor="middle" fill="#c2410c" font-size="8.5" font-weight="700">Official Reports</text>
+<text x="698" y="390" text-anchor="middle" fill="#ea580c" font-size="7.5">Prison Statistics</text>
+
+<text x="480" y="508" text-anchor="middle" fill="#94a3b8" font-size="9">Figure 4.1 — Level 0 Context Diagram: Puntland Prison Management System</text>
+</svg>
+</div>
+
+<!-- ═══════════ LEVEL 1 ═══════════ -->
+<div class="sec">
+  <h2 class="h-purple">Level 1 — Detailed Data Flow Diagram</h2>
+<svg viewBox="0 0 1280 900" width="100%" xmlns="http://www.w3.org/2000/svg" style="max-width:1280px">
+<defs>
+  <marker id="b1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2563eb"/></marker>
+  <marker id="b2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#16a34a"/></marker>
+  <marker id="b3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#f59e0b"/></marker>
+  <marker id="b4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ea580c"/></marker>
+
+  <radialGradient id="p1" cx="30%" cy="30%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0891b2"/></radialGradient>
+  <radialGradient id="p2" cx="30%" cy="30%"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#059669"/></radialGradient>
+  <radialGradient id="p3" cx="30%" cy="30%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#7c3aed"/></radialGradient>
+  <radialGradient id="p4" cx="30%" cy="30%"><stop offset="0%" stop-color="#f87171"/><stop offset="100%" stop-color="#dc2626"/></radialGradient>
+  <radialGradient id="p5" cx="30%" cy="30%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#d97706"/></radialGradient>
+  <radialGradient id="p6" cx="30%" cy="30%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#16a34a"/></radialGradient>
+  <filter id="sf"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.10)"/></filter>
+</defs>
+
+<rect width="1280" height="900" fill="white" rx="8"/>
+<g stroke="#f1f5f9" stroke-width="1">
+  <line x1="0" y1="150" x2="1280" y2="150"/><line x1="0" y1="300" x2="1280" y2="300"/>
+  <line x1="0" y1="450" x2="1280" y2="450"/><line x1="0" y1="600" x2="1280" y2="600"/>
+  <line x1="0" y1="750" x2="1280" y2="750"/>
+  <line x1="213" y1="0" x2="213" y2="900"/><line x1="426" y1="0" x2="426" y2="900"/>
+  <line x1="640" y1="0" x2="640" y2="900"/><line x1="854" y1="0" x2="854" y2="900"/>
+  <line x1="1067" y1="0" x2="1067" y2="900"/>
+</g>
+
+<!-- column labels -->
+<text x="106" y="22" text-anchor="middle" fill="#2563eb" font-size="8.5" font-weight="800" letter-spacing="1.5">EXTERNAL ENTITIES</text>
+<text x="510" y="22" text-anchor="middle" fill="#7c3aed" font-size="8.5" font-weight="800" letter-spacing="1.5">PROCESSES</text>
+<text x="1100" y="22" text-anchor="middle" fill="#d97706" font-size="8.5" font-weight="800" letter-spacing="1.5">DATA STORES</text>
+
+<!-- ═══ EXTERNAL ENTITIES ═══ -->
+<rect x="16" y="58" width="178" height="60" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2" filter="url(#sf)"/>
+<rect x="16" y="58" width="178" height="20" rx="8" fill="#2563eb"/>
+<rect x="16" y="68" width="178" height="10" fill="#2563eb"/>
+<text x="105" y="72" text-anchor="middle" fill="white" font-size="9.5" font-weight="800">E1 — Super Admin</text>
+<text x="105" y="92" text-anchor="middle" fill="#1d4ed8" font-size="8.5" font-weight="600">Full System Access</text>
+<text x="105" y="106" text-anchor="middle" fill="#3b82f6" font-size="8">SuperAdmin Role</text>
+
+<rect x="16" y="248" width="178" height="60" rx="8" fill="#f3e8ff" stroke="#7c3aed" stroke-width="2" filter="url(#sf)"/>
+<rect x="16" y="248" width="178" height="20" rx="8" fill="#7c3aed"/>
+<rect x="16" y="258" width="178" height="10" fill="#7c3aed"/>
+<text x="105" y="262" text-anchor="middle" fill="white" font-size="9.5" font-weight="800">E2 — Prison Admin</text>
+<text x="105" y="282" text-anchor="middle" fill="#6d28d9" font-size="8.5" font-weight="600">Operational Control</text>
+<text x="105" y="296" text-anchor="middle" fill="#8b5cf6" font-size="8">PrisonAdministrator Role</text>
+
+<rect x="16" y="478" width="178" height="60" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="2" filter="url(#sf)"/>
+<rect x="16" y="478" width="178" height="20" rx="8" fill="#16a34a"/>
+<rect x="16" y="488" width="178" height="10" fill="#16a34a"/>
+<text x="105" y="492" text-anchor="middle" fill="white" font-size="9.5" font-weight="800">E3 — Staff User</text>
+<text x="105" y="512" text-anchor="middle" fill="#15803d" font-size="8.5" font-weight="600">Limited Access</text>
+<text x="105" y="526" text-anchor="middle" fill="#16a34a" font-size="8">StaffUser Role</text>
+
+<rect x="16" y="728" width="178" height="60" rx="8" fill="#ffedd5" stroke="#ea580c" stroke-width="2" filter="url(#sf)"/>
+<rect x="16" y="728" width="178" height="20" rx="8" fill="#ea580c"/>
+<rect x="16" y="738" width="178" height="10" fill="#ea580c"/>
+<text x="105" y="742" text-anchor="middle" fill="white" font-size="9.5" font-weight="800">E4 — Government</text>
+<text x="105" y="762" text-anchor="middle" fill="#c2410c" font-size="8.5" font-weight="600">Report Consumer</text>
+<text x="105" y="776" text-anchor="middle" fill="#ea580c" font-size="8">Official Statistics</text>
+
+<!-- ═══ PROCESSES ═══ -->
+<circle cx="360" cy="88" r="56" fill="url(#p1)" filter="url(#sf)"/>
+<circle cx="360" cy="88" r="56" fill="none" stroke="white" stroke-width="1.5" opacity=".4"/>
+<text x="360" y="79" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="8.5" letter-spacing="1">P1</text>
+<text x="360" y="95" text-anchor="middle" fill="white" font-size="11" font-weight="800">Auth &amp;</text>
+<text x="360" y="109" text-anchor="middle" fill="#e0f2fe" font-size="8.5">User Mgmt</text>
+
+<circle cx="360" cy="278" r="56" fill="url(#p2)" filter="url(#sf)"/>
+<circle cx="360" cy="278" r="56" fill="none" stroke="white" stroke-width="1.5" opacity=".4"/>
+<text x="360" y="269" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="8.5" letter-spacing="1">P2</text>
+<text x="360" y="285" text-anchor="middle" fill="white" font-size="11" font-weight="800">Prisoner</text>
+<text x="360" y="299" text-anchor="middle" fill="#d1fae5" font-size="8.5">Management</text>
+
+<circle cx="360" cy="508" r="56" fill="url(#p3)" filter="url(#sf)"/>
+<circle cx="360" cy="508" r="56" fill="none" stroke="white" stroke-width="1.5" opacity=".4"/>
+<text x="360" y="499" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="8.5" letter-spacing="1">P3</text>
+<text x="360" y="515" text-anchor="middle" fill="white" font-size="11" font-weight="800">Staff &amp;</text>
+<text x="360" y="529" text-anchor="middle" fill="#ede9fe" font-size="8.5">Facility Mgmt</text>
+
+<circle cx="660" cy="188" r="56" fill="url(#p4)" filter="url(#sf)"/>
+<circle cx="660" cy="188" r="56" fill="none" stroke="white" stroke-width="1.5" opacity=".4"/>
+<text x="660" y="179" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="8.5" letter-spacing="1">P4</text>
+<text x="660" y="195" text-anchor="middle" fill="white" font-size="11" font-weight="800">Security</text>
+<text x="660" y="209" text-anchor="middle" fill="#fee2e2" font-size="8.5">&amp; Alerts</text>
+
+<circle cx="660" cy="438" r="56" fill="url(#p5)" filter="url(#sf)"/>
+<circle cx="660" cy="438" r="56" fill="none" stroke="white" stroke-width="1.5" opacity=".4"/>
+<text x="660" y="429" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="8.5" letter-spacing="1">P5</text>
+<text x="660" y="445" text-anchor="middle" fill="white" font-size="11" font-weight="800">Case Reports</text>
+<text x="660" y="459" text-anchor="middle" fill="#fef3c7" font-size="8.5">&amp; Analytics</text>
+
+<circle cx="660" cy="758" r="56" fill="url(#p6)" filter="url(#sf)"/>
+<circle cx="660" cy="758" r="56" fill="none" stroke="white" stroke-width="1.5" opacity=".4"/>
+<text x="660" y="749" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="8.5" letter-spacing="1">P6</text>
+<text x="660" y="765" text-anchor="middle" fill="white" font-size="11" font-weight="800">Report</text>
+<text x="660" y="779" text-anchor="middle" fill="#dcfce7" font-size="8.5">Generation</text>
+
+<!-- ═══ DATA STORES ═══ -->
+<!-- D1 -->
+<line x1="900" y1="68" x2="1240" y2="68" stroke="#f59e0b" stroke-width="2.5"/>
+<line x1="900" y1="100" x2="1240" y2="100" stroke="#f59e0b" stroke-width="2.5"/>
+<line x1="1240" y1="68" x2="1240" y2="100" stroke="#f59e0b" stroke-width="2.5"/>
+<rect x="900" y="68" width="340" height="32" fill="#fef9c3"/>
+<text x="918" y="82" fill="#d97706" font-size="9" font-weight="800">D1</text>
+<text x="946" y="82" fill="#92400e" font-size="9.5" font-weight="700"> Users &amp; Auth Database</text>
+<text x="918" y="96" fill="#b45309" font-size="8">AspNetUsers · Roles · Sessions</text>
+
+<!-- D2 -->
+<line x1="900" y1="186" x2="1240" y2="186" stroke="#059669" stroke-width="2.5"/>
+<line x1="900" y1="218" x2="1240" y2="218" stroke="#059669" stroke-width="2.5"/>
+<line x1="1240" y1="186" x2="1240" y2="218" stroke="#059669" stroke-width="2.5"/>
+<rect x="900" y="186" width="340" height="32" fill="#dcfce7"/>
+<text x="918" y="200" fill="#059669" font-size="9" font-weight="800">D2</text>
+<text x="946" y="200" fill="#14532d" font-size="9.5" font-weight="700"> Prisoners Database</text>
+<text x="918" y="214" fill="#15803d" font-size="8">Prisoner Records · Photos · Status</text>
+
+<!-- D3 -->
+<line x1="900" y1="306" x2="1240" y2="306" stroke="#7c3aed" stroke-width="2.5"/>
+<line x1="900" y1="338" x2="1240" y2="338" stroke="#7c3aed" stroke-width="2.5"/>
+<line x1="1240" y1="306" x2="1240" y2="338" stroke="#7c3aed" stroke-width="2.5"/>
+<rect x="900" y="306" width="340" height="32" fill="#f3e8ff"/>
+<text x="918" y="320" fill="#7c3aed" font-size="9" font-weight="800">D3</text>
+<text x="946" y="320" fill="#4c1d95" font-size="9.5" font-weight="700"> Staff &amp; Facilities Database</text>
+<text x="918" y="334" fill="#6d28d9" font-size="8">Staff Records · Prison Facilities</text>
+
+<!-- D4 -->
+<line x1="900" y1="426" x2="1240" y2="426" stroke="#dc2626" stroke-width="2.5"/>
+<line x1="900" y1="458" x2="1240" y2="458" stroke="#dc2626" stroke-width="2.5"/>
+<line x1="1240" y1="426" x2="1240" y2="458" stroke="#dc2626" stroke-width="2.5"/>
+<rect x="900" y="426" width="340" height="32" fill="#fee2e2"/>
+<text x="918" y="440" fill="#dc2626" font-size="9" font-weight="800">D4</text>
+<text x="946" y="440" fill="#7f1d1d" font-size="9.5" font-weight="700"> Security Database</text>
+<text x="918" y="454" fill="#b91c1c" font-size="8">Alerts · Wanted Criminals</text>
+
+<!-- D5 -->
+<line x1="900" y1="546" x2="1240" y2="546" stroke="#d97706" stroke-width="2.5"/>
+<line x1="900" y1="578" x2="1240" y2="578" stroke="#d97706" stroke-width="2.5"/>
+<line x1="1240" y1="546" x2="1240" y2="578" stroke="#d97706" stroke-width="2.5"/>
+<rect x="900" y="546" width="340" height="32" fill="#fef9c3"/>
+<text x="918" y="560" fill="#d97706" font-size="9" font-weight="800">D5</text>
+<text x="946" y="560" fill="#78350f" font-size="9.5" font-weight="700"> Case Reports Database</text>
+<text x="918" y="574" fill="#b45309" font-size="8">Case Records · CASE-YYYY-NNNN</text>
+
+<!-- D6 -->
+<line x1="900" y1="666" x2="1240" y2="666" stroke="#16a34a" stroke-width="2.5"/>
+<line x1="900" y1="698" x2="1240" y2="698" stroke="#16a34a" stroke-width="2.5"/>
+<line x1="1240" y1="666" x2="1240" y2="698" stroke="#16a34a" stroke-width="2.5"/>
+<rect x="900" y="666" width="340" height="32" fill="#dcfce7"/>
+<text x="918" y="680" fill="#16a34a" font-size="9" font-weight="800">D6</text>
+<text x="946" y="680" fill="#14532d" font-size="9.5" font-weight="700"> Archive &amp; Activity Log DB</text>
+<text x="918" y="694" fill="#15803d" font-size="8">Former Prisoners · Activity Logs</text>
+
+<!-- D7 -->
+<line x1="900" y1="786" x2="1240" y2="786" stroke="#2563eb" stroke-width="2.5"/>
+<line x1="900" y1="818" x2="1240" y2="818" stroke="#2563eb" stroke-width="2.5"/>
+<line x1="1240" y1="786" x2="1240" y2="818" stroke="#2563eb" stroke-width="2.5"/>
+<rect x="900" y="786" width="340" height="32" fill="#dbeafe"/>
+<text x="918" y="800" fill="#2563eb" font-size="9" font-weight="800">D7</text>
+<text x="946" y="800" fill="#1e3a8a" font-size="9.5" font-weight="700"> Generated Reports Store</text>
+<text x="918" y="814" fill="#1d4ed8" font-size="8">Excel Reports · wwwroot/uploads</text>
+
+<!-- ═══ DATA FLOWS ═══ -->
+<!-- E1→P1 -->
+<line x1="194" y1="84" x2="303" y2="87" stroke="#2563eb" stroke-width="1.8" marker-end="url(#b1)"/>
+<rect x="200" y="72" width="98" height="18" rx="4" fill="#dbeafe"/>
+<text x="249" y="84" text-anchor="middle" fill="#1d4ed8" font-size="8" font-weight="700">Login Credentials</text>
+
+<!-- P1→E1 -->
+<line x1="304" y1="100" x2="194" y2="96" stroke="#16a34a" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#b2)"/>
+<rect x="200" y="100" width="94" height="18" rx="4" fill="#dcfce7"/>
+<text x="247" y="112" text-anchor="middle" fill="#15803d" font-size="8">Auth Token, Role</text>
+
+<!-- P1↔D1 -->
+<line x1="416" y1="76" x2="900" y2="80" stroke="#2563eb" stroke-width="1.5" marker-end="url(#b1)"/>
+<rect x="576" y="64" width="118" height="17" rx="4" fill="#dbeafe"/>
+<text x="635" y="75" text-anchor="middle" fill="#1d4ed8" font-size="8">Verify Credentials</text>
+<line x1="900" y1="92" x2="416" y2="96" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#b2)"/>
+<rect x="580" y="95" width="104" height="17" rx="4" fill="#dcfce7"/>
+<text x="632" y="106" text-anchor="middle" fill="#15803d" font-size="8">User Profile &amp; Role</text>
+
+<!-- E2→P2 -->
+<line x1="194" y1="270" x2="303" y2="274" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#b1)"/>
+<rect x="200" y="257" width="96" height="18" rx="4" fill="#f3e8ff"/>
+<text x="248" y="269" text-anchor="middle" fill="#6d28d9" font-size="8" font-weight="700">Prisoner Data</text>
+
+<!-- P2→E2 -->
+<line x1="304" y1="286" x2="194" y2="282" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#b2)"/>
+<rect x="200" y="288" width="96" height="18" rx="4" fill="#dcfce7"/>
+<text x="248" y="300" text-anchor="middle" fill="#15803d" font-size="8">Records, Analytics</text>
+
+<!-- P2↔D2 -->
+<line x1="416" y1="265" x2="900" y2="198" stroke="#2563eb" stroke-width="1.5" marker-end="url(#b1)"/>
+<rect x="558" y="224" width="130" height="17" rx="4" fill="#dbeafe"/>
+<text x="623" y="235" text-anchor="middle" fill="#1d4ed8" font-size="8">Write Prisoner Records</text>
+<line x1="900" y1="210" x2="416" y2="284" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#b2)"/>
+<rect x="562" y="254" width="118" height="17" rx="4" fill="#dcfce7"/>
+<text x="621" y="265" text-anchor="middle" fill="#15803d" font-size="8">Read Prisoner Records</text>
+
+<!-- E2→P3 -->
+<line x1="194" y1="296" x2="306" y2="460" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#b1)"/>
+<rect x="190" y="374" width="108" height="18" rx="4" fill="#f3e8ff"/>
+<text x="244" y="386" text-anchor="middle" fill="#6d28d9" font-size="8">Staff / Facility Data</text>
+
+<!-- P3↔D3 -->
+<line x1="416" y1="496" x2="900" y2="318" stroke="#2563eb" stroke-width="1.5" marker-end="url(#b1)"/>
+<rect x="568" y="390" width="118" height="17" rx="4" fill="#dbeafe"/>
+<text x="627" y="401" text-anchor="middle" fill="#1d4ed8" font-size="8">Write Staff Records</text>
+<line x1="900" y1="330" x2="416" y2="515" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#b2)"/>
+<rect x="572" y="424" width="106" height="17" rx="4" fill="#dcfce7"/>
+<text x="625" y="435" text-anchor="middle" fill="#15803d" font-size="8">Read Staff Records</text>
+
+<!-- E3→P2 -->
+<line x1="194" y1="494" x2="305" y2="316" stroke="#2563eb" stroke-width="1.5" marker-end="url(#b1)"/>
+<rect x="180" y="406" width="104" height="18" rx="4" fill="#dbeafe"/>
+<text x="232" y="418" text-anchor="middle" fill="#1d4ed8" font-size="8">Search Query</text>
+
+<!-- P2→E3 -->
+<line x1="305" y1="328" x2="194" y2="508" stroke="#16a34a" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#b2)"/>
+<rect x="202" y="444" width="94" height="18" rx="4" fill="#dcfce7"/>
+<text x="249" y="456" text-anchor="middle" fill="#15803d" font-size="8">Search Results</text>
+
+<!-- E2→P4 Alert Data -->
+<line x1="194" y1="282" x2="604" y2="185" stroke="#7c3aed" stroke-width="1.4" marker-end="url(#b1)"/>
+<rect x="338" y="218" width="114" height="18" rx="4" fill="#f3e8ff"/>
+<text x="395" y="230" text-anchor="middle" fill="#6d28d9" font-size="8">Alert / Wanted Data</text>
+
+<!-- P4↔D4 -->
+<line x1="716" y1="185" x2="900" y2="437" stroke="#2563eb" stroke-width="1.4" marker-end="url(#b1)"/>
+<rect x="772" y="298" width="108" height="17" rx="4" fill="#dbeafe"/>
+<text x="826" y="309" text-anchor="middle" fill="#1d4ed8" font-size="8">Write Alerts</text>
+<line x1="900" y1="448" x2="716" y2="200" stroke="#16a34a" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#b2)"/>
+<rect x="778" y="330" width="100" height="17" rx="4" fill="#dcfce7"/>
+<text x="828" y="341" text-anchor="middle" fill="#15803d" font-size="8">Read Alerts</text>
+
+<!-- E2→P5 Case Data -->
+<line x1="194" y1="290" x2="606" y2="394" stroke="#7c3aed" stroke-width="1.4" marker-end="url(#b1)"/>
+<rect x="354" y="338" width="96" height="18" rx="4" fill="#f3e8ff"/>
+<text x="402" y="350" text-anchor="middle" fill="#6d28d9" font-size="8">Case Report Data</text>
+
+<!-- E3→P5 -->
+<line x1="194" y1="516" x2="606" y2="452" stroke="#2563eb" stroke-width="1.4" marker-end="url(#b1)"/>
+<rect x="350" y="482" width="96" height="18" rx="4" fill="#dbeafe"/>
+<text x="398" y="494" text-anchor="middle" fill="#1d4ed8" font-size="8">Case Submission</text>
+
+<!-- P5↔D5 -->
+<line x1="716" y1="436" x2="900" y2="556" stroke="#2563eb" stroke-width="1.4" marker-end="url(#b1)"/>
+<rect x="778" y="484" width="100" height="17" rx="4" fill="#dbeafe"/>
+<text x="828" y="495" text-anchor="middle" fill="#1d4ed8" font-size="8">Write Case Records</text>
+<line x1="900" y1="566" x2="716" y2="450" stroke="#16a34a" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#b2)"/>
+<rect x="780" y="514" width="98" height="17" rx="4" fill="#dcfce7"/>
+<text x="829" y="525" text-anchor="middle" fill="#15803d" font-size="8">Read Case Records</text>
+
+<!-- P5→P6 Stats feed -->
+<line x1="660" y1="494" x2="660" y2="702" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#b3)"/>
+<rect x="664" y="594" width="78" height="17" rx="4" fill="#fef9c3"/>
+<text x="703" y="605" text-anchor="middle" fill="#92400e" font-size="8">Case Statistics</text>
+
+<!-- D4→P6 -->
+<line x1="900" y1="446" x2="710" y2="704" stroke="#f59e0b" stroke-width="1.4" marker-end="url(#b3)"/>
+<rect x="820" y="572" width="98" height="17" rx="4" fill="#fef9c3"/>
+<text x="869" y="583" text-anchor="middle" fill="#92400e" font-size="8">Security Stats</text>
+
+<!-- D6→P6 -->
+<line x1="900" y1="680" x2="712" y2="748" stroke="#f59e0b" stroke-width="1.4" marker-end="url(#b3)"/>
+<rect x="790" y="706" width="90" height="17" rx="4" fill="#fef9c3"/>
+<text x="835" y="717" text-anchor="middle" fill="#92400e" font-size="8">Archive Data</text>
+
+<!-- P6→D7 -->
+<line x1="716" y1="758" x2="900" y2="800" stroke="#2563eb" stroke-width="1.4" marker-end="url(#b1)"/>
+<rect x="780" y="774" width="90" height="17" rx="4" fill="#dbeafe"/>
+<text x="825" y="785" text-anchor="middle" fill="#1d4ed8" font-size="8">Store Report</text>
+
+<!-- P6→E2 Reports -->
+<line x1="606" y1="748" x2="194" y2="306" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#b2)"/>
+<rect x="356" y="538" width="100" height="18" rx="4" fill="#dcfce7"/>
+<text x="406" y="550" text-anchor="middle" fill="#15803d" font-size="8">Excel / PDF Report</text>
+
+<!-- P6→E4 Official Reports -->
+<line x1="618" y1="812" x2="194" y2="758" stroke="#ea580c" stroke-width="1.8" stroke-dasharray="6,3" marker-end="url(#b4)"/>
+<rect x="352" y="782" width="120" height="18" rx="4" fill="#ffedd5"/>
+<text x="412" y="794" text-anchor="middle" fill="#c2410c" font-size="8" font-weight="700">Official Reports &amp; Stats</text>
+
+<text x="640" y="884" text-anchor="middle" fill="#94a3b8" font-size="9">Figure 4.2 — Level 1 Detailed Data Flow Diagram: Puntland Prison Management System</text>
+</svg>
+</div>
+
+<!-- ═══════════ FLOW TABLE ═══════════ -->
+<div class="sec">
+  <h2 style="color:#0f172a;border-color:#e2e8f0;font-size:.9rem;font-weight:800;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid">Data Flow Register</h2>
+<table>
+  <thead><tr><th>#</th><th>From</th><th>To</th><th>Flow Name</th><th>Data Description</th><th>Type</th></tr></thead>
+  <tbody>
+    <tr><td>F01</td><td>E1 Super Admin</td><td>P1 Auth</td><td>Login Credentials</td><td>Username, password, role</td><td><span class="bi">INPUT</span></td></tr>
+    <tr><td>F02</td><td>P1 Auth</td><td>D1 Users DB</td><td>Verify Credentials</td><td>Password hash lookup</td><td><span class="bw">WRITE</span></td></tr>
+    <tr><td>F03</td><td>D1 Users DB</td><td>P1 Auth</td><td>User Profile &amp; Role</td><td>Full name, role, prison</td><td><span class="br">READ</span></td></tr>
+    <tr><td>F04</td><td>P1 Auth</td><td>E1 Super Admin</td><td>Auth Token &amp; Dashboard</td><td>Session token, dashboard data</td><td><span class="bo">OUTPUT</span></td></tr>
+    <tr><td>F05</td><td>E2 Prison Admin</td><td>P2 Prisoner Mgmt</td><td>Prisoner Registration Data</td><td>Name, NID, crime, sentence, photo</td><td><span class="bi">INPUT</span></td></tr>
+    <tr><td>F06</td><td>P2 Prisoner Mgmt</td><td>D2 Prisoners DB</td><td>Write Prisoner Record</td><td>Complete prisoner record</td><td><span class="bw">WRITE</span></td></tr>
+    <tr><td>F07</td><td>D2 Prisoners DB</td><td>P2 Prisoner Mgmt</td><td>Prisoner Records List</td><td>Paginated prisoner data</td><td><span class="br">READ</span></td></tr>
+    <tr><td>F08</td><td>E3 Staff User</td><td>P2 Prisoner Mgmt</td><td>Search Query</td><td>Name, NID, crime type filters</td><td><span class="bi">INPUT</span></td></tr>
+    <tr><td>F09</td><td>P2 Prisoner Mgmt</td><td>E3 Staff User</td><td>Search Results</td><td>Filtered prisoner records</td><td><span class="bo">OUTPUT</span></td></tr>
+    <tr><td>F10</td><td>E2 Prison Admin</td><td>P3 Staff &amp; Facility</td><td>Staff / Prison Data</td><td>Staff profile, prison capacity</td><td><span class="bi">INPUT</span></td></tr>
+    <tr><td>F11</td><td>P3 Staff &amp; Facility</td><td>D3 Staff DB</td><td>Write Staff Records</td><td>Staff record with prison assignment</td><td><span class="bw">WRITE</span></td></tr>
+    <tr><td>F12</td><td>D3 Staff DB</td><td>P3 Staff &amp; Facility</td><td>Read Staff Records</td><td>Staff list, department, status</td><td><span class="br">READ</span></td></tr>
+    <tr><td>F13</td><td>E2 Prison Admin</td><td>P4 Security</td><td>Alert / Wanted Data</td><td>Alert type, wanted criminal info</td><td><span class="bi">INPUT</span></td></tr>
+    <tr><td>F14</td><td>P4 Security</td><td>D4 Security DB</td><td>Write Alert Records</td><td>Alerts, wanted details, risk level</td><td><span class="bw">WRITE</span></td></tr>
+    <tr><td>F15</td><td>D4 Security DB</td><td>P4 Security</td><td>Read Active Alerts</td><td>Alert list by priority</td><td><span class="br">READ</span></td></tr>
+    <tr><td>F16</td><td>E2 Prison Admin</td><td>P5 Case Reports</td><td>Case Report Data</td><td>Case ID, crime type, status</td><td><span class="bi">INPUT</span></td></tr>
+    <tr><td>F17</td><td>E3 Staff User</td><td>P5 Case Reports</td><td>Case Submission</td><td>New case with date and category</td><td><span class="bi">INPUT</span></td></tr>
+    <tr><td>F18</td><td>P5 Case Reports</td><td>D5 Case Reports DB</td><td>Write Case Records</td><td>CASE-YYYY-NNNN record</td><td><span class="bw">WRITE</span></td></tr>
+    <tr><td>F19</td><td>D5 Case Reports DB</td><td>P5 Case Reports</td><td>Read Case Records</td><td>Filtered case list, chart data</td><td><span class="br">READ</span></td></tr>
+    <tr><td>F20</td><td>D4 Security DB</td><td>P6 Report Gen</td><td>Security Statistics</td><td>Alert counts, risk levels</td><td><span class="br">READ</span></td></tr>
+    <tr><td>F21</td><td>D5 Case Reports DB</td><td>P6 Report Gen</td><td>Case Statistics</td><td>Case counts by type and status</td><td><span class="br">READ</span></td></tr>
+    <tr><td>F22</td><td>D6 Archive DB</td><td>P6 Report Gen</td><td>Archive Statistics</td><td>Former prisoners, activity log</td><td><span class="br">READ</span></td></tr>
+    <tr><td>F23</td><td>P6 Report Gen</td><td>E2 Prison Admin</td><td>Excel / PDF Report</td><td>Formatted workbook output</td><td><span class="bo">OUTPUT</span></td></tr>
+    <tr><td>F24</td><td>P6 Report Gen</td><td>E4 Government</td><td>Official Reports &amp; Statistics</td><td>Statistical summary report</td><td><span class="bo">OUTPUT</span></td></tr>
+    <tr><td>F25</td><td>P6 Report Gen</td><td>D7 Reports Store</td><td>Save Generated Report</td><td>Excel saved to wwwroot/uploads</td><td><span class="bw">WRITE</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="foot">Puntland Prison Management System — PPMS &nbsp;·&nbsp; Chapter 4: System Design &nbsp;·&nbsp; Data Flow Diagram &nbsp;·&nbsp; 2026</div>
+
+</body>
+</html>
