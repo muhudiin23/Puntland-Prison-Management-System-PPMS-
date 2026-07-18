@@ -39,5 +39,9 @@ namespace PPMS.Models
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        public string? PhotoPath { get; set; }
+
+        public ICollection<StaffCertificate> Certificates { get; set; } = new List<StaffCertificate>();
     }
 }

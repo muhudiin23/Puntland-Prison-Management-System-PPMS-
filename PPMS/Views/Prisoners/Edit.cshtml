@@ -59,6 +59,35 @@
                     <input type="file" name="photo" class="form-control form-control-sm" accept="image/*" onchange="var r=new FileReader();r.onload=function(e){document.getElementById('pp').innerHTML='<img src=\''+e.target.result+'\' style=\'width:100%;height:100%;object-fit:cover;\'/>';};r.readAsDataURL(this.files[0]);" />
                 </div>
             </div>
+
+            <div class="card mb-3">
+                <div class="card-header"><i class="fas fa-folder-open me-2 text-warning"></i>Add Evidence Documents</div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold">Document Type</label>
+                        <select name="documentType" class="form-select form-select-sm">
+                            <option value="Court Document">Court Document</option>
+                            <option value="Investigation Report">Investigation Report</option>
+                            <option value="Witness Statement">Witness Statement</option>
+                            <option value="Crime Scene Photo">Crime Scene Photo</option>
+                            <option value="Identification Document">Identification Document</option>
+                            <option value="Other">Other Legal Evidence</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold">Description <span class="text-muted fw-normal">(optional)</span></label>
+                        <input type="text" name="description" class="form-control form-control-sm" placeholder="Brief description" />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold">Files</label>
+                        <input type="file" name="evidenceFiles" class="form-control form-control-sm" accept=".pdf,.docx,.jpg,.jpeg,.png" multiple onchange="showEvidenceNames(this)" />
+                        <small class="text-muted">PDF, DOCX, JPG, PNG — max 20MB each</small>
+                    </div>
+                    <ul id="evidenceNamesList" class="list-unstyled mt-1 small text-muted"></ul>
+                    <a href="/Prisoners/Details/@Model.Id" class="btn btn-outline-secondary btn-sm mt-1"><i class="fas fa-eye me-1"></i>View / Delete existing evidence</a>
+                </div>
+            </div>
+
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Save Changes</button>
                 <a href="/Prisoners" class="btn btn-outline-secondary"><i class="fas fa-times me-2"></i>Cancel</a>
@@ -71,5 +100,14 @@
 <script>
 function calc(){ var e=document.getElementById('ed').value,m=parseInt(document.getElementById('sm').value)||0;if(e&&m>0){var d=new Date(e);d.setMonth(d.getMonth()+m);document.getElementById('rd').value=d.toISOString().split('T')[0];}}
 document.getElementById('ed').addEventListener('change',calc);document.getElementById('sm').addEventListener('input',calc);
+function showEvidenceNames(input) {
+    var list = document.getElementById('evidenceNamesList');
+    list.innerHTML = '';
+    for (var i = 0; i < input.files.length; i++) {
+        var li = document.createElement('li');
+        li.innerHTML = '<i class="fas fa-paperclip me-1"></i>' + input.files[i].name;
+        list.appendChild(li);
+    }
+}
 </script>
 }

@@ -15,6 +15,8 @@ namespace PPMS.Data
         public DbSet<Alert> Alerts { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<CaseReport> CaseReports { get; set; }
+        public DbSet<StaffCertificate> StaffCertificates { get; set; }
+        public DbSet<PrisonerEvidence> PrisonerEvidences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -45,6 +47,22 @@ namespace PPMS.Data
                  .WithMany(p => p.Staff)
                  .HasForeignKey(s => s.PrisonId)
                  .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            builder.Entity<StaffCertificate>(e =>
+            {
+                e.HasOne(c => c.Staff)
+                 .WithMany(s => s.Certificates)
+                 .HasForeignKey(c => c.StaffId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<PrisonerEvidence>(e =>
+            {
+                e.HasOne(ev => ev.Prisoner)
+                 .WithMany(p => p.Evidences)
+                 .HasForeignKey(ev => ev.PrisonerId)
+                 .OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.Entity<WantedCriminal>(e =>

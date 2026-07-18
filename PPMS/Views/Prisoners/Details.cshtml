@@ -9,6 +9,10 @@
     </div>
 </div>
 
+@if (TempData["Success"] != null) {
+    <div class="alert alert-success alert-dismissible fade show"><i class="fas fa-check-circle me-2"></i>@TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+}
+
 <div class="row g-4">
     <div class="col-md-3">
         <div class="card text-center">
@@ -58,7 +62,7 @@
                 </div>
             </div>
         </div>
-        <div class="card">
+        <div class="card mb-3">
             <div class="card-header"><i class="fas fa-info-circle me-2"></i>Record Information</div>
             <div class="card-body">
                 <div class="row g-3">
@@ -67,5 +71,85 @@
                 </div>
             </div>
         </div>
+
+        @if (User.IsInRole("SuperAdmin") || User.IsInRole("PrisonAdministrator")) {
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-folder-open me-2 text-warning"></i>Evidence Documents</span>
+                <span class="badge bg-secondary">@Model.Evidences.Count file(s)</span>
+            </div>
+            <div class="card-body">
+                @if (Model.Evidences.Any()) {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-3">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Type</th>
+                                    <th>Document Type</th>
+                                    <th>Description</th>
+                                    <th>Size</th>
+                                    <th>Uploaded</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var ev in Model.Evidences.OrderByDescending(e => e.UploadedAt)) {
+                                    <tr>
+                                        <td><i class="fas @(ev.FileType=="pdf"?"fa-file-pdf text-danger":ev.FileType=="docx"?"fa-file-word text-primary":"fa-file-image text-info") me-1"></i>@ev.OriginalName</td>
+                                        <td><span class="badge bg-light text-dark">@ev.FileType.ToUpper()</span></td>
+                                        <td><span class="badge bg-warning text-dark">@ev.DocumentType</span></td>
+                                        <td><small>@(string.IsNullOrEmpty(ev.Description) ? "—" : ev.Description)</small></td>
+                                        <td>@((ev.FileSize / 1024.0).ToString("F1")) KB</td>
+                                        <td>@ev.UploadedAt.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            <a href="/Prisoners/DownloadEvidence/@ev.Id" class="btn btn-outline-primary btn-sm" title="Download"><i class="fas fa-download"></i></a>
+                                            <form asp-action="DeleteEvidence" asp-controller="Prisoners" method="post" class="d-inline" onsubmit="return confirm('Delete this evidence document?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@ev.Id" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                } else {
+                    <p class="text-muted mb-3"><i class="fas fa-info-circle me-1"></i>No evidence documents uploaded yet.</p>
+                }
+
+                <form asp-action="UploadEvidence" asp-controller="Prisoners" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="prisonerId" value="@Model.Id" />
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold mb-1">Document Type</label>
+                            <select name="documentType" class="form-select form-select-sm">
+                                <option value="Court Document">Court Document</option>
+                                <option value="Investigation Report">Investigation Report</option>
+                                <option value="Witness Statement">Witness Statement</option>
+                                <option value="Crime Scene Photo">Crime Scene Photo</option>
+                                <option value="Identification Document">Identification Document</option>
+                                <option value="Other">Other Legal Evidence</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold mb-1">Description</label>
+                            <input type="text" name="description" class="form-control form-control-sm" placeholder="Optional" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold mb-1">Files</label>
+                            <input type="file" name="evidenceFiles" class="form-control form-control-sm" accept=".pdf,.docx,.jpg,.jpeg,.png" multiple required />
+                            <small class="text-muted">PDF, DOCX, JPG, PNG — max 20MB each</small>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-warning btn-sm w-100"><i class="fas fa-upload me-1"></i>Upload</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        }
     </div>
 </div>

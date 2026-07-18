@@ -66,5 +66,7 @@ namespace PPMS.Models
 
         [MaxLength(500)]
         public string? ArchiveNotes { get; set; }
+
+        public ICollection<PrisonerEvidence> Evidences { get; set; } = new List<PrisonerEvidence>();
     }
 }

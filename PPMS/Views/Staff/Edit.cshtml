@@ -1,11 +1,12 @@
 @model PPMS.Models.Staff
 @{ ViewData["Title"] = "Edit Staff"; }
 <div class="page-header"><h2><i class="fas fa-user-edit me-2" style="color:#16a34a;"></i>Edit Staff Member</h2></div>
-<div class="card" style="max-width:800px;">
+<div class="card" style="max-width:900px;">
     <div class="card-body">
-        <form asp-action="Edit" method="post">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <input asp-for="Id" type="hidden" />
+            <input asp-for="PhotoPath" type="hidden" />
             <div class="row g-3">
                 <div class="col-md-6"><label class="form-label fw-semibold">Full Name *</label><input asp-for="FullName" class="form-control" /></div>
                 <div class="col-md-3"><label class="form-label fw-semibold">Staff ID</label><input asp-for="StaffIdNumber" class="form-control" /></div>
@@ -19,6 +20,34 @@
                 <div class="col-12">
                     <div class="form-check"><input asp-for="IsActive" class="form-check-input" type="checkbox" /><label class="form-check-label">Active</label></div>
                 </div>
+
+                <div class="col-12">
+                    <hr class="my-1" />
+                    <label class="form-label fw-semibold"><i class="fas fa-camera me-1 text-primary"></i>Profile Photo</label>
+                    <div class="d-flex align-items-center gap-3">
+                        <div id="photoPreview" style="width:90px;height:100px;border:2px dashed #cbd5e1;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#f8fafc;flex-shrink:0;">
+                            @if (!string.IsNullOrEmpty(Model.PhotoPath)) {
+                                <img src="@Model.PhotoPath" style="width:100%;height:100%;object-fit:cover;" />
+                            } else {
+                                <i class="fas fa-user" style="font-size:2.5rem;color:#cbd5e1;"></i>
+                            }
+                        </div>
+                        <div>
+                            <input type="file" name="photo" class="form-control form-control-sm" accept="image/*" onchange="var r=new FileReader();r.onload=function(e){document.getElementById('photoPreview').innerHTML='<img src=\''+e.target.result+'\' style=\'width:100%;height:100%;object-fit:cover;\'/>';};r.readAsDataURL(this.files[0]);" />
+                            <small class="text-muted d-block mt-1">Upload new photo to replace current. JPG, PNG, GIF (max 5MB)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <hr class="my-1" />
+                    <label class="form-label fw-semibold"><i class="fas fa-graduation-cap me-1 text-success"></i>Add More Certificates</label>
+                    <input type="file" name="certificates" class="form-control form-control-sm" accept=".pdf,.docx,.jpg,.jpeg,.png" multiple onchange="showCertNames(this)" />
+                    <small class="text-muted d-block mt-1">PDF, DOCX, JPG, PNG (max 10MB each, multiple files allowed)</small>
+                    <ul id="certNamesList" class="list-unstyled mt-1 small text-muted"></ul>
+                    <a href="/Staff/Details/@Model.Id" class="btn btn-outline-secondary btn-sm mt-1"><i class="fas fa-eye me-1"></i>View / Delete existing certificates</a>
+                </div>
+
                 <div class="col-12 d-flex gap-2">
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Save Changes</button>
                     <a href="/Staff" class="btn btn-outline-secondary">Cancel</a>
@@ -27,3 +56,17 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+<script>
+function showCertNames(input) {
+    var list = document.getElementById('certNamesList');
+    list.innerHTML = '';
+    for (var i = 0; i < input.files.length; i++) {
+        var li = document.createElement('li');
+        li.innerHTML = '<i class="fas fa-paperclip me-1"></i>' + input.files[i].name;
+        list.appendChild(li);
+    }
+}
+</script>
+}

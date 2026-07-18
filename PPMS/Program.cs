@@ -5,6 +5,9 @@ using PPMS.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Allow large file uploads (evidence docs up to 20 MB each, multiple at once)
+builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = 200 * 1024 * 1024);
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -34,6 +37,12 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
+});
+
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(o =>
+{
+    o.MultipartBodyLengthLimit = 200 * 1024 * 1024; // 200 MB
+    o.ValueLengthLimit = 200 * 1024 * 1024;
 });
 
 builder.Services.AddSession();
