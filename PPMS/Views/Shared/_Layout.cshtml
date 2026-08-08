@@ -6,19 +6,30 @@
     var isAuth = User.Identity?.IsAuthenticated == true;
 }
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="@theme">
+<html lang="en" data-bs-theme="@theme" data-ppms-theme="@theme">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+    <script>
+    // Apply saved theme before first paint to prevent flash of wrong theme
+    (function(){
+        var t = localStorage.getItem('ppms_theme');
+        if (t === 'dark' || t === 'light') {
+            document.documentElement.setAttribute('data-bs-theme', t);
+            document.documentElement.setAttribute('data-ppms-theme', t);
+        }
+    })();
+    </script>
     <title>@ViewData["Title"] — PPMS</title>
     <link rel="icon" href="/images/spf-logo.png" type="image/png" />
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
 
     <style>
         :root {
@@ -335,20 +346,31 @@ function closeSidebar() {
 // ── Theme toggle ──────────────────────────────────────────
 document.getElementById('themeToggle')?.addEventListener('click', function () {
     var html = document.documentElement;
-    var current = html.getAttribute('data-bs-theme') || 'light';
+    var current = html.getAttribute('data-ppms-theme') || html.getAttribute('data-bs-theme') || 'light';
     var next = current === 'dark' ? 'light' : 'dark';
 
+    // Apply immediately — no waiting for server round-trip
+    html.setAttribute('data-bs-theme', next);
+    html.setAttribute('data-ppms-theme', next);
+    localStorage.setItem('ppms_theme', next);
+
+    var icon = document.getElementById('themeIcon');
+    if (icon) icon.className = next === 'dark' ? 'fas fa-sun text-warning' : 'fas fa-moon';
+
+    // Sync cookie with server so next page load Razor gets the right value
     $.post('/Settings/UpdateTheme', {
         theme: next,
         __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
-    }, function () {
-        html.setAttribute('data-bs-theme', next);
-        var icon = document.getElementById('themeIcon');
-        if (icon) {
-            icon.className = next === 'dark' ? 'fas fa-sun text-warning' : 'fas fa-moon';
-        }
     });
 });
+
+// Sync icon with actual theme on page load (covers localStorage override case)
+(function(){
+    var t = document.documentElement.getAttribute('data-ppms-theme') || 'light';
+    var icon = document.getElementById('themeIcon');
+    if (icon) icon.className = t === 'dark' ? 'fas fa-sun text-warning' : 'fas fa-moon';
+    localStorage.setItem('ppms_theme', t);
+})();
 
 // ── Notifications polling ─────────────────────────────────
 function pollNotifications() {
