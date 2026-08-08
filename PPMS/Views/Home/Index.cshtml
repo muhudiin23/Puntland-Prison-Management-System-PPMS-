@@ -55,38 +55,38 @@
 @@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
 /* ══════════════════════════════════════════════════════════════
-   PREMIUM ENTERPRISE SECURITY DASHBOARD
+   PPMS DASHBOARD — NIGHT MODE BASE
+   Day Mode overrides live in site.css [data-ppms-theme="light"]
    ══════════════════════════════════════════════════════════════ */
 
-/* Deep navy base — animated canvas sits on top at z-index:0 */
+/* Night-mode: deep navy + edge vignettes that frame the image */
 #main-content {
-    background: linear-gradient(160deg,
-        #0F172A 0%, #0d1e3c 30%, #0f2348 58%, #0c1a32 82%, #0F172A 100%);
+    background:
+        radial-gradient(ellipse 120% 55% at 50% 0%,   rgba(4,9,24,0.72) 0%, rgba(4,9,24,0) 55%),
+        radial-gradient(ellipse 120% 45% at 50% 100%, rgba(4,9,24,0.72) 0%, rgba(4,9,24,0) 55%),
+        radial-gradient(ellipse 38% 100% at 0%   50%, rgba(4,9,24,0.45) 0%, rgba(4,9,24,0) 65%),
+        radial-gradient(ellipse 38% 100% at 100% 50%, rgba(4,9,24,0.45) 0%, rgba(4,9,24,0) 65%),
+        linear-gradient(160deg, #0D1B35 0%, #0d1e3c 28%, #0f2348 55%, #0c1a32 80%, #0D1B35 100%);
     position: relative;
 }
 
-/* Kill old pseudo-element layers */
 #main-content::after { display: none !important; }
 
-/* Puntland logo watermark — centered, behind all content */
+/* Puntland background — full cover, professionally visible (~18%) */
 #main-content::before {
     content: '';
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: min(680px, 80vw);
-    height: min(680px, 80vw);
+    inset: 0;
     background-image: url('/images/Puntland-logo.png');
-    background-size: contain;
-    background-repeat: no-repeat;
+    background-size: cover;
     background-position: center;
-    opacity: 0.07;
+    background-repeat: no-repeat;
+    opacity: 0.18;
     pointer-events: none;
     z-index: 1;
 }
 
-/* All dashboard content floats above the canvas background (z-index: 0) */
+/* All dashboard content floats above the background layers */
 #main-content > * { position: relative; z-index: 5; }
 
 /* ── Page header ─────────────────────────────────── */
@@ -664,9 +664,9 @@
 })();
 </script>
 <script>
-var isDark = true; // dark navy dashboard background — always use dark-mode chart palette
-var gridColor = 'rgba(255,255,255,0.08)';
-var textColor = '#94a3b8';
+var isDark = document.documentElement.getAttribute('data-ppms-theme') !== 'light';
+var gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(30,41,59,0.10)';
+var textColor  = isDark ? '#94a3b8' : '#475569';
 var colors = ['#1565c0','#16a34a','#d97706','#dc2626','#7c3aed','#0891b2','#ea580c','#db2777'];
 
 Chart.defaults.color = textColor;
