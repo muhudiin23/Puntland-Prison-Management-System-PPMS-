@@ -197,27 +197,67 @@ namespace PPMS.Controllers
             return View(prisoner);
         }
 
-        // POST — archives the prisoner (never hard-deletes)
+        // POST — copies prisoner to FormerPrisoners table, then hard-deletes from Prisoners
         [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken, Authorize(Roles = "SuperAdmin,PrisonAdministrator")]
         public async Task<IActionResult> DeleteConfirmed(int id, string? archiveReason, string? archiveNotes)
         {
-            var prisoner = await _db.Prisoners.FindAsync(id);
+            var prisoner = await _db.Prisoners
+                .Include(p => p.Prison)
+                .Include(p => p.Evidences)
+                .FirstOrDefaultAsync(p => p.Id == id && !p.IsArchived);
             if (prisoner == null) return NotFound();
 
-            prisoner.IsArchived    = true;
-            prisoner.ArchivedAt    = DateTime.Now;
-            prisoner.ArchiveReason = string.IsNullOrEmpty(archiveReason) ? "Administrative" : archiveReason;
-            prisoner.ArchivedBy    = User.Identity?.Name;
-            prisoner.ArchiveNotes  = archiveNotes;
-            prisoner.UpdatedAt     = DateTime.Now;
+            var finalReason = string.IsNullOrEmpty(archiveReason) ? "Administrative" : archiveReason;
+            var finalStatus = finalReason is "Released" or "Transferred" or "Deceased"
+                ? finalReason : prisoner.CriminalStatus;
 
-            // Update criminal status to match archive reason if it's a known final status
-            if (prisoner.ArchiveReason is "Released" or "Transferred" or "Deceased")
-                prisoner.CriminalStatus = prisoner.ArchiveReason;
+            await using var tx = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                _db.FormerPrisoners.Add(new FormerPrisoner
+                {
+                    PrisonerId             = prisoner.PrisonerId,
+                    FullName               = prisoner.FullName,
+                    NationalId             = prisoner.NationalId,
+                    Gender                 = prisoner.Gender,
+                    DateOfBirth            = prisoner.DateOfBirth,
+                    CrimeType              = prisoner.CrimeType,
+                    SentenceDurationMonths = prisoner.SentenceDurationMonths,
+                    EntryDate              = prisoner.EntryDate,
+                    ReleaseDate            = prisoner.ReleaseDate,
+                    CriminalStatus         = finalStatus,
+                    Address                = prisoner.Address,
+                    EmergencyContact       = prisoner.EmergencyContact,
+                    PhotoPath              = prisoner.PhotoPath,
+                    FingerprintData        = prisoner.FingerprintData,
+                    OriginalPrisonId       = prisoner.PrisonId,
+                    PrisonName             = prisoner.Prison?.PrisonName ?? string.Empty,
+                    PrisonCity             = prisoner.Prison?.City,
+                    OriginalCreatedAt      = prisoner.CreatedAt,
+                    OriginalUpdatedAt      = prisoner.UpdatedAt,
+                    ArchivedAt             = DateTime.Now,
+                    ArchiveReason          = finalReason,
+                    ArchivedBy             = User.Identity?.Name,
+                    ArchiveNotes           = archiveNotes,
+                    EvidenceCount          = prisoner.Evidences.Count,
+                    RecordMovedAt          = DateTime.Now
+                });
+                await _db.SaveChangesAsync();
 
-            await _db.SaveChangesAsync();
+                // Hard-delete prisoner; cascade deletes PrisonerEvidence rows
+                _db.Prisoners.Remove(prisoner);
+                await _db.SaveChangesAsync();
+                await tx.CommitAsync();
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                TempData["Error"] = "An error occurred while archiving the prisoner. No data was lost. Please try again.";
+                return RedirectToAction(nameof(Delete), new { id });
+            }
+
             await UpdatePrisonPopulation(prisoner.PrisonId);
-            await LogActivity($"Prisoner '{prisoner.FullName}' (ID: {prisoner.PrisonerId}) archived. Reason: {prisoner.ArchiveReason}.", "Archive");
+            await LogActivity($"Prisoner '{prisoner.FullName}' (ID: {prisoner.PrisonerId}) archived. Reason: {finalReason}.", "Archive");
             TempData["Success"] = $"'{prisoner.FullName}' has been moved to the Former Prisoners Archive.";
             return RedirectToAction(nameof(Index));
         }

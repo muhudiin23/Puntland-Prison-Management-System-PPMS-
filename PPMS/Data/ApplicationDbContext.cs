@@ -17,6 +17,7 @@ namespace PPMS.Data
         public DbSet<CaseReport> CaseReports { get; set; }
         public DbSet<StaffCertificate> StaffCertificates { get; set; }
         public DbSet<PrisonerEvidence> PrisonerEvidences { get; set; }
+        public DbSet<FormerPrisoner> FormerPrisoners { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

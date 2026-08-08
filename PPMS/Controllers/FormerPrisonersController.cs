@@ -21,9 +21,7 @@ namespace PPMS.Controllers
             string? search, string? status, int? prisonId,
             string? from, string? to, string? sort, int page = 1)
         {
-            var query = _db.Prisoners.Include(p => p.Prison)
-                .Where(p => p.IsArchived)
-                .AsQueryable();
+            var query = _db.FormerPrisoners.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
                 query = query.Where(p =>
@@ -36,7 +34,7 @@ namespace PPMS.Controllers
                 query = query.Where(p => p.ArchiveReason == status);
 
             if (prisonId.HasValue)
-                query = query.Where(p => p.PrisonId == prisonId.Value);
+                query = query.Where(p => p.OriginalPrisonId == prisonId.Value);
 
             if (DateTime.TryParse(from, out var fromDt))
                 query = query.Where(p => p.ArchivedAt >= fromDt);
@@ -54,15 +52,14 @@ namespace PPMS.Controllers
                 _           => query.OrderByDescending(p => p.ArchivedAt)
             };
 
-            // Summary counts (always over full archive regardless of current filters)
-            var archive = _db.Prisoners.Where(p => p.IsArchived);
-            ViewBag.TotalArchived     = await archive.CountAsync();
-            ViewBag.ReleasedCount     = await archive.CountAsync(p => p.ArchiveReason == "Released");
-            ViewBag.TransferredCount  = await archive.CountAsync(p => p.ArchiveReason == "Transferred");
-            ViewBag.DeceasedCount     = await archive.CountAsync(p => p.ArchiveReason == "Deceased");
-            ViewBag.AdminCount        = await archive.CountAsync(p => p.ArchiveReason == "Administrative");
+            // Summary counts over full archive
+            ViewBag.TotalArchived    = await _db.FormerPrisoners.CountAsync();
+            ViewBag.ReleasedCount    = await _db.FormerPrisoners.CountAsync(p => p.ArchiveReason == "Released");
+            ViewBag.TransferredCount = await _db.FormerPrisoners.CountAsync(p => p.ArchiveReason == "Transferred");
+            ViewBag.DeceasedCount    = await _db.FormerPrisoners.CountAsync(p => p.ArchiveReason == "Deceased");
+            ViewBag.AdminCount       = await _db.FormerPrisoners.CountAsync(p => p.ArchiveReason == "Administrative");
 
-            var paginated = await PaginatedList<Prisoner>.CreateAsync(query, page, PageSize);
+            var paginated = await PaginatedList<FormerPrisoner>.CreateAsync(query, page, PageSize);
 
             ViewBag.Search     = search;
             ViewBag.Status     = status;
@@ -80,54 +77,95 @@ namespace PPMS.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            var prisoner = await _db.Prisoners.Include(p => p.Prison)
-                .FirstOrDefaultAsync(p => p.Id == id && p.IsArchived);
-            if (prisoner == null) return NotFound();
-            return View(prisoner);
+            var former = await _db.FormerPrisoners.FindAsync(id);
+            if (former == null) return NotFound();
+            return View(former);
         }
 
         public async Task<IActionResult> PrintRecord(int id)
         {
-            var prisoner = await _db.Prisoners.Include(p => p.Prison)
-                .FirstOrDefaultAsync(p => p.Id == id && p.IsArchived);
-            if (prisoner == null) return NotFound();
-            return View(prisoner);
+            var former = await _db.FormerPrisoners.FindAsync(id);
+            if (former == null) return NotFound();
+            return View(former);
         }
 
         [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "SuperAdmin,PrisonAdministrator")]
         public async Task<IActionResult> Restore(int id)
         {
-            var prisoner = await _db.Prisoners.FindAsync(id);
-            if (prisoner == null || !prisoner.IsArchived) return NotFound();
+            var former = await _db.FormerPrisoners.FindAsync(id);
+            if (former == null) return NotFound();
 
-            prisoner.IsArchived    = false;
-            prisoner.ArchivedAt    = null;
-            prisoner.ArchiveReason = null;
-            prisoner.ArchivedBy    = null;
-            prisoner.ArchiveNotes  = null;
-            prisoner.CriminalStatus = "Active";
-            prisoner.UpdatedAt     = DateTime.Now;
-
-            await _db.SaveChangesAsync();
-            await UpdatePrisonPopulation(prisoner.PrisonId);
-
-            _db.Activities.Add(new Activity
+            // Locate the original prison; fall back to matching by name if it was deleted
+            Prison? prison = null;
+            if (former.OriginalPrisonId.HasValue)
+                prison = await _db.Prisons.FindAsync(former.OriginalPrisonId.Value);
+            if (prison == null)
+                prison = await _db.Prisons.FirstOrDefaultAsync(p => p.PrisonName == former.PrisonName);
+            if (prison == null)
             {
-                Description  = $"Prisoner '{prisoner.FullName}' (ID: {prisoner.PrisonerId}) restored from archive to active records.",
-                ActivityType = "Archive",
-                UserName     = User.Identity?.Name
-            });
-            await _db.SaveChangesAsync();
+                TempData["Error"] = $"Cannot restore: prison '{former.PrisonName}' no longer exists. Recreate it first.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            TempData["Success"] = $"'{prisoner.FullName}' has been restored to active prisoner records.";
+            // Guard: PrisonerId must not already exist in active records
+            if (await _db.Prisoners.AnyAsync(p => p.PrisonerId == former.PrisonerId))
+            {
+                TempData["Error"] = $"Cannot restore: Prisoner ID '{former.PrisonerId}' already exists in active records.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await using var tx = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                _db.Prisoners.Add(new Prisoner
+                {
+                    PrisonerId             = former.PrisonerId,
+                    FullName               = former.FullName,
+                    NationalId             = former.NationalId,
+                    Gender                 = former.Gender,
+                    DateOfBirth            = former.DateOfBirth,
+                    CrimeType              = former.CrimeType,
+                    SentenceDurationMonths = former.SentenceDurationMonths,
+                    EntryDate              = former.EntryDate,
+                    ReleaseDate            = former.ReleaseDate,
+                    CriminalStatus         = "Active",
+                    Address                = former.Address,
+                    EmergencyContact       = former.EmergencyContact,
+                    PhotoPath              = former.PhotoPath,
+                    FingerprintData        = former.FingerprintData,
+                    PrisonId               = prison.Id,
+                    CreatedAt              = former.OriginalCreatedAt,
+                    UpdatedAt              = DateTime.Now,
+                    IsArchived             = false
+                });
+                _db.FormerPrisoners.Remove(former);
+                await _db.SaveChangesAsync();
+
+                _db.Activities.Add(new Activity
+                {
+                    Description  = $"Former prisoner '{former.FullName}' (ID: {former.PrisonerId}) restored to active records.",
+                    ActivityType = "Archive",
+                    UserName     = User.Identity?.Name
+                });
+                await _db.SaveChangesAsync();
+                await tx.CommitAsync();
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                TempData["Error"] = "An error occurred while restoring the prisoner. Please try again.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await UpdatePrisonPopulation(prison.Id);
+            TempData["Success"] = $"'{former.FullName}' has been restored to active prisoner records.";
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> ExportExcel(
             string? search, string? status, int? prisonId, string? from, string? to)
         {
-            var query = _db.Prisoners.Include(p => p.Prison)
-                .Where(p => p.IsArchived).AsQueryable();
+            var query = _db.FormerPrisoners.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
                 query = query.Where(p =>
@@ -138,7 +176,7 @@ namespace PPMS.Controllers
                 query = query.Where(p => p.ArchiveReason == status);
 
             if (prisonId.HasValue)
-                query = query.Where(p => p.PrisonId == prisonId.Value);
+                query = query.Where(p => p.OriginalPrisonId == prisonId.Value);
 
             if (DateTime.TryParse(from, out var fromDt))
                 query = query.Where(p => p.ArchivedAt >= fromDt);
@@ -151,7 +189,6 @@ namespace PPMS.Controllers
             using var wb = new XLWorkbook();
             var ws = wb.Worksheets.Add("Former Prisoners");
 
-            // Header styling
             var headers = new[]
             {
                 "Prisoner ID", "Full Name", "National ID", "Gender", "Date of Birth",
@@ -170,8 +207,8 @@ namespace PPMS.Controllers
 
             for (int i = 0; i < data.Count; i++)
             {
-                var p  = data[i];
-                int r  = i + 2;
+                var p = data[i];
+                int r = i + 2;
                 ws.Cell(r, 1).Value  = p.PrisonerId;
                 ws.Cell(r, 2).Value  = p.FullName;
                 ws.Cell(r, 3).Value  = p.NationalId;
@@ -179,7 +216,7 @@ namespace PPMS.Controllers
                 ws.Cell(r, 5).Value  = p.DateOfBirth.ToString("yyyy-MM-dd");
                 ws.Cell(r, 6).Value  = p.CrimeType;
                 ws.Cell(r, 7).Value  = p.SentenceDurationMonths;
-                ws.Cell(r, 8).Value  = p.Prison?.PrisonName ?? "";
+                ws.Cell(r, 8).Value  = p.PrisonName;
                 ws.Cell(r, 9).Value  = p.EntryDate.ToString("yyyy-MM-dd");
                 ws.Cell(r, 10).Value = p.ReleaseDate.ToString("yyyy-MM-dd");
                 ws.Cell(r, 11).Value = p.ArchiveReason ?? "Administrative";
@@ -187,19 +224,17 @@ namespace PPMS.Controllers
                 ws.Cell(r, 13).Value = p.ArchivedBy ?? "";
                 ws.Cell(r, 14).Value = p.ArchiveNotes ?? "";
 
-                // Row shading by status
                 var rowColor = p.ArchiveReason switch
                 {
-                    "Released"      => XLColor.FromHtml("#f0fdf4"),
-                    "Transferred"   => XLColor.FromHtml("#eff6ff"),
-                    "Deceased"      => XLColor.FromHtml("#f8f8f8"),
-                    _               => XLColor.FromHtml("#fffbeb")
+                    "Released"    => XLColor.FromHtml("#f0fdf4"),
+                    "Transferred" => XLColor.FromHtml("#eff6ff"),
+                    "Deceased"    => XLColor.FromHtml("#f8f8f8"),
+                    _             => XLColor.FromHtml("#fffbeb")
                 };
                 for (int c = 1; c <= headers.Length; c++)
                     ws.Cell(r, c).Style.Fill.BackgroundColor = rowColor;
             }
 
-            // Legend row
             int legendRow = data.Count + 3;
             ws.Cell(legendRow, 1).Value = "Legend:";
             ws.Cell(legendRow, 1).Style.Font.Bold = true;

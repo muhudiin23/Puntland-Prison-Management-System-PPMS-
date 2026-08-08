@@ -23,7 +23,7 @@ namespace PPMS.Controllers
                 TotalPrisons               = await _db.Prisons.CountAsync(),
                 WantedCriminals            = await _db.WantedCriminals.CountAsync(w => w.IsActive),
                 ActiveAlerts               = await _db.Alerts.CountAsync(a => a.IsActive && !a.IsDismissed),
-                FormerPrisonersCount       = await _db.Prisoners.CountAsync(p => p.IsArchived),
+                FormerPrisonersCount       = await _db.FormerPrisoners.CountAsync(),
                 TotalCaseReports           = await _db.CaseReports.CountAsync(),
                 OpenCaseReports            = await _db.CaseReports.CountAsync(c => c.CaseStatus == "Open"),
                 PrisonersReleasedThisMonth = await _db.Prisoners.CountAsync(p =>

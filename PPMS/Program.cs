@@ -73,6 +73,61 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
     await DbSeeder.SeedAsync(scope.ServiceProvider);
+
+    // One-time migration: move soft-archived prisoners to the new FormerPrisoners table
+    var archivedPrisoners = await db.Prisoners
+        .Include(p => p.Prison)
+        .Include(p => p.Evidences)
+        .Where(p => p.IsArchived)
+        .ToListAsync();
+
+    if (archivedPrisoners.Count > 0)
+    {
+        await using var tx = await db.Database.BeginTransactionAsync();
+        try
+        {
+            foreach (var p in archivedPrisoners)
+            {
+                db.FormerPrisoners.Add(new FormerPrisoner
+                {
+                    PrisonerId             = p.PrisonerId,
+                    FullName               = p.FullName,
+                    NationalId             = p.NationalId,
+                    Gender                 = p.Gender,
+                    DateOfBirth            = p.DateOfBirth,
+                    CrimeType              = p.CrimeType,
+                    SentenceDurationMonths = p.SentenceDurationMonths,
+                    EntryDate              = p.EntryDate,
+                    ReleaseDate            = p.ReleaseDate,
+                    CriminalStatus         = p.CriminalStatus,
+                    Address                = p.Address,
+                    EmergencyContact       = p.EmergencyContact,
+                    PhotoPath              = p.PhotoPath,
+                    FingerprintData        = p.FingerprintData,
+                    OriginalPrisonId       = p.PrisonId,
+                    PrisonName             = p.Prison?.PrisonName ?? string.Empty,
+                    PrisonCity             = p.Prison?.City,
+                    OriginalCreatedAt      = p.CreatedAt,
+                    OriginalUpdatedAt      = p.UpdatedAt,
+                    ArchivedAt             = p.ArchivedAt,
+                    ArchiveReason          = p.ArchiveReason ?? "Administrative",
+                    ArchivedBy             = p.ArchivedBy,
+                    ArchiveNotes           = p.ArchiveNotes,
+                    EvidenceCount          = p.Evidences.Count,
+                    RecordMovedAt          = p.ArchivedAt ?? DateTime.Now
+                });
+                db.Prisoners.Remove(p);
+            }
+            await db.SaveChangesAsync();
+            await tx.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "Failed to migrate archived prisoners to FormerPrisoners table.");
+        }
+    }
 }
 
 app.Run();

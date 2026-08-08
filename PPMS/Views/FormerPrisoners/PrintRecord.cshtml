@@ -1,4 +1,4 @@
-@model PPMS.Models.Prisoner
+@model PPMS.Models.FormerPrisoner
 @{ ViewData["Title"] = $"Archive Record — {Model.FullName}"; Layout = null; }
 @{
     var reason      = Model.ArchiveReason ?? "Administrative";
@@ -103,7 +103,7 @@
             <div class="info-item"><div class="lbl">National ID</div><div class="val">@Model.NationalId</div></div>
             <div class="info-item"><div class="lbl">Gender</div><div class="val">@Model.Gender</div></div>
             <div class="info-item"><div class="lbl">Date of Birth</div><div class="val">@Model.DateOfBirth.ToString("MMMM dd, yyyy")</div></div>
-            <div class="info-item"><div class="lbl">Prison Facility</div><div class="val">@(Model.Prison?.PrisonName ?? "—") @(!string.IsNullOrEmpty(Model.Prison?.City) ? $"— {Model.Prison.City}" : "")</div></div>
+            <div class="info-item"><div class="lbl">Prison Facility</div><div class="val">@(string.IsNullOrEmpty(Model.PrisonName) ? "—" : Model.PrisonName)@(!string.IsNullOrEmpty(Model.PrisonCity) ? $" — {Model.PrisonCity}" : "")</div></div>
         </div>
     </div>
 
@@ -139,7 +139,7 @@
         <div class="info-item"><div class="lbl">Archive Reason</div><div class="val" style="color:@reasonColor;">@reason</div></div>
         <div class="info-item"><div class="lbl">Archived By</div><div class="val">@(Model.ArchivedBy ?? "System")</div></div>
         <div class="info-item"><div class="lbl">Archive Date</div><div class="val">@(Model.ArchivedAt?.ToString("MMMM dd, yyyy HH:mm") ?? "—")</div></div>
-        <div class="info-item"><div class="lbl">Record Created</div><div class="val">@Model.CreatedAt.ToString("MMMM dd, yyyy")</div></div>
+        <div class="info-item"><div class="lbl">Record Created</div><div class="val">@Model.OriginalCreatedAt.ToString("MMMM dd, yyyy")</div></div>
         @if (!string.IsNullOrEmpty(Model.ArchiveNotes))
         {
             <div class="info-item" style="grid-column:1/-1;"><div class="lbl">Notes</div><div class="val">@Model.ArchiveNotes</div></div>
