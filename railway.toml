@@ -1,0 +1,10 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "sh -c 'ASPNETCORE_URLS=http://+:${PORT:-8080} dotnet PPMS.dll'"
+healthcheckPath = "/Account/Login"
+healthcheckTimeout = 300
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
