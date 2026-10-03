@@ -47,10 +47,13 @@
                     { <option value="@s" selected="@(ViewBag.CaseStatus as string == s ? "selected" : null)">@s</option> }
                 </select>
             </div>
+            @if (ViewBag.Prisons != null)
+            {
             <div class="col-md-2">
                 @Html.DropDownList("prisonId", ViewBag.Prisons as Microsoft.AspNetCore.Mvc.Rendering.SelectList,
                     "All Prisons", new { @class = "form-select form-select-sm" })
             </div>
+            }
             <div class="col-md-1">
                 <input type="date" name="from" value="@ViewBag.From" class="form-control form-control-sm" title="From date" />
             </div>

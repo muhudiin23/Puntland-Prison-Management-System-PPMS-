@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,7 +41,15 @@ namespace PPMS.Controllers
             string? caseStatus, string? from, string? to,
             string? sort, int page = 1)
         {
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var query = _db.CaseReports.Include(c => c.Prison).AsQueryable();
+
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(c => c.PrisonId == userPrisonId.Value);
+            else if (superAdmin && prisonId.HasValue)
+                query = query.Where(c => c.PrisonId == prisonId.Value);
 
             if (!string.IsNullOrWhiteSpace(search))
                 query = query.Where(c =>
@@ -52,9 +61,6 @@ namespace PPMS.Controllers
 
             if (!string.IsNullOrEmpty(crimeType))
                 query = query.Where(c => c.CrimeType == crimeType);
-
-            if (prisonId.HasValue)
-                query = query.Where(c => c.PrisonId == prisonId.Value);
 
             if (!string.IsNullOrEmpty(caseStatus))
                 query = query.Where(c => c.CaseStatus == caseStatus);
@@ -88,7 +94,8 @@ namespace PPMS.Controllers
             ViewBag.TotalCount   = paginated.TotalCount;
             ViewBag.Categories   = CrimeCategories;
             ViewBag.CaseStatuses = CaseStatuses;
-            ViewBag.Prisons      = new SelectList(await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
+            if (superAdmin)
+                ViewBag.Prisons = new SelectList(await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
 
             return View(paginated);
         }
@@ -98,6 +105,7 @@ namespace PPMS.Controllers
         {
             var c = await _db.CaseReports.Include(x => x.Prison).FirstOrDefaultAsync(x => x.Id == id);
             if (c == null) return NotFound();
+            if (!CanAccessCase(c)) return Forbid();
             return View(c);
         }
 
@@ -191,19 +199,32 @@ namespace PPMS.Controllers
         {
             var c = await _db.CaseReports.FindAsync(id);
             if (c == null) return NotFound();
-            DeleteFile(c.DocumentPath);
-            DeleteFile(c.EvidencePath);
-            _db.CaseReports.Remove(c);
-            await _db.SaveChangesAsync();
-            await LogActivity($"Case '{c.CaseId}' deleted.", "CaseReport");
-            TempData["Success"] = $"Case {c.CaseId} deleted.";
+            try
+            {
+                DeleteFile(c.DocumentPath);
+                DeleteFile(c.EvidencePath);
+                _db.CaseReports.Remove(c);
+                await _db.SaveChangesAsync();
+                await LogActivity($"Case '{c.CaseId}' deleted.", "CaseReport");
+                TempData["Success"] = $"Case {c.CaseId} deleted.";
+            }
+            catch
+            {
+                TempData["Error"] = "An error occurred while deleting the case report. Please try again.";
+                return RedirectToAction(nameof(Delete), new { id });
+            }
             return RedirectToAction(nameof(Index));
         }
 
         // ── Analytics Dashboard ───────────────────────────────────
         public async Task<IActionResult> Analytics(string? from, string? to)
         {
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var all = _db.CaseReports.Include(c => c.Prison).AsQueryable();
+            if (!superAdmin && userPrisonId.HasValue)
+                all = all.Where(c => c.PrisonId == userPrisonId.Value);
 
             // Summary stats
             ViewBag.TotalCases   = await all.CountAsync();
@@ -294,11 +315,18 @@ namespace PPMS.Controllers
         // ── Excel Export ──────────────────────────────────────────
         public async Task<IActionResult> ExportExcel(string? crimeType, string? caseStatus, int? prisonId, string? from, string? to)
         {
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var query = _db.CaseReports.Include(c => c.Prison).AsQueryable();
+
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(c => c.PrisonId == userPrisonId.Value);
+            else if (superAdmin && prisonId.HasValue)
+                query = query.Where(c => c.PrisonId == prisonId.Value);
 
             if (!string.IsNullOrEmpty(crimeType))    query = query.Where(c => c.CrimeType  == crimeType);
             if (!string.IsNullOrEmpty(caseStatus))   query = query.Where(c => c.CaseStatus == caseStatus);
-            if (prisonId.HasValue)                   query = query.Where(c => c.PrisonId   == prisonId.Value);
             if (DateTime.TryParse(from, out var fd)) query = query.Where(c => c.DateOfCrime >= fd);
             if (DateTime.TryParse(to,   out var td)) query = query.Where(c => c.DateOfCrime <= td.AddDays(1));
 
@@ -396,18 +424,36 @@ namespace PPMS.Controllers
             if (System.IO.File.Exists(full)) System.IO.File.Delete(full);
         }
 
+        private bool CanAccessCase(CaseReport c)
+        {
+            if (User.IsSuperAdmin()) return true;
+            var userPrisonId = User.PrisonId();
+            return c.PrisonId == null || (userPrisonId.HasValue && c.PrisonId == userPrisonId.Value);
+        }
+
         private async Task PopulateDropdowns()
         {
             ViewBag.Categories            = CrimeCategories;
             ViewBag.InvestigationStatuses = InvestigationStatuses;
             ViewBag.CaseStatuses          = CaseStatuses;
-            ViewBag.Prisons               = new SelectList(
-                await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
+            if (User.IsSuperAdmin())
+            {
+                ViewBag.Prisons = new SelectList(
+                    await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
+            }
+            else
+            {
+                var prisonId = User.PrisonId();
+                var prisons = prisonId.HasValue
+                    ? await _db.Prisons.Where(p => p.Id == prisonId.Value).ToListAsync()
+                    : new List<Prison>();
+                ViewBag.Prisons = new SelectList(prisons, "Id", "PrisonName");
+            }
         }
 
         private async Task LogActivity(string desc, string type)
         {
-            _db.Activities.Add(new Activity { Description = desc, ActivityType = type, UserName = User.Identity?.Name });
+            _db.Activities.Add(new Activity { Description = desc, ActivityType = type, UserName = User.Identity?.Name, PrisonId = User.PrisonId() });
             await _db.SaveChangesAsync();
         }
     }

@@ -1,26 +1,217 @@
-@model PPMS.Models.Prison
-@{ ViewData["Title"] = "Add Prison"; }
-<div class="page-header"><h2><i class="fas fa-plus-circle me-2" style="color:#d97706;"></i>Add New Prison</h2></div>
-<div class="card" style="max-width:700px;">
-    <div class="card-body">
-        <form asp-action="Create" method="post">
-            @Html.AntiForgeryToken()
-            <div class="row g-3">
-                <div class="col-md-8"><label class="form-label fw-semibold">Prison Name *</label><input asp-for="PrisonName" class="form-control" placeholder="Official prison name" /><span asp-validation-for="PrisonName" class="text-danger small"></span></div>
-                <div class="col-md-4"><label class="form-label fw-semibold">City *</label><input asp-for="City" class="form-control" /><span asp-validation-for="City" class="text-danger small"></span></div>
-                <div class="col-md-4"><label class="form-label fw-semibold">Capacity *</label><input asp-for="Capacity" type="number" class="form-control" min="1" /><span asp-validation-for="Capacity" class="text-danger small"></span></div>
-                <div class="col-md-4"><label class="form-label fw-semibold">Current Population</label><input asp-for="CurrentPopulation" type="number" class="form-control" min="0" /></div>
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Security Level</label>
-                    <select asp-for="SecurityLevel" class="form-select"><option>Minimum</option><option selected>Medium</option><option>Maximum</option></select>
+@model PPMS.Models.ViewModels.CreatePrisonViewModel
+@{ ViewData["Title"] = "Add New Prison"; }
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-plus-circle me-2" style="color:#d97706;"></i>Add New Prison</h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">Create a correctional facility and its initial administrator account in one step.</p>
+    </div>
+    <a href="/Prisons" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back</a>
+</div>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data" id="createPrisonForm" novalidate>
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" style="display:@(ViewData.ModelState.ErrorCount > 0 ? "block" : "none");border-radius:10px;"></div>
+
+    <div class="row g-4">
+
+        <!-- ══════════════════════════════════════════════════
+             SECTION 1 — PRISON INFORMATION
+             ══════════════════════════════════════════════════ -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header d-flex align-items-center gap-2" style="background:linear-gradient(135deg,#7c3a00,#d97706);">
+                    <div style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-building" style="color:#fff;font-size:0.9rem;"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight:700;color:#fff;font-size:0.95rem;letter-spacing:.3px;">PRISON INFORMATION</div>
+                        <div style="font-size:0.68rem;color:rgba(255,255,255,0.75);">Facility details and capacity</div>
+                    </div>
                 </div>
-                <div class="col-12"><label class="form-label fw-semibold">Address</label><input asp-for="Address" class="form-control" /></div>
-                <div class="col-md-6"><label class="form-label fw-semibold">Contact Number</label><input asp-for="ContactNumber" class="form-control" /></div>
-                <div class="col-12 d-flex gap-2 mt-2">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Add Prison</button>
-                    <a href="/Prisons" class="btn btn-outline-secondary">Cancel</a>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Prison Name <span class="text-danger">*</span></label>
+                            <input asp-for="PrisonName" class="form-control" placeholder="e.g. Garowe Central Prison" />
+                            <span asp-validation-for="PrisonName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                            <input asp-for="City" class="form-control" placeholder="e.g. Garowe" />
+                            <span asp-validation-for="City" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Security Level</label>
+                            <select asp-for="SecurityLevel" class="form-select">
+                                <option value="Minimum">Minimum</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="Maximum">Maximum</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Total Capacity <span class="text-danger">*</span></label>
+                            <input asp-for="Capacity" type="number" class="form-control" min="1" placeholder="e.g. 300" />
+                            <span asp-validation-for="Capacity" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Current Population</label>
+                            <input asp-for="CurrentPopulation" type="number" class="form-control" min="0" placeholder="0" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Address</label>
+                            <input asp-for="Address" class="form-control" placeholder="Full address..." />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Contact Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                <input asp-for="ContactNumber" class="form-control" placeholder="+252-..." />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </form>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════
+             SECTION 2 — PRISON ADMINISTRATOR ACCOUNT
+             ══════════════════════════════════════════════════ -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header d-flex align-items-center gap-2" style="background:linear-gradient(135deg,#1e3a8a,#2563eb);">
+                    <div style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-user-shield" style="color:#fff;font-size:0.9rem;"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight:700;color:#fff;font-size:0.95rem;letter-spacing:.3px;">PRISON ADMINISTRATOR</div>
+                        <div style="font-size:0.68rem;color:rgba(255,255,255,0.75);">Initial admin account — role auto-assigned</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Profile photo -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Profile Photo <span class="text-muted fw-normal">(optional)</span></label>
+                            <div class="d-flex align-items-center gap-3">
+                                <div id="photoPreview" style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.4rem;flex-shrink:0;overflow:hidden;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <input type="file" name="AdminProfilePhoto" id="photoInput" accept="image/*"
+                                           class="form-control form-control-sm" onchange="previewPhoto(this)" />
+                                    <div class="form-text">JPG, PNG, GIF, WEBP — max 5 MB</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                            <input asp-for="AdminFullName" class="form-control" placeholder="Administrator's full name" />
+                            <span asp-validation-for="AdminFullName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">@@</span>
+                                <input asp-for="AdminUsername" class="form-control" placeholder="e.g. admin_garowe" autocomplete="off" />
+                            </div>
+                            <span asp-validation-for="AdminUsername" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input asp-for="AdminEmail" type="email" class="form-control" placeholder="admin@ppms.gov" />
+                            <span asp-validation-for="AdminEmail" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <input asp-for="AdminPhone" class="form-control" placeholder="+252-..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input asp-for="AdminPassword" type="password" class="form-control" id="adminPwd"
+                                       placeholder="Min. 8 characters" autocomplete="new-password" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="toggleVis('adminPwd','eyePwd')" tabindex="-1">
+                                    <i class="fas fa-eye" id="eyePwd"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="AdminPassword" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input asp-for="AdminConfirmPassword" type="password" class="form-control" id="adminPwdConfirm"
+                                       placeholder="Repeat password" autocomplete="new-password" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="toggleVis('adminPwdConfirm','eyeConfirm')" tabindex="-1">
+                                    <i class="fas fa-eye" id="eyeConfirm"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="AdminConfirmPassword" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Auto-assigned fields info -->
+                        <div class="col-12">
+                            <div style="background:rgba(37,99,235,0.07);border:1px solid rgba(37,99,235,0.18);border-radius:10px;padding:12px 14px;">
+                                <div style="font-size:0.78rem;font-weight:700;color:#2563eb;margin-bottom:6px;">
+                                    <i class="fas fa-info-circle me-1"></i>Auto-assigned on creation
+                                </div>
+                                <div class="d-flex gap-3 flex-wrap" style="font-size:0.76rem;color:var(--bs-secondary-color);">
+                                    <span><i class="fas fa-user-tag me-1"></i>Role: <strong>Prison Administrator</strong></span>
+                                    <span><i class="fas fa-building me-1"></i>Prison: <strong>New prison above</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+
+    <!-- ── Submit ──────────────────────────────────────────────────────── -->
+    <div class="d-flex gap-3 mt-4 align-items-center">
+        <button type="submit" class="btn btn-primary btn-lg px-4" id="submitBtn">
+            <i class="fas fa-plus-circle me-2"></i>Create Prison &amp; Administrator
+        </button>
+        <a href="/Prisons" class="btn btn-outline-secondary btn-lg">Cancel</a>
+        <span class="text-muted ms-auto" style="font-size:0.78rem;">
+            <i class="fas fa-lock me-1"></i>Both records are created together — if either fails, neither is saved.
+        </span>
+    </div>
+</form>
+
+@section Scripts {
+<script>
+function toggleVis(inputId, iconId) {
+    var inp = document.getElementById(inputId);
+    var ico = document.getElementById(iconId);
+    var isText = inp.type === 'text';
+    inp.type = isText ? 'password' : 'text';
+    ico.className = isText ? 'fas fa-eye' : 'fas fa-eye-slash';
+}
+
+function previewPhoto(input) {
+    var preview = document.getElementById('photoPreview');
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;" />';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Client-side password match check
+document.getElementById('createPrisonForm').addEventListener('submit', function(e) {
+    var pwd  = document.getElementById('adminPwd').value;
+    var conf = document.getElementById('adminPwdConfirm').value;
+    if (pwd && conf && pwd !== conf) {
+        e.preventDefault();
+        document.getElementById('adminPwdConfirm').classList.add('is-invalid');
+        var msg = document.getElementById('adminPwdConfirm').nextElementSibling;
+        if (msg) msg.textContent = 'Passwords do not match.';
+    }
+});
+</script>
+}

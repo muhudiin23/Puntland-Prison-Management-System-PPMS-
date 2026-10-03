@@ -43,6 +43,30 @@ namespace PPMS.Data
                 );
                 await db.SaveChangesAsync();
             }
+
+            // Seed demo PrisonAdministrator accounts (one per prison) if not already created
+            var prisons = db.Prisons.ToList();
+            foreach (var prison in prisons)
+            {
+                var slug = prison.City?.ToLower().Replace(" ", "") ?? prison.Id.ToString();
+                var username = $"admin_{slug}";
+                if (await userManager.FindByNameAsync(username) == null)
+                {
+                    var prisonAdmin = new ApplicationUser
+                    {
+                        UserName = username,
+                        Email = $"{slug}@ppms.gov",
+                        FullName = $"{prison.PrisonName} Administrator",
+                        Role = "PrisonAdministrator",
+                        AssignedPrisonId = prison.Id,
+                        IsActive = true,
+                        EmailConfirmed = true
+                    };
+                    var res = await userManager.CreateAsync(prisonAdmin, "Admin@123456");
+                    if (res.Succeeded)
+                        await userManager.AddToRoleAsync(prisonAdmin, "PrisonAdministrator");
+                }
+            }
         }
     }
 }

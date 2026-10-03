@@ -18,10 +18,19 @@ namespace PPMS.Data
         public DbSet<StaffCertificate> StaffCertificates { get; set; }
         public DbSet<PrisonerEvidence> PrisonerEvidences { get; set; }
         public DbSet<FormerPrisoner> FormerPrisoners { get; set; }
+        public DbSet<PrisonerTransfer> PrisonerTransfers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<ApplicationUser>(e =>
+            {
+                e.HasOne(u => u.AssignedPrison)
+                 .WithMany()
+                 .HasForeignKey(u => u.AssignedPrisonId)
+                 .OnDelete(DeleteBehavior.SetNull);
+            });
 
             builder.Entity<Prison>(e =>
             {
@@ -74,6 +83,26 @@ namespace PPMS.Data
             builder.Entity<Alert>(e =>
             {
                 e.HasIndex(a => a.IsActive);
+                e.HasOne<Prison>()
+                 .WithMany()
+                 .HasForeignKey(a => a.PrisonId)
+                 .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            builder.Entity<PrisonerTransfer>(e =>
+            {
+                e.HasOne(t => t.Prisoner)
+                 .WithMany()
+                 .HasForeignKey(t => t.PrisonerId)
+                 .OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(t => t.SourcePrison)
+                 .WithMany()
+                 .HasForeignKey(t => t.SourcePrisonId)
+                 .OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(t => t.DestinationPrison)
+                 .WithMany()
+                 .HasForeignKey(t => t.DestinationPrisonId)
+                 .OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<CaseReport>(e =>

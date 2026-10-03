@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PPMS.Data;
+using PPMS.Helpers;
 
 namespace PPMS.Controllers
 {
@@ -16,6 +18,8 @@ namespace PPMS.Controllers
         [HttpGet("monthly-registrations")]
         public async Task<IActionResult> MonthlyRegistrations()
         {
+            var prisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
             var now = DateTime.Now;
             var data = new List<object>();
 
@@ -23,7 +27,8 @@ namespace PPMS.Controllers
             {
                 var month = now.AddMonths(-i);
                 var count = await _db.Prisoners.CountAsync(p =>
-                    p.CreatedAt.Year == month.Year && p.CreatedAt.Month == month.Month);
+                    p.CreatedAt.Year == month.Year && p.CreatedAt.Month == month.Month &&
+                    (superAdmin || p.PrisonId == prisonId));
                 data.Add(new { label = month.ToString("MMM yyyy"), count });
             }
 
@@ -33,7 +38,11 @@ namespace PPMS.Controllers
         [HttpGet("criminal-status")]
         public async Task<IActionResult> CriminalStatus()
         {
+            var prisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var statuses = await _db.Prisoners
+                .Where(p => superAdmin || p.PrisonId == prisonId)
                 .GroupBy(p => p.CriminalStatus)
                 .Select(g => new { label = g.Key, count = g.Count() })
                 .ToListAsync();
@@ -43,7 +52,11 @@ namespace PPMS.Controllers
         [HttpGet("prison-occupancy")]
         public async Task<IActionResult> PrisonOccupancy()
         {
+            var prisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var data = await _db.Prisons
+                .Where(p => superAdmin || p.Id == prisonId)
                 .Select(p => new
                 {
                     label = p.PrisonName,
@@ -57,7 +70,11 @@ namespace PPMS.Controllers
         [HttpGet("crime-types")]
         public async Task<IActionResult> CrimeTypes()
         {
+            var prisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var data = await _db.Prisoners
+                .Where(p => superAdmin || p.PrisonId == prisonId)
                 .GroupBy(p => p.CrimeType)
                 .Select(g => new { label = g.Key, count = g.Count() })
                 .OrderByDescending(x => x.count)
@@ -69,19 +86,25 @@ namespace PPMS.Controllers
         [HttpGet("staff-by-role")]
         public async Task<IActionResult> StaffByRole()
         {
+            var prisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var data = await _db.Staff
+                .Where(s => superAdmin || s.PrisonId == prisonId)
                 .GroupBy(s => s.Role)
                 .Select(g => new { label = g.Key, count = g.Count() })
                 .ToListAsync();
             return Ok(data);
         }
 
-        // ── Case Report analytics ──────────────────────────────────
-
         [HttpGet("cases-by-type")]
         public async Task<IActionResult> CasesByType()
         {
+            var prisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var data = await _db.CaseReports
+                .Where(c => superAdmin || c.PrisonId == prisonId)
                 .GroupBy(c => c.CrimeType)
                 .Select(g => new { label = g.Key, count = g.Count() })
                 .OrderByDescending(x => x.count)
@@ -92,7 +115,11 @@ namespace PPMS.Controllers
         [HttpGet("cases-by-status")]
         public async Task<IActionResult> CasesByStatus()
         {
+            var prisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var data = await _db.CaseReports
+                .Where(c => superAdmin || c.PrisonId == prisonId)
                 .GroupBy(c => c.CaseStatus)
                 .Select(g => new { label = g.Key, count = g.Count() })
                 .ToListAsync();
@@ -102,13 +129,17 @@ namespace PPMS.Controllers
         [HttpGet("cases-monthly")]
         public async Task<IActionResult> CasesMonthly()
         {
-            var now  = DateTime.Now;
+            var prisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+            var now = DateTime.Now;
             var data = new List<object>();
+
             for (int i = 11; i >= 0; i--)
             {
                 var month = now.AddMonths(-i);
                 var count = await _db.CaseReports.CountAsync(c =>
-                    c.DateOfCrime.Year == month.Year && c.DateOfCrime.Month == month.Month);
+                    c.DateOfCrime.Year == month.Year && c.DateOfCrime.Month == month.Month &&
+                    (superAdmin || c.PrisonId == prisonId));
                 data.Add(new { label = month.ToString("MMM yyyy"), count });
             }
             return Ok(data);
@@ -117,8 +148,11 @@ namespace PPMS.Controllers
         [HttpGet("cases-by-prison")]
         public async Task<IActionResult> CasesByPrison()
         {
+            var prisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var data = await _db.CaseReports
-                .Where(c => c.PrisonId != null)
+                .Where(c => c.PrisonId != null && (superAdmin || c.PrisonId == prisonId))
                 .Include(c => c.Prison)
                 .GroupBy(c => c.Prison!.PrisonName)
                 .Select(g => new { label = g.Key, count = g.Count() })
@@ -131,7 +165,11 @@ namespace PPMS.Controllers
         [HttpGet("cases-by-year")]
         public async Task<IActionResult> CasesByYear()
         {
+            var prisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var data = await _db.CaseReports
+                .Where(c => superAdmin || c.PrisonId == prisonId)
                 .GroupBy(c => c.DateOfCrime.Year)
                 .Select(g => new { label = g.Key.ToString(), count = g.Count() })
                 .OrderBy(x => x.label)
@@ -142,7 +180,11 @@ namespace PPMS.Controllers
         [HttpGet("cases-investigation")]
         public async Task<IActionResult> CasesInvestigation()
         {
+            var prisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var data = await _db.CaseReports
+                .Where(c => superAdmin || c.PrisonId == prisonId)
                 .GroupBy(c => c.InvestigationStatus)
                 .Select(g => new { label = g.Key, count = g.Count() })
                 .ToListAsync();
@@ -152,8 +194,16 @@ namespace PPMS.Controllers
         [HttpGet("notifications")]
         public async Task<IActionResult> Notifications()
         {
-            var alerts = await _db.Alerts
-                .Where(a => !a.IsDismissed && a.IsActive)
+            var prisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
+            var query = _db.Alerts
+                .Where(a => !a.IsDismissed && a.IsActive);
+
+            if (!superAdmin && prisonId.HasValue)
+                query = query.Where(a => a.PrisonId == prisonId.Value);
+
+            var alerts = await query
                 .OrderByDescending(a => a.CreatedAt)
                 .Take(10)
                 .Select(a => new { a.Id, a.AlertType, a.Message, a.Severity, a.CreatedAt })

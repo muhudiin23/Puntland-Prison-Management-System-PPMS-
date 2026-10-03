@@ -16,10 +16,21 @@
 </div></div>
 <div class="card"><div class="card-body p-0">
     <table class="table table-hover align-middle mb-0">
-        <thead><tr><th>User</th><th class="d-none d-md-table-cell">Email</th><th>Role</th><th class="d-none d-lg-table-cell">Prison</th><th class="d-none d-md-table-cell">Last Login</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead>
+            <tr>
+                <th>User</th>
+                <th class="d-none d-md-table-cell">Email</th>
+                <th>Role</th>
+                <th class="d-none d-lg-table-cell">Assigned Prison</th>
+                <th class="d-none d-xl-table-cell">Last Login</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
         <tbody>
             @foreach (var u in Model)
             {
+                var prisonName = u.AssignedPrison?.PrisonName;
                 <tr>
                     <td>
                         <div class="d-flex align-items-center gap-2">
@@ -34,9 +45,33 @@
                         </div>
                     </td>
                     <td class="d-none d-md-table-cell text-muted" style="font-size:0.84rem;">@u.Email</td>
-                    <td><span class="badge" style="font-size:0.7rem;background:@(u.Role=="SuperAdmin"?"#dc2626":u.Role=="PrisonAdministrator"?"#d97706":"#0891b2");">@u.Role</span></td>
-                    <td class="d-none d-lg-table-cell text-muted" style="font-size:0.84rem;">@(u.PrisonAssigned ?? "—")</td>
-                    <td class="d-none d-md-table-cell text-muted" style="font-size:0.78rem;">@(u.LastLoginAt?.ToString("MMM dd, HH:mm") ?? "Never")</td>
+                    <td>
+                        <span class="badge" style="font-size:0.7rem;background:@(u.Role=="SuperAdmin"?"#dc2626":u.Role=="PrisonAdministrator"?"#d97706":"#0891b2");">
+                            @(u.Role == "PrisonAdministrator" ? "Prison Admin" : u.Role == "SuperAdmin" ? "Super Admin" : "Staff User")
+                        </span>
+                    </td>
+                    <td class="d-none d-lg-table-cell" style="font-size:0.84rem;">
+                        @if (!string.IsNullOrEmpty(prisonName))
+                        {
+                            <span style="display:inline-flex;align-items:center;gap:5px;">
+                                <i class="fas fa-building text-muted" style="font-size:0.7rem;"></i>
+                                @prisonName
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </td>
+                    <td class="d-none d-xl-table-cell text-muted" style="font-size:0.78rem;">
+                        @if (u.LastLoginAt.HasValue)
+                        {
+                            <span title="@u.LastLoginAt.Value.ToString("yyyy-MM-dd HH:mm:ss")">
+                                @u.LastLoginAt.Value.ToString("MMM dd, HH:mm")
+                            </span>
+                        }
+                        else { <span>Never</span> }
+                    </td>
                     <td><span class="badge @(u.IsActive?"bg-success":"bg-secondary")">@(u.IsActive?"Active":"Disabled")</span></td>
                     <td>
                         <div class="d-flex gap-1">
@@ -58,20 +93,62 @@
 </div></div>
 @await Html.PartialAsync("_Pagination")
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <div class="modal fade" id="resetModal" tabindex="-1">
-    <div class="modal-dialog modal-sm">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h6 class="modal-title"><i class="fas fa-key me-2"></i>Reset Password</h6><button class="btn-close" data-bs-dismiss="modal"></button></div>
-            <form asp-action="ResetPassword" method="post">
+            <div class="modal-header">
+                <h6 class="modal-title"><i class="fas fa-key me-2"></i>Reset Password</h6>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="ResetPassword" method="post" id="resetModalForm" novalidate>
                 @Html.AntiForgeryToken()
+                <input type="hidden" name="fromIndex" value="true" />
                 <div class="modal-body">
                     <p class="text-muted small mb-3" id="resetUserName"></p>
                     <input type="hidden" name="id" id="resetUserId" />
-                    <label class="form-label fw-semibold">New Password</label>
-                    <input type="password" name="newPassword" class="form-control" minlength="8" required placeholder="Min 8 characters" />
-                    <div class="form-text">Must be at least 8 characters.</div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">New Password *</label>
+                        <div class="input-group">
+                            <input type="password" name="newPassword" id="modalNewPwd"
+                                   class="form-control" placeholder="Min 8 characters, must include a digit" autocomplete="new-password" />
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleModalVis('modalNewPwd','modalEyeNew')" tabindex="-1">
+                                <i class="fas fa-eye" id="modalEyeNew"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback" id="modalNewPwdErr" style="display:none;"></div>
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label fw-semibold">Confirm Password *</label>
+                        <div class="input-group">
+                            <input type="password" name="confirmPassword" id="modalConfirmPwd"
+                                   class="form-control" placeholder="Repeat new password" autocomplete="new-password" />
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleModalVis('modalConfirmPwd','modalEyeConfirm')" tabindex="-1">
+                                <i class="fas fa-eye" id="modalEyeConfirm"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback" id="modalConfirmPwdErr" style="display:none;"></div>
+                    </div>
+                    <div class="form-text mt-2"><i class="fas fa-info-circle me-1"></i>At least 8 characters, must include at least one digit.</div>
                 </div>
-                <div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-danger btn-sm">Reset Password</button></div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-key me-1"></i>Reset Password</button>
+                </div>
             </form>
         </div>
     </div>
@@ -79,9 +156,56 @@
 
 @section Scripts {
 <script>
-$('#resetModal').on('show.bs.modal', function(e) {
-    document.getElementById('resetUserId').value = e.relatedTarget.dataset.uid;
-    document.getElementById('resetUserName').textContent = 'Resetting password for: ' + e.relatedTarget.dataset.name;
+document.getElementById('resetModal').addEventListener('show.bs.modal', function(e) {
+    var btn = e.relatedTarget;
+    document.getElementById('resetUserId').value = btn.dataset.uid;
+    document.getElementById('resetUserName').textContent = 'Resetting password for: ' + btn.dataset.name;
+    // Clear fields and errors each time modal opens
+    document.getElementById('modalNewPwd').value = '';
+    document.getElementById('modalConfirmPwd').value = '';
+    document.getElementById('modalNewPwd').classList.remove('is-invalid');
+    document.getElementById('modalConfirmPwd').classList.remove('is-invalid');
+    document.getElementById('modalNewPwdErr').style.display = 'none';
+    document.getElementById('modalConfirmPwdErr').style.display = 'none';
 });
+
+document.getElementById('resetModalForm').addEventListener('submit', function(e) {
+    var np = document.getElementById('modalNewPwd').value;
+    var cp = document.getElementById('modalConfirmPwd').value;
+    var newErr = document.getElementById('modalNewPwdErr');
+    var conErr = document.getElementById('modalConfirmPwdErr');
+    var ok = true;
+
+    document.getElementById('modalNewPwd').classList.remove('is-invalid');
+    document.getElementById('modalConfirmPwd').classList.remove('is-invalid');
+    newErr.style.display = 'none';
+    conErr.style.display = 'none';
+
+    if (np.length < 8) {
+        newErr.textContent = 'Password must be at least 8 characters.';
+        newErr.style.display = 'block';
+        document.getElementById('modalNewPwd').classList.add('is-invalid');
+        ok = false;
+    } else if (!/\d/.test(np)) {
+        newErr.textContent = 'Password must contain at least one digit.';
+        newErr.style.display = 'block';
+        document.getElementById('modalNewPwd').classList.add('is-invalid');
+        ok = false;
+    }
+    if (np !== cp) {
+        conErr.textContent = 'Passwords do not match.';
+        conErr.style.display = 'block';
+        document.getElementById('modalConfirmPwd').classList.add('is-invalid');
+        ok = false;
+    }
+    if (!ok) e.preventDefault();
+});
+
+function toggleModalVis(inputId, iconId) {
+    var inp = document.getElementById(inputId);
+    var ico = document.getElementById(iconId);
+    inp.type = inp.type === 'text' ? 'password' : 'text';
+    ico.className = inp.type === 'text' ? 'fas fa-eye-slash' : 'fas fa-eye';
+}
 </script>
 }

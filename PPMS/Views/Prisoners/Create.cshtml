@@ -56,7 +56,9 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Crime Type <span class="text-danger">*</span></label>
-                            <input asp-for="CrimeType" class="form-control" placeholder="e.g. Armed Robbery" />
+                            <select asp-for="CrimeType" asp-items="ViewBag.CrimeTypes" class="form-select">
+                                <option value="">-- Select Crime Type --</option>
+                            </select>
                             <span asp-validation-for="CrimeType" class="text-danger small"></span>
                         </div>
                         <div class="col-md-3">

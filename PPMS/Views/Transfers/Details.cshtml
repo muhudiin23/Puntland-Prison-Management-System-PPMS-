@@ -1,0 +1,90 @@
+@model PPMS.Models.PrisonerTransfer
+@{ ViewData["Title"] = "Transfer Details"; }
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2><i class="fas fa-exchange-alt me-2" style="color:#1565c0;"></i>Transfer #@Model.Id</h2>
+    <a href="/Transfers" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Back</a>
+</div>
+
+@{
+    var badgeColor = Model.Status switch
+    {
+        "Pending" => "#f59e0b",
+        "Approved" => "#2563eb",
+        "Completed" => "#16a34a",
+        "Rejected" => "#dc2626",
+        _ => "#64748b"
+    };
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card mb-3">
+            <div class="card-header">Transfer Information</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8"><span class="badge fs-6" style="background:@badgeColor;">@Model.Status</span></dd>
+                    <dt class="col-sm-4">Prisoner</dt>
+                    <dd class="col-sm-8">@Model.Prisoner?.FullName (@Model.Prisoner?.PrisonerId)</dd>
+                    <dt class="col-sm-4">From Prison</dt>
+                    <dd class="col-sm-8">@Model.SourcePrison?.PrisonName</dd>
+                    <dt class="col-sm-4">To Prison</dt>
+                    <dd class="col-sm-8">@Model.DestinationPrison?.PrisonName</dd>
+                    <dt class="col-sm-4">Transfer Reason</dt>
+                    <dd class="col-sm-8">@Model.TransferReason</dd>
+                    @if (!string.IsNullOrEmpty(Model.TransferNotes))
+                    {
+                        <dt class="col-sm-4">Notes</dt>
+                        <dd class="col-sm-8">@Model.TransferNotes</dd>
+                    }
+                    <dt class="col-sm-4">Requested By</dt>
+                    <dd class="col-sm-8">@Model.RequestedBy</dd>
+                    <dt class="col-sm-4">Requested At</dt>
+                    <dd class="col-sm-8">@Model.RequestedAt.ToString("MMM dd, yyyy HH:mm")</dd>
+                    @if (!string.IsNullOrEmpty(Model.ReviewedBy))
+                    {
+                        <dt class="col-sm-4">Reviewed By</dt>
+                        <dd class="col-sm-8">@Model.ReviewedBy at @Model.ReviewedAt?.ToString("MMM dd, yyyy HH:mm")</dd>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                    {
+                        <dt class="col-sm-4">Rejection Reason</dt>
+                        <dd class="col-sm-8 text-danger">@Model.RejectionReason</dd>
+                    }
+                    @if (Model.CompletedAt.HasValue)
+                    {
+                        <dt class="col-sm-4">Completed At</dt>
+                        <dd class="col-sm-8">@Model.CompletedAt?.ToString("MMM dd, yyyy HH:mm") by @Model.AuthorizedBy</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        @if (Model.Status == "Pending" && (User.IsInRole("SuperAdmin") || User.IsInRole("PrisonAdministrator")))
+        {
+            <div class="card mb-3">
+                <div class="card-header">Actions</div>
+                <div class="card-body d-flex flex-column gap-2">
+                    <a href="/Transfers/Review/@Model.Id" class="btn btn-warning"><i class="fas fa-clipboard-check me-1"></i>Review this Transfer</a>
+                </div>
+            </div>
+        }
+        @if (Model.Status == "Approved" && (User.IsInRole("SuperAdmin") || User.IsInRole("PrisonAdministrator")))
+        {
+            <div class="card mb-3">
+                <div class="card-header">Complete Transfer</div>
+                <div class="card-body">
+                    <p class="small text-muted">This will physically move the prisoner to the destination prison.</p>
+                    <form asp-action="Complete" asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-success w-100"
+                                onclick="return confirm('Complete this transfer and move the prisoner?')">
+                            <i class="fas fa-check-circle me-1"></i>Complete Transfer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>

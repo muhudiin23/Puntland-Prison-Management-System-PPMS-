@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,18 +18,29 @@ namespace PPMS.Controllers
 
         public async Task<IActionResult> Index(bool showAll = false, string? alertType = null, int page = 1)
         {
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var query = _db.Alerts.AsQueryable();
+
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(a => a.PrisonId == userPrisonId.Value);
+
             if (!showAll) query = query.Where(a => !a.IsDismissed);
             if (!string.IsNullOrEmpty(alertType)) query = query.Where(a => a.AlertType == alertType);
 
             var paginated = await PaginatedList<Alert>.CreateAsync(query.OrderByDescending(a => a.CreatedAt), page, PageSize);
+
+            var baseCountQuery = _db.Alerts.AsQueryable();
+            if (!superAdmin && userPrisonId.HasValue)
+                baseCountQuery = baseCountQuery.Where(a => a.PrisonId == userPrisonId.Value);
 
             ViewBag.ShowAll = showAll;
             ViewBag.AlertType = alertType;
             ViewBag.PageIndex = paginated.PageIndex;
             ViewBag.TotalPages = paginated.TotalPages;
             ViewBag.TotalCount = paginated.TotalCount;
-            ViewBag.ActiveCount = await _db.Alerts.CountAsync(a => !a.IsDismissed);
+            ViewBag.ActiveCount = await baseCountQuery.CountAsync(a => !a.IsDismissed);
             return View(paginated);
         }
 
@@ -40,6 +52,7 @@ namespace PPMS.Controllers
             if (!ModelState.IsValid) return View(model);
             model.CreatedBy = User.Identity?.Name;
             model.IsActive = true;
+            model.PrisonId = User.PrisonId();
             _db.Alerts.Add(model);
             await _db.SaveChangesAsync();
             TempData["Success"] = "Alert created and broadcast.";
@@ -51,6 +64,7 @@ namespace PPMS.Controllers
         {
             var alert = await _db.Alerts.FindAsync(id);
             if (alert == null) return NotFound();
+            if (!CanAccessAlert(alert)) return Forbid();
             alert.IsDismissed = true;
             alert.IsActive = false;
             alert.DismissedAt = DateTime.Now;
@@ -62,7 +76,14 @@ namespace PPMS.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DismissAll()
         {
-            var alerts = await _db.Alerts.Where(a => !a.IsDismissed).ToListAsync();
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
+            var query = _db.Alerts.Where(a => !a.IsDismissed);
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(a => a.PrisonId == userPrisonId.Value);
+
+            var alerts = await query.ToListAsync();
             foreach (var a in alerts) { a.IsDismissed = true; a.IsActive = false; a.DismissedAt = DateTime.Now; }
             await _db.SaveChangesAsync();
             TempData["Success"] = $"{alerts.Count} alerts dismissed.";
@@ -71,12 +92,26 @@ namespace PPMS.Controllers
 
         public async Task<IActionResult> History(int page = 1)
         {
-            var query = _db.Alerts.Where(a => a.IsDismissed).OrderByDescending(a => a.DismissedAt);
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
+            var query = _db.Alerts.Where(a => a.IsDismissed);
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(a => a.PrisonId == userPrisonId.Value);
+
+            query = query.OrderByDescending(a => a.DismissedAt);
             var paginated = await PaginatedList<Alert>.CreateAsync(query, page, PageSize);
             ViewBag.PageIndex = paginated.PageIndex;
             ViewBag.TotalPages = paginated.TotalPages;
             ViewBag.TotalCount = paginated.TotalCount;
             return View(paginated);
+        }
+
+        private bool CanAccessAlert(Alert alert)
+        {
+            if (User.IsSuperAdmin()) return true;
+            var userPrisonId = User.PrisonId();
+            return alert.PrisonId == null || (userPrisonId.HasValue && alert.PrisonId == userPrisonId.Value);
         }
     }
 }

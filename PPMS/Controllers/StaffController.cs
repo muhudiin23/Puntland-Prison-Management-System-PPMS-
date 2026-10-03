@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -26,11 +27,18 @@ namespace PPMS.Controllers
 
         public async Task<IActionResult> Index(string? search, int? prisonId, string? role, int page = 1)
         {
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var query = _db.Staff.Include(s => s.Prison).AsQueryable();
+
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(s => s.PrisonId == userPrisonId.Value);
+            else if (superAdmin && prisonId.HasValue)
+                query = query.Where(s => s.PrisonId == prisonId.Value);
+
             if (!string.IsNullOrEmpty(search))
                 query = query.Where(s => s.FullName.Contains(search) || s.StaffIdNumber.Contains(search) || s.Email.Contains(search));
-            if (prisonId.HasValue)
-                query = query.Where(s => s.PrisonId == prisonId.Value);
             if (!string.IsNullOrEmpty(role))
                 query = query.Where(s => s.Role == role);
 
@@ -42,7 +50,8 @@ namespace PPMS.Controllers
             ViewBag.PageIndex = paginated.PageIndex;
             ViewBag.TotalPages = paginated.TotalPages;
             ViewBag.TotalCount = paginated.TotalCount;
-            ViewBag.Prisons = new SelectList(await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
+            if (superAdmin)
+                ViewBag.Prisons = new SelectList(await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
             return View(paginated);
         }
 
@@ -121,6 +130,7 @@ namespace PPMS.Controllers
                 .Include(s => s.Certificates)
                 .FirstOrDefaultAsync(s => s.Id == id);
             if (staff == null) return NotFound();
+            if (!CanAccessPrison(staff.PrisonId)) return Forbid();
             return View(staff);
         }
 
@@ -128,6 +138,7 @@ namespace PPMS.Controllers
         {
             var staff = await _db.Staff.Include(s => s.Prison).FirstOrDefaultAsync(s => s.Id == id);
             if (staff == null) return NotFound();
+            if (!CanAccessPrison(staff.PrisonId)) return Forbid();
             return View(staff);
         }
 
@@ -137,14 +148,22 @@ namespace PPMS.Controllers
             var staff = await _db.Staff.Include(s => s.Certificates).FirstOrDefaultAsync(s => s.Id == id);
             if (staff == null) return NotFound();
 
-            if (staff.PhotoPath != null) DeletePhysicalFile(staff.PhotoPath);
-            foreach (var cert in staff.Certificates)
-                DeletePhysicalFile(cert.FilePath);
+            try
+            {
+                if (staff.PhotoPath != null) DeletePhysicalFile(staff.PhotoPath);
+                foreach (var cert in staff.Certificates)
+                    DeletePhysicalFile(cert.FilePath);
 
-            _db.Staff.Remove(staff);
-            await _db.SaveChangesAsync();
-            await LogActivity($"Staff '{staff.FullName}' deleted.");
-            TempData["Success"] = "Staff record deleted.";
+                _db.Staff.Remove(staff);
+                await _db.SaveChangesAsync();
+                await LogActivity($"Staff '{staff.FullName}' deleted.");
+                TempData["Success"] = "Staff record deleted.";
+            }
+            catch
+            {
+                TempData["Error"] = "An error occurred while deleting the staff record. Please try again.";
+                return RedirectToAction(nameof(Delete), new { id });
+            }
             return RedirectToAction(nameof(Index));
         }
 
@@ -244,14 +263,32 @@ namespace PPMS.Controllers
             _ => "application/octet-stream"
         };
 
+        private bool CanAccessPrison(int prisonId)
+        {
+            if (User.IsSuperAdmin()) return true;
+            var userPrisonId = User.PrisonId();
+            return userPrisonId.HasValue && userPrisonId.Value == prisonId;
+        }
+
         private async Task PopulateDropdowns()
         {
-            ViewBag.Prisons = new SelectList(await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
+            if (User.IsSuperAdmin())
+            {
+                ViewBag.Prisons = new SelectList(await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
+            }
+            else
+            {
+                var prisonId = User.PrisonId();
+                var prisons = prisonId.HasValue
+                    ? await _db.Prisons.Where(p => p.Id == prisonId.Value).ToListAsync()
+                    : new List<Prison>();
+                ViewBag.Prisons = new SelectList(prisons, "Id", "PrisonName");
+            }
         }
 
         private async Task LogActivity(string desc)
         {
-            _db.Activities.Add(new Activity { Description = desc, ActivityType = "Staff", UserName = User.Identity?.Name });
+            _db.Activities.Add(new Activity { Description = desc, ActivityType = "Staff", UserName = User.Identity?.Name, PrisonId = User.PrisonId() });
             await _db.SaveChangesAsync();
         }
     }

@@ -1,0 +1,748 @@
+<!doctype html>
+<title>PPMS Database Schema</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap">
+<style>
+:root {
+  --bg:#0e1621; --surface:#17222f; --surface2:#1e2d3e; --border:#253447;
+  --accent:#2563eb; --text:#d8e8f5; --muted:#5e7a96;
+  --pk:#10b981; --fk:#f59e0b; --idx:#818cf8; --uq:#3b82f6;
+  --cat-core:#1d4ed8; --cat-child:#0284c7; --cat-auth:#7c3aed;
+  --cat-archive:#9333ea; --cat-alert:#dc2626; --cat-alone:#475569; --cat-tx:#b45309;
+  --cascade:#10b981; --setnull:#f59e0b; --restrict:#ef4444;
+}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#eef2f7; --surface:#ffffff; --surface2:#f1f5fb; --border:#d1dcea;
+  --text:#0b1929; --muted:#4f6a88;
+  --pk:#059669; --fk:#d97706; --idx:#6366f1; --uq:#2563eb;
+}}
+:root[data-theme="light"]{
+  --bg:#eef2f7; --surface:#ffffff; --surface2:#f1f5fb; --border:#d1dcea;
+  --text:#0b1929; --muted:#4f6a88;
+  --pk:#059669; --fk:#d97706; --idx:#6366f1; --uq:#2563eb;
+}
+:root[data-theme="dark"]{
+  --bg:#0e1621; --surface:#17222f; --surface2:#1e2d3e; --border:#253447;
+  --text:#d8e8f5; --muted:#5e7a96;
+  --pk:#10b981; --fk:#f59e0b; --idx:#818cf8; --uq:#3b82f6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+
+/* header */
+.hdr{
+  padding:16px 28px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);position:sticky;top:0;z-index:100;gap:16px;
+}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.hdr-badge{
+  width:38px;height:38px;border-radius:9px;flex-shrink:0;
+  background:linear-gradient(135deg,#1d4ed8,#7c3aed);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;color:#fff;
+}
+.hdr-text h1{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:800;line-height:1}
+.hdr-text p{font-size:.7rem;color:var(--muted);margin-top:2px}
+.hdr-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.chip{font-size:.68rem;padding:3px 9px;border-radius:4px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 12px;cursor:pointer;font-size:.72rem;font-family:'Barlow',sans-serif}
+.theme-btn:hover{color:var(--text);border-color:var(--muted)}
+
+/* sections */
+.sec{padding:24px 28px}
+.sec-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec-title{font-size:1.2rem;font-weight:700;margin-bottom:4px}
+.sec-sub{font-size:.8rem;color:var(--muted);margin-bottom:18px}
+
+/* legend */
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-bottom:16px;align-items:center}
+.li{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted)}
+.li-dot{width:10px;height:10px;border-radius:2px;font-size:.58rem;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'JetBrains Mono',monospace;color:#fff;flex-shrink:0}
+.li-line{width:24px;height:2px;border-radius:1px}
+.li-box{width:14px;height:10px;border-radius:2px}
+
+/* ERD wrapper */
+.erd-wrap{border:1px solid var(--border);border-radius:10px;overflow:auto;background:var(--surface)}
+#erd{display:block}
+
+/* table cards */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(500px,1fr));gap:16px}
+.tcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.tcard-hdr{padding:10px 14px;display:flex;align-items:center;gap:8px}
+.tcard-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.03em}
+.tcard-desc{font-size:.7rem;color:var(--muted);margin-left:auto}
+.tcard-body{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.77rem}
+thead tr{background:var(--surface2)}
+th{padding:6px 12px;text-align:left;font-weight:600;font-size:.67rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:5px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.cn{font-family:'JetBrains Mono',monospace;font-size:.73rem}
+.ct{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:500;white-space:nowrap;margin-right:2px}
+.bpk{background:rgba(16,185,129,.14);color:var(--pk)}
+.bfk{background:rgba(245,158,11,.14);color:var(--fk)}
+.bidx{background:rgba(129,140,248,.14);color:var(--idx)}
+.buq{background:rgba(59,130,246,.14);color:var(--uq)}
+.bnl{background:rgba(94,122,150,.12);color:var(--muted)}
+.col-note{font-size:.67rem;color:var(--muted)}
+
+/* rel table */
+.rt{width:100%;border-collapse:collapse;font-size:.78rem}
+.rt th{padding:6px 14px;text-align:left;font-weight:600;font-size:.67rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap}
+.rt td{padding:6px 14px;border-bottom:1px solid var(--border)}
+.rt tr:last-child td{border-bottom:none}
+.rt tr:hover td{background:var(--surface2)}
+.rb{display:inline-flex;align-items:center;gap:4px;font-size:.7rem;font-weight:600;font-family:'JetBrains Mono',monospace;padding:2px 7px;border-radius:4px}
+.rc{background:rgba(16,185,129,.12);color:var(--cascade)}
+.rs{background:rgba(245,158,11,.12);color:var(--setnull)}
+.rr{background:rgba(239,68,68,.12);color:var(--restrict)}
+.tn{font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:500}
+
+footer{padding:20px 28px;border-top:1px solid var(--border);text-align:center;font-size:.72rem;color:var(--muted)}
+</style>
+
+<header class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-badge">DB</div>
+    <div class="hdr-text">
+      <h1>PPMS Database Schema</h1>
+      <p>Puntland Prison Management System — Entity-Relationship Design</p>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <span class="chip">EF Core 9</span>
+    <span class="chip">SQL Server</span>
+    <span class="chip">12 Tables · 10 FKs</span>
+    <button class="theme-btn" onclick="toggleTheme()">☀ / ☾</button>
+  </div>
+</header>
+
+<div class="sec">
+  <div class="sec-lbl">Entity-Relationship Diagram</div>
+  <div class="sec-title">Database Architecture</div>
+  <div class="sec-sub">Compact view — table names, primary keys, and foreign keys. Scroll horizontally to explore.</div>
+
+  <div class="legend">
+    <div class="li"><div class="li-dot" style="background:var(--pk)">PK</div> Primary Key</div>
+    <div class="li"><div class="li-dot" style="background:var(--fk)">FK</div> Foreign Key</div>
+    <div class="li"><div class="li-dot" style="background:var(--uq)">UQ</div> Unique</div>
+    <div class="li"><div class="li-dot" style="background:var(--idx)">IX</div> Index</div>
+    <div class="li" style="gap:6px"><div class="li-line" style="background:var(--cascade)"></div> CASCADE</div>
+    <div class="li" style="gap:6px"><div class="li-line" style="border-top:2px dashed var(--setnull);background:none;height:0"></div> SET NULL</div>
+    <div class="li" style="gap:6px"><div class="li-line" style="border-top:2px dotted var(--restrict);background:none;height:0"></div> RESTRICT</div>
+    <div class="li"><div class="li-box" style="background:var(--cat-core);opacity:.85"></div> Core</div>
+    <div class="li"><div class="li-box" style="background:var(--cat-auth);opacity:.85"></div> Auth</div>
+    <div class="li"><div class="li-box" style="background:var(--cat-tx);opacity:.85"></div> Transfers</div>
+    <div class="li"><div class="li-box" style="background:var(--cat-child);opacity:.85"></div> Files</div>
+    <div class="li"><div class="li-box" style="background:var(--cat-archive);opacity:.85"></div> Archive</div>
+    <div class="li"><div class="li-box" style="background:var(--cat-alert);opacity:.85"></div> Alerts/Cases</div>
+    <div class="li"><div class="li-box" style="background:var(--cat-alone);opacity:.85"></div> Standalone</div>
+  </div>
+
+  <div class="erd-wrap">
+    <svg id="erd" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-lbl">Table Reference</div>
+  <div class="sec-title">Column Definitions</div>
+  <div class="sec-sub">Complete schema for all 12 tables — data types, constraints, and FK references</div>
+  <div class="tgrid" id="tgrid"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-lbl">Relationship Index</div>
+  <div class="sec-title">Foreign Key Constraints</div>
+  <div class="sec-sub">All 10 FK relationships with delete behaviors</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;overflow-x:auto">
+    <table class="rt" id="rtable">
+      <thead>
+        <tr><th>Child Table</th><th>FK Column</th><th>→</th><th>Parent Table</th><th>PK</th><th>On Delete</th><th>Cardinality</th><th>Notes</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>PPMS · Puntland Prison Management System · Database Schema v2 · 2026-08-19 · ASP.NET Core 9 / EF Core 9 / SQL Server</footer>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────
+
+const CAT_COLOR = {
+  core:'#1d4ed8', child:'#0284c7', auth:'#7c3aed',
+  archive:'#9333ea', alert:'#dc2626', alone:'#475569', tx:'#b45309'
+};
+
+// ERD only shows PK + FK columns. Full details in cards.
+// disCols = columns shown in ERD box
+// cols = full column list for cards
+
+const DB = {
+  Prisons: {
+    x:480, y:30, cat:'core', desc:'Correctional facilities',
+    disCols:[
+      {name:'Id', type:'INT', pk:true},
+    ],
+    cols:[
+      {name:'Id',              type:'INT',           pk:true},
+      {name:'PrisonName',      type:'NVARCHAR(150)', uq:true},
+      {name:'City',            type:'NVARCHAR(100)'},
+      {name:'Capacity',        type:'INT'},
+      {name:'CurrentPopulation',type:'INT',          note:'DEFAULT 0'},
+      {name:'SecurityLevel',   type:'NVARCHAR',      note:'DEFAULT Medium'},
+      {name:'Address',         type:'NVARCHAR(300)'},
+      {name:'ContactNumber',   type:'NVARCHAR(20)'},
+      {name:'CreatedAt',       type:'DATETIME2'},
+    ]
+  },
+
+  Prisoners: {
+    x:20, y:30, cat:'core', desc:'Active inmate records',
+    disCols:[
+      {name:'Id',       type:'INT', pk:true},
+      {name:'PrisonId', type:'INT', fk:true, ref:'Prisons.Id'},
+    ],
+    cols:[
+      {name:'Id',          type:'INT',           pk:true},
+      {name:'PrisonerId',  type:'NVARCHAR(50)',  uq:true},
+      {name:'FullName',    type:'NVARCHAR(150)'},
+      {name:'NationalId',  type:'NVARCHAR(30)',  idx:true},
+      {name:'Gender',      type:'NVARCHAR'},
+      {name:'DateOfBirth', type:'DATETIME2'},
+      {name:'CrimeType',   type:'NVARCHAR(200)'},
+      {name:'SentenceDurationMonths',type:'INT'},
+      {name:'EntryDate',   type:'DATETIME2'},
+      {name:'ReleaseDate', type:'DATETIME2'},
+      {name:'CriminalStatus',type:'NVARCHAR',   note:'Active | …'},
+      {name:'Address',     type:'NVARCHAR(300)'},
+      {name:'EmergencyContact',type:'NVARCHAR(150)'},
+      {name:'PhotoPath',   type:'NVARCHAR',      nl:true},
+      {name:'FingerprintData',type:'NVARCHAR',   nl:true},
+      {name:'PrisonId',    type:'INT',           fk:true, ref:'Prisons.Id'},
+      {name:'IsArchived',  type:'BIT',           idx:true, note:'DEFAULT 0'},
+      {name:'ArchivedAt',  type:'DATETIME2',     nl:true},
+      {name:'ArchiveReason',type:'NVARCHAR(50)', nl:true},
+      {name:'ArchivedBy',  type:'NVARCHAR(256)', nl:true},
+      {name:'ArchiveNotes',type:'NVARCHAR(500)', nl:true},
+      {name:'CreatedAt',   type:'DATETIME2'},
+      {name:'UpdatedAt',   type:'DATETIME2'},
+    ]
+  },
+
+  PrisonerTransfer: {
+    x:250, y:30, cat:'tx', desc:'Inter-prison transfer workflow',
+    disCols:[
+      {name:'Id',                  type:'INT', pk:true},
+      {name:'PrisonerId',          type:'INT', fk:true, ref:'Prisoners.Id'},
+      {name:'SourcePrisonId',      type:'INT', fk:true, ref:'Prisons.Id'},
+      {name:'DestinationPrisonId', type:'INT', fk:true, ref:'Prisons.Id'},
+    ],
+    cols:[
+      {name:'Id',                  type:'INT',          pk:true},
+      {name:'PrisonerId',          type:'INT',          fk:true, ref:'Prisoners.Id'},
+      {name:'SourcePrisonId',      type:'INT',          fk:true, ref:'Prisons.Id'},
+      {name:'DestinationPrisonId', type:'INT',          fk:true, ref:'Prisons.Id'},
+      {name:'TransferReason',      type:'NVARCHAR(500)'},
+      {name:'TransferNotes',       type:'NVARCHAR(1000)',nl:true},
+      {name:'Status',              type:'NVARCHAR',     note:'Pending|Approved|Completed|Rejected'},
+      {name:'AuthorizedBy',        type:'NVARCHAR',     nl:true},
+      {name:'RequestedBy',         type:'NVARCHAR'},
+      {name:'RequestedAt',         type:'DATETIME2'},
+      {name:'ReviewedBy',          type:'NVARCHAR',     nl:true},
+      {name:'ReviewedAt',          type:'DATETIME2',    nl:true},
+      {name:'RejectionReason',     type:'NVARCHAR',     nl:true},
+      {name:'CompletedAt',         type:'DATETIME2',    nl:true},
+      {name:'CreatedAt',           type:'DATETIME2'},
+    ]
+  },
+
+  ApplicationUser: {
+    x:480, y:190, cat:'auth', desc:'Extends ASP.NET Identity — system accounts',
+    disCols:[
+      {name:'Id',               type:'NVARCHAR(450)', pk:true},
+      {name:'AssignedPrisonId', type:'INT',           fk:true, ref:'Prisons.Id', nl:true},
+    ],
+    cols:[
+      {name:'Id',              type:'NVARCHAR(450)', pk:true,  note:'Identity'},
+      {name:'UserName',        type:'NVARCHAR(256)', uq:true,  note:'Identity'},
+      {name:'NormalizedUserName',type:'NVARCHAR(256)',          note:'Identity'},
+      {name:'Email',           type:'NVARCHAR(256)',            note:'Identity'},
+      {name:'PasswordHash',    type:'NVARCHAR',                 note:'Identity'},
+      {name:'PhoneNumber',     type:'NVARCHAR',      nl:true,  note:'Identity'},
+      {name:'EmailConfirmed',  type:'BIT',                      note:'Identity'},
+      {name:'SecurityStamp',   type:'NVARCHAR',                 note:'Identity'},
+      {name:'FullName',        type:'NVARCHAR'},
+      {name:'Role',            type:'NVARCHAR',                 note:'SuperAdmin | PrisonAdministrator | StaffUser'},
+      {name:'AssignedPrisonId',type:'INT',           fk:true, ref:'Prisons.Id', nl:true},
+      {name:'IsActive',        type:'BIT',                      note:'DEFAULT 1'},
+      {name:'ProfilePhotoPath',type:'NVARCHAR',      nl:true},
+      {name:'Theme',           type:'NVARCHAR',                 note:'DEFAULT light'},
+      {name:'LastLoginAt',     type:'DATETIME2',     nl:true},
+      {name:'LastLoginIp',     type:'NVARCHAR',      nl:true},
+      {name:'LoginCount',      type:'INT'},
+      {name:'CreatedAt',       type:'DATETIME2'},
+    ]
+  },
+
+  Staff: {
+    x:920, y:30, cat:'core', desc:'Prison staff members',
+    disCols:[
+      {name:'Id',       type:'INT', pk:true},
+      {name:'PrisonId', type:'INT', fk:true, ref:'Prisons.Id'},
+    ],
+    cols:[
+      {name:'Id',           type:'INT',          pk:true},
+      {name:'FullName',     type:'NVARCHAR(150)'},
+      {name:'StaffIdNumber',type:'NVARCHAR(50)',  uq:true},
+      {name:'PhoneNumber',  type:'NVARCHAR(20)'},
+      {name:'Email',        type:'NVARCHAR(150)'},
+      {name:'Gender',       type:'NVARCHAR'},
+      {name:'Role',         type:'NVARCHAR(100)'},
+      {name:'PrisonId',     type:'INT',          fk:true, ref:'Prisons.Id'},
+      {name:'ShiftSchedule',type:'NVARCHAR(100)'},
+      {name:'Username',     type:'NVARCHAR(100)'},
+      {name:'IsActive',     type:'BIT'},
+      {name:'PhotoPath',    type:'NVARCHAR',      nl:true},
+      {name:'CreatedAt',    type:'DATETIME2'},
+    ]
+  },
+
+  PrisonerEvidence: {
+    x:20, y:230, cat:'child', desc:'Evidence files attached to prisoners',
+    disCols:[
+      {name:'Id',        type:'INT', pk:true},
+      {name:'PrisonerId',type:'INT', fk:true, ref:'Prisoners.Id'},
+    ],
+    cols:[
+      {name:'Id',          type:'INT',          pk:true},
+      {name:'PrisonerId',  type:'INT',          fk:true, ref:'Prisoners.Id'},
+      {name:'FileName',    type:'NVARCHAR(300)'},
+      {name:'FilePath',    type:'NVARCHAR(500)'},
+      {name:'OriginalName',type:'NVARCHAR(300)'},
+      {name:'FileType',    type:'NVARCHAR(20)'},
+      {name:'FileSize',    type:'BIGINT'},
+      {name:'DocumentType',type:'NVARCHAR(100)', note:'DEFAULT Other'},
+      {name:'Description', type:'NVARCHAR(500)', nl:true},
+      {name:'UploadedAt',  type:'DATETIME2'},
+      {name:'UploadedBy',  type:'NVARCHAR(256)', nl:true},
+    ]
+  },
+
+  Alert: {
+    x:20, y:390, cat:'alert', desc:'System security alerts',
+    disCols:[
+      {name:'Id',      type:'INT', pk:true},
+      {name:'PrisonId',type:'INT', fk:true, ref:'Prisons.Id', nl:true},
+    ],
+    cols:[
+      {name:'Id',         type:'INT',          pk:true},
+      {name:'AlertType',  type:'NVARCHAR'},
+      {name:'Message',    type:'NVARCHAR(500)'},
+      {name:'Severity',   type:'NVARCHAR',     note:'Low|Medium|High|Critical'},
+      {name:'IsActive',   type:'BIT',          idx:true},
+      {name:'IsDismissed',type:'BIT'},
+      {name:'CreatedAt',  type:'DATETIME2'},
+      {name:'DismissedAt',type:'DATETIME2',    nl:true},
+      {name:'CreatedBy',  type:'NVARCHAR',     nl:true},
+      {name:'PrisonId',   type:'INT',          fk:true, ref:'Prisons.Id', nl:true},
+    ]
+  },
+
+  CaseReport: {
+    x:480, y:390, cat:'alert', desc:'Criminal case investigations',
+    disCols:[
+      {name:'Id',      type:'INT', pk:true},
+      {name:'PrisonId',type:'INT', fk:true, ref:'Prisons.Id', nl:true},
+    ],
+    cols:[
+      {name:'Id',                  type:'INT',          pk:true},
+      {name:'CaseId',              type:'NVARCHAR(30)',  uq:true,  note:'CASE-YYYY-NNNN'},
+      {name:'CaseTitle',           type:'NVARCHAR(200)'},
+      {name:'CrimeType',           type:'NVARCHAR(100)', idx:true},
+      {name:'CrimeDescription',    type:'NVARCHAR'},
+      {name:'PrisonerName',        type:'NVARCHAR(150)'},
+      {name:'NationalId',          type:'NVARCHAR(50)'},
+      {name:'PrisonId',            type:'INT',           fk:true, ref:'Prisons.Id', nl:true},
+      {name:'DateOfCrime',         type:'DATETIME2',     idx:true},
+      {name:'DateReported',        type:'DATETIME2'},
+      {name:'InvestigationStatus', type:'NVARCHAR(50)',  note:'Pending|Ongoing|Completed|Suspended'},
+      {name:'CaseStatus',          type:'NVARCHAR(50)',  idx:true, note:'Open|Under Review|Closed|Dismissed'},
+      {name:'OfficerInCharge',     type:'NVARCHAR(150)'},
+      {name:'DocumentPath',        type:'NVARCHAR',      nl:true},
+      {name:'EvidencePath',        type:'NVARCHAR',      nl:true},
+      {name:'Notes',               type:'NVARCHAR(1000)',nl:true},
+      {name:'CreatedBy',           type:'NVARCHAR(256)', nl:true},
+      {name:'CreatedAt',           type:'DATETIME2'},
+      {name:'UpdatedAt',           type:'DATETIME2'},
+    ]
+  },
+
+  FormerPrisoner: {
+    x:710, y:190, cat:'archive', desc:'Archived prisoner records — immutable copy, no FK',
+    disCols:[
+      {name:'Id', type:'INT', pk:true},
+    ],
+    cols:[
+      {name:'Id',           type:'INT',           pk:true},
+      {name:'PrisonerId',   type:'NVARCHAR(50)',   note:'original ID — no FK by design'},
+      {name:'FullName',     type:'NVARCHAR(150)'},
+      {name:'NationalId',   type:'NVARCHAR(30)'},
+      {name:'Gender',       type:'NVARCHAR'},
+      {name:'DateOfBirth',  type:'DATETIME2'},
+      {name:'CrimeType',    type:'NVARCHAR(200)'},
+      {name:'SentenceDurationMonths',type:'INT'},
+      {name:'EntryDate',    type:'DATETIME2'},
+      {name:'ReleaseDate',  type:'DATETIME2'},
+      {name:'CriminalStatus',type:'NVARCHAR'},
+      {name:'Address',      type:'NVARCHAR(300)'},
+      {name:'EmergencyContact',type:'NVARCHAR(150)'},
+      {name:'PhotoPath',    type:'NVARCHAR',       nl:true},
+      {name:'FingerprintData',type:'NVARCHAR',     nl:true},
+      {name:'OriginalPrisonId',type:'INT',         nl:true, note:'no FK — orphan-safe'},
+      {name:'PrisonName',   type:'NVARCHAR(200)',  note:'denormalized copy'},
+      {name:'PrisonCity',   type:'NVARCHAR(100)',  nl:true},
+      {name:'OriginalCreatedAt',type:'DATETIME2'},
+      {name:'OriginalUpdatedAt',type:'DATETIME2'},
+      {name:'ArchivedAt',   type:'DATETIME2',      nl:true},
+      {name:'ArchiveReason',type:'NVARCHAR(50)',   nl:true},
+      {name:'ArchivedBy',   type:'NVARCHAR(256)',  nl:true},
+      {name:'ArchiveNotes', type:'NVARCHAR(500)',  nl:true},
+      {name:'EvidenceCount',type:'INT'},
+      {name:'RecordMovedAt',type:'DATETIME2'},
+    ]
+  },
+
+  StaffCertificate: {
+    x:920, y:190, cat:'child', desc:'Certification files for staff',
+    disCols:[
+      {name:'Id',     type:'INT', pk:true},
+      {name:'StaffId',type:'INT', fk:true, ref:'Staff.Id'},
+    ],
+    cols:[
+      {name:'Id',          type:'INT',           pk:true},
+      {name:'StaffId',     type:'INT',           fk:true, ref:'Staff.Id'},
+      {name:'FileName',    type:'NVARCHAR(300)'},
+      {name:'FilePath',    type:'NVARCHAR(500)'},
+      {name:'OriginalName',type:'NVARCHAR(300)'},
+      {name:'FileType',    type:'NVARCHAR(20)'},
+      {name:'FileSize',    type:'BIGINT'},
+      {name:'UploadedAt',  type:'DATETIME2'},
+      {name:'UploadedBy',  type:'NVARCHAR(256)',  nl:true},
+    ]
+  },
+
+  WantedCriminal: {
+    x:710, y:390, cat:'alone', desc:'Fugitive / wanted persons registry',
+    disCols:[
+      {name:'Id', type:'INT', pk:true},
+    ],
+    cols:[
+      {name:'Id',                type:'INT',          pk:true},
+      {name:'CriminalName',      type:'NVARCHAR(150)'},
+      {name:'NationalId',        type:'NVARCHAR(30)', idx:true},
+      {name:'CrimeDescription',  type:'NVARCHAR(500)'},
+      {name:'LastKnownLocation', type:'NVARCHAR(300)'},
+      {name:'RiskLevel',         type:'NVARCHAR',     note:'Low|Medium|High|Critical'},
+      {name:'PhotoPath',         type:'NVARCHAR',     nl:true},
+      {name:'DateAdded',         type:'DATETIME2'},
+      {name:'IsActive',          type:'BIT'},
+    ]
+  },
+
+  Activity: {
+    x:920, y:390, cat:'alone', desc:'Audit log — all user actions',
+    disCols:[
+      {name:'Id', type:'INT', pk:true},
+    ],
+    cols:[
+      {name:'Id',           type:'INT',     pk:true},
+      {name:'Description',  type:'NVARCHAR(200)'},
+      {name:'ActivityType', type:'NVARCHAR'},
+      {name:'UserId',       type:'NVARCHAR',nl:true, note:'soft ref — no FK'},
+      {name:'UserName',     type:'NVARCHAR',nl:true},
+      {name:'PrisonId',     type:'INT',     nl:true, note:'soft ref — no FK'},
+      {name:'CreatedAt',    type:'DATETIME2'},
+    ]
+  },
+};
+
+const RELS = [
+  {from:'Prisoners',        fc:'PrisonId',          to:'Prisons', tc:'Id', del:'Restrict', note:'Many prisoners → one prison'},
+  {from:'Staff',            fc:'PrisonId',          to:'Prisons', tc:'Id', del:'Restrict', note:'Many staff → one prison'},
+  {from:'ApplicationUser',  fc:'AssignedPrisonId',  to:'Prisons', tc:'Id', del:'SetNull',  note:'Users optionally assigned to prison', opt:true},
+  {from:'Alert',            fc:'PrisonId',          to:'Prisons', tc:'Id', del:'SetNull',  note:'Alert scoped to prison (optional)', opt:true},
+  {from:'CaseReport',       fc:'PrisonId',          to:'Prisons', tc:'Id', del:'SetNull',  note:'Case scoped to prison (optional)', opt:true},
+  {from:'PrisonerTransfer', fc:'PrisonerId',        to:'Prisoners',tc:'Id',del:'Restrict', note:'Transfer record for one prisoner'},
+  {from:'PrisonerTransfer', fc:'SourcePrisonId',    to:'Prisons', tc:'Id', del:'Restrict', note:'Transfer origin'},
+  {from:'PrisonerTransfer', fc:'DestinationPrisonId',to:'Prisons',tc:'Id', del:'Restrict', note:'Transfer destination'},
+  {from:'PrisonerEvidence', fc:'PrisonerId',        to:'Prisoners',tc:'Id',del:'Cascade',  note:'Evidence files belong to prisoner'},
+  {from:'StaffCertificate', fc:'StaffId',           to:'Staff',   tc:'Id', del:'Cascade',  note:'Certificates belong to staff member'},
+];
+
+// ── SVG RENDERER ─────────────────────────────────────────────────────────────
+
+const NS = 'http://www.w3.org/2000/svg';
+const RH = 22, HH = 34, TW = 210;
+
+function svgEl(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  if (attrs) for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v);
+  return e;
+}
+function cssVar(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+function tableHeight(t) { return HH + t.disCols.length * RH; }
+
+function colMidY(tName, colName) {
+  const t = DB[tName];
+  const i = t.disCols.findIndex(c => c.name === colName);
+  return t.y + HH + (i < 0 ? 0 : i) * RH + RH / 2;
+}
+
+function renderERD() {
+  const svg = document.getElementById('erd');
+  svg.innerHTML = '';
+
+  const bg   = cssVar('--surface');
+  const surf = cssVar('--surface2');
+  const bord = cssVar('--border');
+  const txt  = cssVar('--text');
+  const mut  = cssVar('--muted');
+  const pk   = cssVar('--pk');
+  const fk   = cssVar('--fk');
+  const casc = cssVar('--cascade');
+  const snul = cssVar('--setnull');
+  const rest = cssVar('--restrict');
+
+  // Compute dimensions
+  let W = 0, H = 0;
+  for (const [n,t] of Object.entries(DB)) {
+    W = Math.max(W, t.x + TW + 24);
+    H = Math.max(H, t.y + tableHeight(t) + 24);
+  }
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  // Background
+  svg.appendChild(svgEl('rect', {x:0,y:0,width:W,height:H,fill:bg}));
+
+  // Subtle dot grid
+  const gridId = 'g'+Math.random().toString(36).slice(2);
+  const defs = svgEl('defs');
+  const pat = svgEl('pattern',{id:gridId,width:20,height:20,patternUnits:'userSpaceOnUse'});
+  const dot = svgEl('circle',{cx:0.5,cy:0.5,r:0.5,fill:bord,opacity:'0.6'});
+  pat.appendChild(dot);
+  defs.appendChild(pat);
+  svg.appendChild(defs);
+  svg.appendChild(svgEl('rect',{x:0,y:0,width:W,height:H,fill:`url(#${gridId})`}));
+
+  // ── Relationship lines (drawn below tables)
+  const linesG = svgEl('g');
+  svg.appendChild(linesG);
+
+  for (const r of RELS) {
+    const ft = DB[r.from], tt = DB[r.to];
+    if (!ft || !tt) continue;
+
+    const fy = colMidY(r.from, r.fc);
+    const ty = colMidY(r.to, r.tc);
+
+    // Decide which sides to connect
+    const fcx = ft.x + TW / 2;
+    const tcx = tt.x + TW / 2;
+    const toRight = fcx < tcx;
+    const fx = toRight ? ft.x + TW : ft.x;
+    const tx = toRight ? tt.x : tt.x + TW;
+
+    const color = r.del==='Cascade' ? casc : r.del==='SetNull' ? snul : rest;
+    const dash  = r.del==='Cascade' ? 'none' : r.del==='SetNull' ? '7,4' : '3,4';
+
+    // Elbow routing: go out horizontally then across, then in
+    const bend = 18;
+    const fx2 = toRight ? fx + bend : fx - bend;
+    const tx2 = toRight ? tx - bend : tx + bend;
+    const midX = (fx2 + tx2) / 2;
+
+    const d = `M${fx},${fy} H${fx2} C${midX},${fy} ${midX},${ty} ${tx2},${ty} H${tx}`;
+    linesG.appendChild(svgEl('path',{d,fill:'none',stroke:color,'stroke-width':'1.5','stroke-dasharray':dash,opacity:'0.7'}));
+
+    // Arrowhead at target
+    const dir = toRight ? -1 : 1;
+    const ax = tx + dir * 6;
+    linesG.appendChild(svgEl('path',{
+      d:`M${tx},${ty} L${ax},${ty-4} L${ax},${ty+4} Z`,
+      fill:color,opacity:'0.7'
+    }));
+
+    // Label
+    const lx = (fx + tx) / 2;
+    const ly = (fy + ty) / 2;
+    const lbl = r.del==='Cascade' ? 'CASCADE' : r.del==='SetNull' ? 'SET NULL' : 'RESTRICT';
+    linesG.appendChild(svgEl('rect',{x:lx-22,y:ly-7,width:44,height:12,rx:3,fill:bg,opacity:'0.88'}));
+    const lt = svgEl('text',{x:lx,y:ly+1,'text-anchor':'middle','dominant-baseline':'middle',
+      'font-family':"'JetBrains Mono',monospace",'font-size':'6.5',fill:color,'font-weight':'500'});
+    lt.textContent = lbl;
+    linesG.appendChild(lt);
+  }
+
+  // ── Tables
+  for (const [name, t] of Object.entries(DB)) {
+    const th = tableHeight(t);
+    const color = CAT_COLOR[t.cat] || '#475569';
+    const g = svgEl('g');
+
+    // Drop shadow
+    g.appendChild(svgEl('rect',{x:t.x+2,y:t.y+2,width:TW,height:th,rx:7,fill:'#000',opacity:'0.15'}));
+    // Card bg
+    g.appendChild(svgEl('rect',{x:t.x,y:t.y,width:TW,height:th,rx:7,fill:surf,stroke:bord,'stroke-width':'1'}));
+    // Header
+    g.appendChild(svgEl('rect',{x:t.x,y:t.y,width:TW,height:HH,rx:7,fill:color}));
+    g.appendChild(svgEl('rect',{x:t.x,y:t.y+HH-7,width:TW,height:7,fill:color}));
+
+    // Table name
+    const tnEl = svgEl('text',{x:t.x+10,y:t.y+HH/2,'dominant-baseline':'middle',
+      'font-family':"'Barlow Condensed',sans-serif",'font-weight':'700','font-size':'11','letter-spacing':'0.3',fill:'#fff'});
+    tnEl.textContent = name;
+    g.appendChild(tnEl);
+
+    // Column count
+    const cn = svgEl('text',{x:t.x+TW-10,y:t.y+HH/2,'dominant-baseline':'middle','text-anchor':'end',
+      'font-family':"'JetBrains Mono',monospace",'font-size':'7.5',fill:'rgba(255,255,255,0.55)'});
+    cn.textContent = `${DB[name].cols.length}c`;
+    g.appendChild(cn);
+
+    // Divider
+    g.appendChild(svgEl('line',{x1:t.x,y1:t.y+HH,x2:t.x+TW,y2:t.y+HH,stroke:bord,'stroke-width':'1'}));
+
+    // Column rows
+    t.disCols.forEach((col, i) => {
+      const ry = t.y + HH + i * RH;
+      const my = ry + RH / 2;
+
+      if (i % 2 === 0) g.appendChild(svgEl('rect',{x:t.x+1,y:ry,width:TW-2,height:RH,fill:'rgba(255,255,255,0.025)'}));
+
+      let tx2 = t.x + 8;
+
+      // PK tag
+      if (col.pk) {
+        g.appendChild(svgEl('rect',{x:tx2,y:my-5,width:16,height:10,rx:2,fill:'rgba(16,185,129,0.2)'}));
+        const pt = svgEl('text',{x:tx2+8,y:my,'text-anchor':'middle','dominant-baseline':'middle',
+          'font-family':"'JetBrains Mono',monospace",'font-size':'6.5',fill:pk,'font-weight':'600'});
+        pt.textContent='PK'; g.appendChild(pt); tx2+=19;
+      }
+      // FK tag
+      if (col.fk) {
+        g.appendChild(svgEl('rect',{x:tx2,y:my-5,width:16,height:10,rx:2,fill:'rgba(245,158,11,0.2)'}));
+        const ft2 = svgEl('text',{x:tx2+8,y:my,'text-anchor':'middle','dominant-baseline':'middle',
+          'font-family':"'JetBrains Mono',monospace",'font-size':'6.5',fill:fk,'font-weight':'600'});
+        ft2.textContent='FK'; g.appendChild(ft2); tx2+=19;
+      }
+      if (col.nl) {
+        const nt = svgEl('text',{x:tx2,y:my,'dominant-baseline':'middle',
+          'font-family':"'JetBrains Mono',monospace",'font-size':'7',fill:mut});
+        nt.textContent='?'; g.appendChild(nt); tx2+=8;
+      }
+
+      // Column name
+      const ne = svgEl('text',{x:tx2+2,y:my,'dominant-baseline':'middle',
+        'font-family':"'JetBrains Mono',monospace",'font-size':col.pk?'8':'7.5',
+        'font-weight':col.pk?'500':'400',
+        fill:col.pk?'#fff':col.fk?fk:txt});
+      ne.textContent=col.name; g.appendChild(ne);
+
+      // Type right
+      const te = svgEl('text',{x:t.x+TW-8,y:my,'text-anchor':'end','dominant-baseline':'middle',
+        'font-family':"'JetBrains Mono',monospace",'font-size':'7',fill:mut,opacity:col.nl?'0.55':'0.8'});
+      let ts = col.type.replace('NVARCHAR','NVC').replace('DATETIME2','DT2');
+      if(ts.length>10) ts=ts.slice(0,10);
+      te.textContent=ts+(col.nl?'?':''); g.appendChild(te);
+
+      // Row divider
+      if (i < t.disCols.length-1) g.appendChild(svgEl('line',{x1:t.x+1,y1:ry+RH,x2:t.x+TW-1,y2:ry+RH,stroke:bord,'stroke-width':'0.5',opacity:'0.4'}));
+    });
+
+    svg.appendChild(g);
+  }
+}
+
+// ── TABLE CARDS ──────────────────────────────────────────────────────────────
+
+function renderCards() {
+  const container = document.getElementById('tgrid');
+  container.innerHTML = '';
+  for (const [name, t] of Object.entries(DB)) {
+    const color = CAT_COLOR[t.cat]||'#475569';
+    const card = document.createElement('div');
+    card.className = 'tcard';
+    const fkRels = RELS.filter(r => r.from===name);
+    card.innerHTML = `
+      <div class="tcard-hdr" style="border-left:4px solid ${color}">
+        <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
+        <div class="tcard-name">${name}</div>
+        <div class="tcard-desc">${t.desc}</div>
+      </div>
+      <div class="tcard-body">
+        <table>
+          <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+          <tbody>${t.cols.map(col=>{
+            const badges=[];
+            if(col.pk) badges.push(`<span class="badge bpk">PK</span>`);
+            if(col.fk) badges.push(`<span class="badge bfk">FK → ${col.ref}</span>`);
+            if(col.uq) badges.push(`<span class="badge buq">UNIQUE</span>`);
+            if(col.idx) badges.push(`<span class="badge bidx">INDEX</span>`);
+            if(col.nl) badges.push(`<span class="badge bnl">NULL</span>`);
+            return `<tr>
+              <td><span class="cn" style="${col.pk?'font-weight:600':''}${col.fk?';color:var(--fk)':''}">${col.name}</span></td>
+              <td><span class="ct">${col.type}</span></td>
+              <td>${badges.join('')}</td>
+              <td><span class="col-note">${col.note||''}</span></td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>`;
+    container.appendChild(card);
+  }
+}
+
+// ── RELATIONSHIP INDEX ────────────────────────────────────────────────────────
+
+function renderRelIndex() {
+  const tbody = document.querySelector('#rtable tbody');
+  tbody.innerHTML = '';
+  for (const r of RELS) {
+    const cls = r.del==='Cascade'?'rc':r.del==='SetNull'?'rs':'rr';
+    const icon = r.del==='Cascade'?'↓ CASCADE':r.del==='SetNull'?'∅ SET NULL':'⚑ RESTRICT';
+    tbody.innerHTML+=`<tr>
+      <td><span class="tn">${r.from}</span></td>
+      <td><span class="tn" style="color:var(--fk)">${r.fc}</span></td>
+      <td><span style="color:var(--muted);font-size:.8rem">→</span></td>
+      <td><span class="tn">${r.to}</span></td>
+      <td><span class="tn" style="color:var(--pk)">${r.tc}</span></td>
+      <td><span class="rb ${cls}">${icon}</span></td>
+      <td><span style="color:var(--muted);font-size:.72rem">${r.opt?'0..1 : N':'1 : N'}</span></td>
+      <td><span style="color:var(--muted);font-size:.72rem">${r.note}</span></td>
+    </tr>`;
+  }
+}
+
+// ── THEME ────────────────────────────────────────────────────────────────────
+
+function toggleTheme() {
+  const r = document.documentElement;
+  r.setAttribute('data-theme', r.getAttribute('data-theme')==='light'?'dark':'light');
+  setTimeout(renderERD, 40);
+}
+window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', ()=>setTimeout(renderERD,40));
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', ()=>{ renderERD(); renderCards(); renderRelIndex(); });
+</script>

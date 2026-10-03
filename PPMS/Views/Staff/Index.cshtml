@@ -10,7 +10,9 @@
 <div class="card mb-4"><div class="card-body py-3">
     <form method="get" class="row g-2 align-items-end">
         <div class="col-md-4"><div class="input-group input-group-sm"><span class="input-group-text"><i class="fas fa-search"></i></span><input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by name, staff ID or email..." /></div></div>
+        @if (ViewBag.Prisons != null) {
         <div class="col-md-3">@Html.DropDownList("prisonId", ViewBag.Prisons as Microsoft.AspNetCore.Mvc.Rendering.SelectList, "All Prisons", new{@class="form-select form-select-sm"})</div>
+        }
         <div class="col-md-3">
             <select name="role" class="form-select form-select-sm">
                 <option value="">All Roles</option>

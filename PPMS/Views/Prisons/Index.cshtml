@@ -5,7 +5,7 @@
         <h2><img src="/images/spf-logo.png" style="width:34px;height:34px;object-fit:contain;vertical-align:middle;" class="me-2" />Prison Management</h2>
         <p class="text-muted mb-0" style="font-size:0.8rem;">Manage all correctional facilities across Puntland</p>
     </div>
-    @if (User.IsInRole("SuperAdmin") || User.IsInRole("PrisonAdministrator"))
+    @if (User.IsInRole("SuperAdmin"))
     { <a href="/Prisons/Create" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Add Prison</a> }
 </div>
 <div class="card mb-4"><div class="card-body py-3">
@@ -23,7 +23,7 @@
         <img src="/images/spf-logo.png" style="width:64px;height:64px;object-fit:contain;opacity:0.35;" class="mb-3" />
         <h5 class="text-muted">No prisons found</h5>
         <p class="text-muted">@(ViewBag.Search != null ? "Try adjusting your search." : "No facilities registered yet.")</p>
-        @if (User.IsInRole("SuperAdmin") || User.IsInRole("PrisonAdministrator"))
+        @if (User.IsInRole("SuperAdmin"))
         { <a href="/Prisons/Create" class="btn btn-primary mt-2"><i class="fas fa-plus me-1"></i>Add Prison</a> }
     </div></div>
 }

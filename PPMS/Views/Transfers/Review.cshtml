@@ -1,0 +1,67 @@
+@model PPMS.Models.PrisonerTransfer
+@{ ViewData["Title"] = "Review Transfer"; }
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2><i class="fas fa-clipboard-check me-2" style="color:#d97706;"></i>Review Transfer #@Model.Id</h2>
+    <a href="/Transfers/Details/@Model.Id" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Back</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card mb-3">
+            <div class="card-header">Transfer Summary</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Prisoner</dt>
+                    <dd class="col-sm-8 fw-bold">@Model.Prisoner?.FullName (@Model.Prisoner?.PrisonerId)</dd>
+                    <dt class="col-sm-4">From Prison</dt>
+                    <dd class="col-sm-8">@Model.SourcePrison?.PrisonName</dd>
+                    <dt class="col-sm-4">To Prison</dt>
+                    <dd class="col-sm-8">@Model.DestinationPrison?.PrisonName</dd>
+                    <dt class="col-sm-4">Reason</dt>
+                    <dd class="col-sm-8">@Model.TransferReason</dd>
+                    @if (!string.IsNullOrEmpty(Model.TransferNotes))
+                    {
+                        <dt class="col-sm-4">Notes</dt>
+                        <dd class="col-sm-8">@Model.TransferNotes</dd>
+                    }
+                    <dt class="col-sm-4">Requested By</dt>
+                    <dd class="col-sm-8">@Model.RequestedBy at @Model.RequestedAt.ToString("MMM dd, yyyy HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card mb-3 border-success">
+            <div class="card-header" style="background:#16a34a;color:#fff;">Approve Transfer</div>
+            <div class="card-body">
+                <form asp-action="Approve" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Additional Notes (optional)</label>
+                        <textarea name="notes" class="form-control" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100"
+                            onclick="return confirm('Approve this transfer request?')">
+                        <i class="fas fa-check me-1"></i>Approve Transfer
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="card border-danger">
+            <div class="card-header" style="background:#dc2626;color:#fff;">Reject Transfer</div>
+            <div class="card-body">
+                <form asp-action="Reject" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rejection Reason *</label>
+                        <textarea name="rejectionReason" class="form-control" rows="2" required placeholder="Explain why this transfer is rejected..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger w-100"
+                            onclick="return confirm('Reject this transfer request?')">
+                        <i class="fas fa-times me-1"></i>Reject Transfer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

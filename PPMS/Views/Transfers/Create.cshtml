@@ -1,0 +1,48 @@
+@model PPMS.Models.PrisonerTransfer
+@{ ViewData["Title"] = "Request Transfer"; }
+<div class="page-header"><h2><i class="fas fa-exchange-alt me-2" style="color:#1565c0;"></i>Request Prisoner Transfer</h2></div>
+<div class="card" style="max-width:700px;">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="All" class="alert alert-danger"></div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Prisoner ID (numeric) *</label>
+                    <input asp-for="PrisonerId" type="number" class="form-control" placeholder="Enter internal prisoner ID" />
+                    <span asp-validation-for="PrisonerId" class="text-danger small"></span>
+                    <small class="text-muted">Use the numeric DB ID (visible in prisoner record URL).</small>
+                </div>
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Source Prison *</label>
+                        <select asp-for="SourcePrisonId" asp-items="ViewBag.Prisons" class="form-select">
+                            <option value="">— Select —</option>
+                        </select>
+                    </div>
+                }
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Destination Prison *</label>
+                    <select asp-for="DestinationPrisonId" asp-items="ViewBag.Prisons" class="form-select">
+                        <option value="">— Select —</option>
+                    </select>
+                    <span asp-validation-for="DestinationPrisonId" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Transfer Reason *</label>
+                    <textarea asp-for="TransferReason" class="form-control" rows="3" placeholder="Explain the reason for this transfer..."></textarea>
+                    <span asp-validation-for="TransferReason" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Additional Notes</label>
+                    <textarea asp-for="TransferNotes" class="form-control" rows="2" placeholder="Optional additional notes..."></textarea>
+                </div>
+                <div class="col-12 d-flex gap-2 mt-2">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i>Submit Request</button>
+                    <a href="/Transfers" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

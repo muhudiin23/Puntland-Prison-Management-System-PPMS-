@@ -1,0 +1,105 @@
+@model PPMS.Helpers.PaginatedList<PPMS.Models.PrisonerTransfer>
+@{ ViewData["Title"] = "Prisoner Transfers"; }
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2><i class="fas fa-exchange-alt me-2" style="color:#1565c0;"></i>Prisoner Transfers</h2>
+    @if (User.IsInRole("SuperAdmin") || User.IsInRole("PrisonAdministrator"))
+    {
+        <a href="/Transfers/Create" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Request Transfer</a>
+    }
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card" style="border-left-color:#f59e0b;">
+            <div class="val">@ViewBag.PendingCount</div>
+            <div class="lbl">Pending Transfers</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card" style="border-left-color:#1565c0;">
+            <div class="val">@ViewBag.TotalCount</div>
+            <div class="lbl">Total Records</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-list me-2"></i>Transfer Records</span>
+        <div class="d-flex gap-2">
+            @foreach (var s in new[] { "Pending", "Approved", "Completed", "Rejected" })
+            {
+                <a href="/Transfers?status=@s" class="btn btn-sm @(ViewBag.Status == s ? "btn-primary" : "btn-outline-secondary")">@s</a>
+            }
+            @if (!string.IsNullOrEmpty(ViewBag.Status?.ToString()))
+            {
+                <a href="/Transfers" class="btn btn-sm btn-outline-secondary">All</a>
+            }
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead style="background:var(--navy);color:#fff;">
+                    <tr>
+                        <th>#</th>
+                        <th>Prisoner</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Status</th>
+                        <th>Requested</th>
+                        <th>Requested By</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model)
+                    {
+                        <tr>
+                            <td>@t.Id</td>
+                            <td>@t.Prisoner?.FullName</td>
+                            <td>@t.SourcePrison?.PrisonName</td>
+                            <td>@t.DestinationPrison?.PrisonName</td>
+                            <td>
+                                @{
+                                    var badgeColor = t.Status switch
+                                    {
+                                        "Pending" => "#f59e0b",
+                                        "Approved" => "#2563eb",
+                                        "Completed" => "#16a34a",
+                                        "Rejected" => "#dc2626",
+                                        _ => "#64748b"
+                                    };
+                                }
+                                <span class="badge" style="background:@badgeColor;">@t.Status</span>
+                            </td>
+                            <td>@t.RequestedAt.ToString("MMM dd, yyyy")</td>
+                            <td>@t.RequestedBy</td>
+                            <td>
+                                <a href="/Transfers/Details/@t.Id" class="btn btn-sm btn-outline-primary">View</a>
+                                @if (t.Status == "Pending" && (User.IsInRole("SuperAdmin") || User.IsInRole("PrisonAdministrator")))
+                                {
+                                    <a href="/Transfers/Review/@t.Id" class="btn btn-sm btn-outline-warning ms-1">Review</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="8" class="text-center text-muted py-4">No transfer records found.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <small class="text-muted">Page @ViewBag.PageIndex of @ViewBag.TotalPages</small>
+            <div class="d-flex gap-1">
+                @if (ViewBag.PageIndex > 1) { <a href="?status=@ViewBag.Status&page=@(ViewBag.PageIndex - 1)" class="btn btn-sm btn-outline-secondary">Prev</a> }
+                @if (ViewBag.PageIndex < ViewBag.TotalPages) { <a href="?status=@ViewBag.Status&page=@(ViewBag.PageIndex + 1)" class="btn btn-sm btn-outline-secondary">Next</a> }
+            </div>
+        </div>
+    }
+</div>

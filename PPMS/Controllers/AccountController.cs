@@ -1,8 +1,11 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PPMS.Data;
+using PPMS.Helpers;
 using PPMS.Models;
 using PPMS.Models.ViewModels;
 
@@ -41,17 +44,28 @@ namespace PPMS.Controllers
             NoCacheHeaders();
             if (!ModelState.IsValid) return View(model);
 
+            // Support login by username OR email address
             var user = await _userManager.FindByNameAsync(model.Username);
+            if (user == null && model.Username.Contains('@'))
+                user = await _userManager.Users
+                    .FirstOrDefaultAsync(u => u.NormalizedEmail == model.Username.ToUpperInvariant());
+
             if (user == null || !user.IsActive)
             {
                 ModelState.AddModelError(string.Empty, "Invalid credentials or account disabled.");
                 return View(model);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, lockoutOnFailure: true);
+            var passwordResult = await _signInManager.CheckPasswordSignInAsync(user, model.Password, lockoutOnFailure: true);
 
-            if (result.Succeeded)
+            if (passwordResult.Succeeded)
             {
+                var extraClaims = new List<Claim>
+                {
+                    new Claim(PrisonAccessHelper.PrisonIdClaim, user.AssignedPrisonId?.ToString() ?? "")
+                };
+                await _signInManager.SignInWithClaimsAsync(user, model.RememberMe, extraClaims);
+
                 user.LastLoginAt = DateTime.Now;
                 user.LastLoginIp = HttpContext.Connection.RemoteIpAddress?.ToString();
                 user.LoginCount++;
@@ -75,7 +89,7 @@ namespace PPMS.Controllers
                 return RedirectToLocal(returnUrl);
             }
 
-            if (result.IsLockedOut)
+            if (passwordResult.IsLockedOut)
             {
                 ModelState.AddModelError(string.Empty, "Account locked. Try again in 15 minutes.");
                 return View(model);

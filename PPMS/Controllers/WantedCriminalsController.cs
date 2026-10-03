@@ -109,15 +109,23 @@ namespace PPMS.Controllers
         {
             var c = await _db.WantedCriminals.FindAsync(id);
             if (c == null) return NotFound();
-            if (!string.IsNullOrEmpty(c.PhotoPath))
+            try
             {
-                var path = Path.Combine(_env.WebRootPath, c.PhotoPath.TrimStart('/'));
-                if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+                if (!string.IsNullOrEmpty(c.PhotoPath))
+                {
+                    var path = Path.Combine(_env.WebRootPath, c.PhotoPath.TrimStart('/'));
+                    if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+                }
+                _db.WantedCriminals.Remove(c);
+                await _db.SaveChangesAsync();
+                await LogActivity($"Wanted criminal '{c.CriminalName}' removed.");
+                TempData["Success"] = "Record deleted.";
             }
-            _db.WantedCriminals.Remove(c);
-            await _db.SaveChangesAsync();
-            await LogActivity($"Wanted criminal '{c.CriminalName}' removed.");
-            TempData["Success"] = "Record deleted.";
+            catch
+            {
+                TempData["Error"] = "An error occurred while deleting the record. Please try again.";
+                return RedirectToAction(nameof(Delete), new { id });
+            }
             return RedirectToAction(nameof(Index));
         }
 

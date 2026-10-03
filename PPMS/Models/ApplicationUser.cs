@@ -7,6 +7,8 @@ namespace PPMS.Models
         public string FullName { get; set; } = string.Empty;
         public string Role { get; set; } = "StaffUser";
         public string? PrisonAssigned { get; set; }
+        public int? AssignedPrisonId { get; set; }
+        public Prison? AssignedPrison { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public string? ProfilePhotoPath { get; set; }

@@ -13,5 +13,8 @@ namespace PPMS.Models.ViewModels
         public int FormerPrisonersCount { get; set; }
         public int TotalCaseReports { get; set; }
         public int OpenCaseReports { get; set; }
+        public int PendingTransfers { get; set; }
+        public string? AssignedPrisonName { get; set; }
+        public bool IsSuperAdmin { get; set; }
     }
 }

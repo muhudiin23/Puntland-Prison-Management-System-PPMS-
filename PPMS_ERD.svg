@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 990 665" width="990" height="665" font-family="Segoe UI,Arial,sans-serif">
+<defs>
+  <filter id="sh"><feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="#94a3b8" flood-opacity="0.22"/></filter>
+  <marker id="arr" viewBox="0 0 8 5" refX="8" refY="2.5" markerWidth="7" markerHeight="5" orient="auto">
+    <polygon points="0,0 8,2.5 0,5" fill="#1565c0"/>
+  </marker>
+  <marker id="tick" viewBox="-1 -4 2 8" refX="0" refY="0" markerWidth="4" markerHeight="10" orient="auto">
+    <line x1="0" y1="-4" x2="0" y2="4" stroke="#1565c0" stroke-width="2"/>
+  </marker>
+</defs>
+
+<rect width="990" height="665" fill="#f8fafc"/>
+<rect width="990" height="46" fill="#0d1b2a"/>
+<text x="495" y="20" text-anchor="middle" font-size="12" font-weight="bold" fill="white" letter-spacing=".4">PUNTLAND PRISON MANAGEMENT SYSTEM (PPMS)</text>
+<text x="495" y="37" text-anchor="middle" font-size="8.5" fill="#94a3b8">Entity Relationship Diagram  -  Chapter 4 - Database Design  -  13 Tables  -  6 FK Relationships</text>
+
+<text x="120" y="57" text-anchor="middle" font-size="7.5" fill="#64748b" font-style="italic">Prisoner Records</text>
+<text x="370" y="57" text-anchor="middle" font-size="7.5" fill="#64748b" font-style="italic">Prison Administration</text>
+<text x="620" y="57" text-anchor="middle" font-size="7.5" fill="#64748b" font-style="italic">Case and Security</text>
+<text x="870" y="57" text-anchor="middle" font-size="7.5" fill="#64748b" font-style="italic">Identity (ASP.NET)</text>
+
+<!-- RELATIONSHIP LINES -->
+<path d="M 265,83 L 242,83 L 242,195 L 225,195" stroke="#1565c0" stroke-width="1.5" fill="none" marker-start="url(#tick)" marker-end="url(#arr)"/>
+<text x="246" y="78" font-size="8" font-weight="bold" fill="#1565c0">1</text>
+<text x="227" y="205" font-size="8" font-weight="bold" fill="#1565c0">M</text>
+<text x="246" y="143" font-size="7" fill="#64748b" transform="rotate(-90,246,143)">RESTRICT</text>
+
+<path d="M 475,83 L 494,83 L 494,308 L 475,308" stroke="#1565c0" stroke-width="1.5" fill="none" marker-start="url(#tick)" marker-end="url(#arr)"/>
+<text x="496" y="78" font-size="8" font-weight="bold" fill="#1565c0">1</text>
+<text x="477" y="319" font-size="8" font-weight="bold" fill="#1565c0">M</text>
+<text x="495" y="200" font-size="7" fill="#64748b" transform="rotate(-90,495,200)">RESTRICT</text>
+
+<path d="M 475,87 L 500,87 L 500,147 L 515,147" stroke="#1565c0" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-start="url(#tick)" marker-end="url(#arr)"/>
+<text x="501" y="80" font-size="8" font-weight="bold" fill="#1565c0">1</text>
+<text x="517" y="143" font-size="8" font-weight="bold" fill="#1565c0">M</text>
+<text x="501" y="120" font-size="7" fill="#64748b" transform="rotate(-90,501,120)">SET NULL</text>
+
+<path d="M 15,83 L 4,83 L 4,276 L 15,276" stroke="#1565c0" stroke-width="1.5" fill="none" marker-start="url(#tick)" marker-end="url(#arr)"/>
+<text x="5" y="78" font-size="8" font-weight="bold" fill="#1565c0">1</text>
+<text x="5" y="287" font-size="8" font-weight="bold" fill="#1565c0">M</text>
+<text x="5" y="183" font-size="7" fill="#64748b" transform="rotate(-90,5,183)">CASCADE</text>
+
+<path d="M 265,244 L 248,244 L 248,421 L 265,421" stroke="#1565c0" stroke-width="1.5" fill="none" marker-start="url(#tick)" marker-end="url(#arr)"/>
+<text x="250" y="239" font-size="8" font-weight="bold" fill="#1565c0">1</text>
+<text x="250" y="432" font-size="8" font-weight="bold" fill="#1565c0">M</text>
+<text x="250" y="337" font-size="7" fill="#64748b" transform="rotate(-90,250,337)">CASCADE</text>
+
+<path d="M 975,83 L 986,83 L 986,244 L 975,244" stroke="#1565c0" stroke-width="1.5" fill="none" marker-start="url(#tick)" marker-end="url(#arr)"/>
+<text x="976" y="78" font-size="8" font-weight="bold" fill="#1565c0">1</text>
+<text x="977" y="255" font-size="8" font-weight="bold" fill="#1565c0">M</text>
+
+<path d="M 765,325 L 750,325 L 750,260 L 765,260" stroke="#1565c0" stroke-width="1.5" fill="none" marker-start="url(#tick)" marker-end="url(#arr)"/>
+<text x="733" y="328" font-size="8" font-weight="bold" fill="#1565c0">1</text>
+<text x="733" y="257" font-size="8" font-weight="bold" fill="#1565c0">M</text>
+
+<!-- PRISONERS (15,62) -->
+<g filter="url(#sh)">
+  <rect x="15" y="62" width="210" height="24" fill="#0a3d62" rx="3"/>
+  <rect x="15" y="75" width="210" height="13" fill="#0a3d62"/>
+  <rect x="15" y="86" width="210" height="128" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="120" y="78" text-anchor="middle" font-size="9.5" font-weight="bold" fill="white">PRISONERS</text>
+  <rect x="15" y="86" width="210" height="16" fill="#dbeafe"/>
+  <text x="19" y="97.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="42" y="97.5" font-size="8" font-weight="bold" fill="#111">Id</text>
+  <text x="150" y="97.5" font-size="7" fill="#6b7280">int</text>
+  <line x1="15" y1="102" x2="225" y2="102" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="102" width="210" height="16" fill="#fef9c3"/>
+  <text x="19" y="113.5" font-size="6" font-weight="bold" fill="#92400e">UQ</text>
+  <text x="42" y="113.5" font-size="8" fill="#111">PrisonerId</text>
+  <text x="150" y="113.5" font-size="7" fill="#6b7280">vc(50)</text>
+  <line x1="15" y1="118" x2="225" y2="118" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="118" width="210" height="16" fill="white"/>
+  <text x="42" y="129.5" font-size="8" fill="#111">FullName</text>
+  <text x="150" y="129.5" font-size="7" fill="#6b7280">vc(150)</text>
+  <line x1="15" y1="134" x2="225" y2="134" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="134" width="210" height="16" fill="#f9fafb"/>
+  <text x="42" y="145.5" font-size="8" fill="#111">Gender</text>
+  <text x="150" y="145.5" font-size="7" fill="#6b7280">vc(10)</text>
+  <line x1="15" y1="150" x2="225" y2="150" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="150" width="210" height="16" fill="white"/>
+  <text x="42" y="161.5" font-size="8" fill="#111">CrimeType</text>
+  <text x="150" y="161.5" font-size="7" fill="#6b7280">vc(200)</text>
+  <line x1="15" y1="166" x2="225" y2="166" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="166" width="210" height="16" fill="#f9fafb"/>
+  <text x="42" y="177.5" font-size="8" fill="#111">CriminalStatus</text>
+  <text x="150" y="177.5" font-size="7" fill="#6b7280">vc(50)</text>
+  <line x1="15" y1="182" x2="225" y2="182" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="182" width="210" height="16" fill="white"/>
+  <text x="42" y="193.5" font-size="8" fill="#111">ReleaseDate</text>
+  <text x="150" y="193.5" font-size="7" fill="#6b7280">datetime</text>
+  <line x1="15" y1="198" x2="225" y2="198" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="198" width="210" height="16" fill="#dcfce7"/>
+  <text x="19" y="209.5" font-size="6" font-weight="bold" fill="#166534">FK</text>
+  <text x="42" y="209.5" font-size="8" font-weight="bold" fill="#166534">PrisonId</text>
+  <text x="150" y="209.5" font-size="7" fill="#6b7280">int -&gt; Prisons</text>
+  <rect x="15" y="62" width="210" height="152" fill="none" stroke="#0a3d62" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- PRISONS (265,62) -->
+<g filter="url(#sh)">
+  <rect x="265" y="62" width="210" height="24" fill="#1565c0" rx="3"/>
+  <rect x="265" y="75" width="210" height="13" fill="#1565c0"/>
+  <rect x="265" y="86" width="210" height="112" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="370" y="78" text-anchor="middle" font-size="9.5" font-weight="bold" fill="white">PRISONS</text>
+  <rect x="265" y="86" width="210" height="16" fill="#dbeafe"/>
+  <text x="269" y="97.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="292" y="97.5" font-size="8" font-weight="bold" fill="#111">Id</text>
+  <text x="400" y="97.5" font-size="7" fill="#6b7280">int</text>
+  <line x1="265" y1="102" x2="475" y2="102" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="102" width="210" height="16" fill="#fef9c3"/>
+  <text x="269" y="113.5" font-size="6" font-weight="bold" fill="#92400e">UQ</text>
+  <text x="292" y="113.5" font-size="8" fill="#111">PrisonName</text>
+  <text x="400" y="113.5" font-size="7" fill="#6b7280">vc(150)</text>
+  <line x1="265" y1="118" x2="475" y2="118" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="118" width="210" height="16" fill="white"/>
+  <text x="292" y="129.5" font-size="8" fill="#111">City</text>
+  <text x="400" y="129.5" font-size="7" fill="#6b7280">vc(100)</text>
+  <line x1="265" y1="134" x2="475" y2="134" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="134" width="210" height="16" fill="#f9fafb"/>
+  <text x="292" y="145.5" font-size="8" fill="#111">Capacity</text>
+  <text x="400" y="145.5" font-size="7" fill="#6b7280">int</text>
+  <line x1="265" y1="150" x2="475" y2="150" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="150" width="210" height="16" fill="white"/>
+  <text x="292" y="161.5" font-size="8" fill="#111">CurrentPopulation</text>
+  <text x="400" y="161.5" font-size="7" fill="#6b7280">int</text>
+  <line x1="265" y1="166" x2="475" y2="166" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="166" width="210" height="16" fill="#f9fafb"/>
+  <text x="292" y="177.5" font-size="8" fill="#111">SecurityLevel</text>
+  <text x="400" y="177.5" font-size="7" fill="#6b7280">vc(50)</text>
+  <line x1="265" y1="182" x2="475" y2="182" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="182" width="210" height="16" fill="white"/>
+  <text x="292" y="193.5" font-size="8" fill="#111">CreatedAt</text>
+  <text x="400" y="193.5" font-size="7" fill="#6b7280">datetime</text>
+  <rect x="265" y="62" width="210" height="136" fill="none" stroke="#1565c0" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- CASE_REPORTS (515,62) -->
+<g filter="url(#sh)">
+  <rect x="515" y="62" width="210" height="24" fill="#b71c1c" rx="3"/>
+  <rect x="515" y="75" width="210" height="13" fill="#b71c1c"/>
+  <rect x="515" y="86" width="210" height="112" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="620" y="78" text-anchor="middle" font-size="9.5" font-weight="bold" fill="white">CASE_REPORTS</text>
+  <rect x="515" y="86" width="210" height="16" fill="#dbeafe"/>
+  <text x="519" y="97.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="542" y="97.5" font-size="8" font-weight="bold" fill="#111">Id</text>
+  <text x="650" y="97.5" font-size="7" fill="#6b7280">int</text>
+  <line x1="515" y1="102" x2="725" y2="102" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="102" width="210" height="16" fill="#fef9c3"/>
+  <text x="519" y="113.5" font-size="6" font-weight="bold" fill="#92400e">UQ</text>
+  <text x="542" y="113.5" font-size="8" fill="#111">CaseId</text>
+  <text x="650" y="113.5" font-size="7" fill="#6b7280">vc(50)</text>
+  <line x1="515" y1="118" x2="725" y2="118" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="118" width="210" height="16" fill="white"/>
+  <text x="542" y="129.5" font-size="8" fill="#111">CaseTitle</text>
+  <text x="650" y="129.5" font-size="7" fill="#6b7280">vc(200)</text>
+  <line x1="515" y1="134" x2="725" y2="134" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="134" width="210" height="16" fill="#f9fafb"/>
+  <text x="542" y="145.5" font-size="8" fill="#111">CrimeType</text>
+  <text x="650" y="145.5" font-size="7" fill="#6b7280">vc(100)</text>
+  <line x1="515" y1="150" x2="725" y2="150" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="150" width="210" height="16" fill="#dcfce7"/>
+  <text x="519" y="161.5" font-size="6" font-weight="bold" fill="#166534">FK</text>
+  <text x="542" y="161.5" font-size="8" font-weight="bold" fill="#166534">PrisonId</text>
+  <text x="650" y="161.5" font-size="7" fill="#6b7280">int? -&gt; Prisons</text>
+  <line x1="515" y1="166" x2="725" y2="166" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="166" width="210" height="16" fill="white"/>
+  <text x="542" y="177.5" font-size="8" fill="#111">CaseStatus</text>
+  <text x="650" y="177.5" font-size="7" fill="#6b7280">vc(50)</text>
+  <line x1="515" y1="182" x2="725" y2="182" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="182" width="210" height="16" fill="#f9fafb"/>
+  <text x="542" y="193.5" font-size="8" fill="#111">CreatedAt</text>
+  <text x="650" y="193.5" font-size="7" fill="#6b7280">datetime</text>
+  <rect x="515" y="62" width="210" height="136" fill="none" stroke="#b71c1c" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- ASP_NET_USERS (765,62) -->
+<g filter="url(#sh)">
+  <rect x="765" y="62" width="210" height="24" fill="#1a237e" rx="3"/>
+  <rect x="765" y="75" width="210" height="13" fill="#1a237e"/>
+  <rect x="765" y="86" width="210" height="112" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="870" y="78" text-anchor="middle" font-size="9" font-weight="bold" fill="white">ASP_NET_USERS</text>
+  <text x="973" y="78" font-size="7" fill="#c7d2fe" text-anchor="end">Identity</text>
+  <rect x="765" y="86" width="210" height="16" fill="#dbeafe"/>
+  <text x="769" y="97.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="792" y="97.5" font-size="8" font-weight="bold" fill="#111">Id</text>
+  <text x="900" y="97.5" font-size="7" fill="#6b7280">guid(450)</text>
+  <line x1="765" y1="102" x2="975" y2="102" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="765" y="102" width="210" height="16" fill="#fef9c3"/>
+  <text x="769" y="113.5" font-size="6" font-weight="bold" fill="#92400e">UQ</text>
+  <text x="792" y="113.5" font-size="8" fill="#111">UserName</text>
+  <text x="900" y="113.5" font-size="7" fill="#6b7280">vc(256)</text>
+  <line x1="765" y1="118" x2="975" y2="118" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="765" y="118" width="210" height="16" fill="white"/>
+  <text x="792" y="129.5" font-size="8" fill="#111">Email</text>
+  <text x="900" y="129.5" font-size="7" fill="#6b7280">vc(256)</text>
+  <line x1="765" y1="134" x2="975" y2="134" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="765" y="134" width="210" height="16" fill="#f9fafb"/>
+  <text x="792" y="145.5" font-size="8" fill="#111">FullName</text>
+  <text x="900" y="145.5" font-size="7" fill="#6b7280">vc(200)</text>
+  <line x1="765" y1="150" x2="975" y2="150" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="765" y="150" width="210" height="16" fill="white"/>
+  <text x="792" y="161.5" font-size="8" fill="#111">Role</text>
+  <text x="900" y="161.5" font-size="7" fill="#6b7280">vc(100)</text>
+  <line x1="765" y1="166" x2="975" y2="166" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="765" y="166" width="210" height="16" fill="#f9fafb"/>
+  <text x="792" y="177.5" font-size="8" fill="#111">IsActive</text>
+  <text x="900" y="177.5" font-size="7" fill="#6b7280">bit</text>
+  <line x1="765" y1="182" x2="975" y2="182" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="765" y="182" width="210" height="16" fill="white"/>
+  <text x="792" y="193.5" font-size="8" fill="#111">CreatedAt</text>
+  <text x="900" y="193.5" font-size="7" fill="#6b7280">datetime</text>
+  <rect x="765" y="62" width="210" height="136" fill="none" stroke="#1a237e" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- PRISONER_EVIDENCES (15,228) -->
+<g filter="url(#sh)">
+  <rect x="15" y="228" width="210" height="24" fill="#1976d2" rx="3"/>
+  <rect x="15" y="241" width="210" height="13" fill="#1976d2"/>
+  <rect x="15" y="252" width="210" height="96" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="120" y="244" text-anchor="middle" font-size="8.5" font-weight="bold" fill="white">PRISONER_EVIDENCES</text>
+  <rect x="15" y="252" width="210" height="16" fill="#dbeafe"/>
+  <text x="19" y="263.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="42" y="263.5" font-size="8" font-weight="bold" fill="#111">Id</text>
+  <text x="150" y="263.5" font-size="7" fill="#6b7280">int</text>
+  <line x1="15" y1="268" x2="225" y2="268" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="268" width="210" height="16" fill="#dcfce7"/>
+  <text x="19" y="279.5" font-size="6" font-weight="bold" fill="#166534">FK</text>
+  <text x="42" y="279.5" font-size="8" font-weight="bold" fill="#166534">PrisonerId</text>
+  <text x="150" y="279.5" font-size="7" fill="#6b7280">int -&gt; Prisoners</text>
+  <line x1="15" y1="284" x2="225" y2="284" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="284" width="210" height="16" fill="white"/>
+  <text x="42" y="295.5" font-size="8" fill="#111">FileName</text>
+  <text x="150" y="295.5" font-size="7" fill="#6b7280">vc(500)</text>
+  <line x1="15" y1="300" x2="225" y2="300" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="300" width="210" height="16" fill="#f9fafb"/>
+  <text x="42" y="311.5" font-size="8" fill="#111">FileType</text>
+  <text x="150" y="311.5" font-size="7" fill="#6b7280">vc(100)</text>
+  <line x1="15" y1="316" x2="225" y2="316" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="316" width="210" height="16" fill="white"/>
+  <text x="42" y="327.5" font-size="8" fill="#111">DocumentType</text>
+  <text x="150" y="327.5" font-size="7" fill="#6b7280">vc(100)</text>
+  <line x1="15" y1="332" x2="225" y2="332" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="332" width="210" height="16" fill="#f9fafb"/>
+  <text x="42" y="343.5" font-size="8" fill="#111">UploadedAt</text>
+  <text x="150" y="343.5" font-size="7" fill="#6b7280">datetime</text>
+  <rect x="15" y="228" width="210" height="120" fill="none" stroke="#1976d2" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- STAFF (265,212) -->
+<g filter="url(#sh)">
+  <rect x="265" y="212" width="210" height="24" fill="#1b5e20" rx="3"/>
+  <rect x="265" y="225" width="210" height="13" fill="#1b5e20"/>
+  <rect x="265" y="236" width="210" height="112" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="370" y="228" text-anchor="middle" font-size="9.5" font-weight="bold" fill="white">STAFF</text>
+  <rect x="265" y="236" width="210" height="16" fill="#dbeafe"/>
+  <text x="269" y="247.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="292" y="247.5" font-size="8" font-weight="bold" fill="#111">Id</text>
+  <text x="400" y="247.5" font-size="7" fill="#6b7280">int</text>
+  <line x1="265" y1="252" x2="475" y2="252" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="252" width="210" height="16" fill="white"/>
+  <text x="292" y="263.5" font-size="8" fill="#111">FullName</text>
+  <text x="400" y="263.5" font-size="7" fill="#6b7280">vc(150)</text>
+  <line x1="265" y1="268" x2="475" y2="268" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="268" width="210" height="16" fill="#fef9c3"/>
+  <text x="269" y="279.5" font-size="6" font-weight="bold" fill="#92400e">UQ</text>
+  <text x="292" y="279.5" font-size="8" fill="#111">StaffIdNumber</text>
+  <text x="400" y="279.5" font-size="7" fill="#6b7280">vc(50)</text>
+  <line x1="265" y1="284" x2="475" y2="284" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="284" width="210" height="16" fill="white"/>
+  <text x="292" y="295.5" font-size="8" fill="#111">Role</text>
+  <text x="400" y="295.5" font-size="7" fill="#6b7280">vc(100)</text>
+  <line x1="265" y1="300" x2="475" y2="300" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="300" width="210" height="16" fill="#dcfce7"/>
+  <text x="269" y="311.5" font-size="6" font-weight="bold" fill="#166534">FK</text>
+  <text x="292" y="311.5" font-size="8" font-weight="bold" fill="#166534">PrisonId</text>
+  <text x="400" y="311.5" font-size="7" fill="#6b7280">int -&gt; Prisons</text>
+  <line x1="265" y1="316" x2="475" y2="316" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="316" width="210" height="16" fill="white"/>
+  <text x="292" y="327.5" font-size="8" fill="#111">IsActive</text>
+  <text x="400" y="327.5" font-size="7" fill="#6b7280">bit</text>
+  <line x1="265" y1="332" x2="475" y2="332" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="332" width="210" height="16" fill="#f9fafb"/>
+  <text x="292" y="343.5" font-size="8" fill="#111">CreatedAt</text>
+  <text x="400" y="343.5" font-size="7" fill="#6b7280">datetime</text>
+  <rect x="265" y="212" width="210" height="136" fill="none" stroke="#1b5e20" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- ALERTS (515,212) -->
+<g filter="url(#sh)">
+  <rect x="515" y="212" width="210" height="24" fill="#6a1b9a" rx="3"/>
+  <rect x="515" y="225" width="210" height="13" fill="#6a1b9a"/>
+  <rect x="515" y="236" width="210" height="112" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="620" y="228" text-anchor="middle" font-size="9.5" font-weight="bold" fill="white">ALERTS</text>
+  <text x="723" y="228" font-size="7" fill="#e9d5ff" text-anchor="end">Standalone</text>
+  <rect x="515" y="236" width="210" height="16" fill="#dbeafe"/>
+  <text x="519" y="247.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="542" y="247.5" font-size="8" font-weight="bold" fill="#111">Id</text>
+  <text x="650" y="247.5" font-size="7" fill="#6b7280">int</text>
+  <line x1="515" y1="252" x2="725" y2="252" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="252" width="210" height="16" fill="white"/>
+  <text x="542" y="263.5" font-size="8" fill="#111">AlertType</text>
+  <text x="650" y="263.5" font-size="7" fill="#6b7280">vc(100)</text>
+  <line x1="515" y1="268" x2="725" y2="268" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="268" width="210" height="16" fill="#f9fafb"/>
+  <text x="542" y="279.5" font-size="8" fill="#111">Message</text>
+  <text x="650" y="279.5" font-size="7" fill="#6b7280">vc(500)</text>
+  <line x1="515" y1="284" x2="725" y2="284" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="284" width="210" height="16" fill="white"/>
+  <text x="542" y="295.5" font-size="8" fill="#111">Severity</text>
+  <text x="650" y="295.5" font-size="7" fill="#6b7280">vc(50)</text>
+  <line x1="515" y1="300" x2="725" y2="300" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="300" width="210" height="16" fill="#f9fafb"/>
+  <text x="542" y="311.5" font-size="8" fill="#111">IsActive</text>
+  <text x="650" y="311.5" font-size="7" fill="#6b7280">bit</text>
+  <line x1="515" y1="316" x2="725" y2="316" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="316" width="210" height="16" fill="#fef3c7"/>
+  <text x="519" y="327.5" font-size="6" font-weight="bold" fill="#78350f">*</text>
+  <text x="542" y="327.5" font-size="8" fill="#92400e">PrisonId</text>
+  <text x="650" y="327.5" font-size="7" fill="#78350f">int? (no FK)</text>
+  <line x1="515" y1="332" x2="725" y2="332" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="332" width="210" height="16" fill="white"/>
+  <text x="542" y="343.5" font-size="8" fill="#111">CreatedAt</text>
+  <text x="650" y="343.5" font-size="7" fill="#6b7280">datetime</text>
+  <rect x="515" y="212" width="210" height="136" fill="none" stroke="#6a1b9a" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- ASP_NET_USER_ROLES (765,212) -->
+<g filter="url(#sh)">
+  <rect x="765" y="212" width="210" height="24" fill="#303f9f" rx="3"/>
+  <rect x="765" y="225" width="210" height="13" fill="#303f9f"/>
+  <rect x="765" y="236" width="210" height="32" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="870" y="228" text-anchor="middle" font-size="8.5" font-weight="bold" fill="white">ASP_NET_USER_ROLES</text>
+  <text x="973" y="228" font-size="7" fill="#c7d2fe" text-anchor="end">M:M Junction</text>
+  <rect x="765" y="236" width="210" height="16" fill="#dcfce7"/>
+  <text x="769" y="247.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="783" y="247.5" font-size="6" font-weight="bold" fill="#166534">FK</text>
+  <text x="798" y="247.5" font-size="8" font-weight="bold" fill="#166534">UserId</text>
+  <text x="900" y="247.5" font-size="7" fill="#6b7280">guid(450)</text>
+  <line x1="765" y1="252" x2="975" y2="252" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="765" y="252" width="210" height="16" fill="#dcfce7"/>
+  <text x="769" y="263.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="783" y="263.5" font-size="6" font-weight="bold" fill="#166534">FK</text>
+  <text x="798" y="263.5" font-size="8" font-weight="bold" fill="#166534">RoleId</text>
+  <text x="900" y="263.5" font-size="7" fill="#6b7280">guid(450)</text>
+  <rect x="765" y="212" width="210" height="56" fill="none" stroke="#303f9f" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- FORMER_PRISONERS (15,372) -->
+<g filter="url(#sh)">
+  <rect x="15" y="372" width="210" height="24" fill="#546e7a" rx="3"/>
+  <rect x="15" y="385" width="210" height="13" fill="#546e7a"/>
+  <rect x="15" y="396" width="210" height="112" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="120" y="388" text-anchor="middle" font-size="8.5" font-weight="bold" fill="white">FORMER_PRISONERS</text>
+  <text x="223" y="388" font-size="7" fill="#cfd8dc" text-anchor="end">Archive</text>
+  <rect x="15" y="396" width="210" height="16" fill="#dbeafe"/>
+  <text x="19" y="407.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="42" y="407.5" font-size="8" font-weight="bold" fill="#111">Id</text>
+  <text x="150" y="407.5" font-size="7" fill="#6b7280">int</text>
+  <line x1="15" y1="412" x2="225" y2="412" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="412" width="210" height="16" fill="white"/>
+  <text x="42" y="423.5" font-size="8" fill="#111">PrisonerId</text>
+  <text x="150" y="423.5" font-size="7" fill="#6b7280">vc(50)</text>
+  <line x1="15" y1="428" x2="225" y2="428" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="428" width="210" height="16" fill="#f9fafb"/>
+  <text x="42" y="439.5" font-size="8" fill="#111">FullName</text>
+  <text x="150" y="439.5" font-size="7" fill="#6b7280">vc(200)</text>
+  <line x1="15" y1="444" x2="225" y2="444" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="444" width="210" height="16" fill="#fef3c7"/>
+  <text x="19" y="455.5" font-size="6" font-weight="bold" fill="#78350f">*</text>
+  <text x="42" y="455.5" font-size="8" fill="#92400e">OriginalPrisonId</text>
+  <text x="150" y="455.5" font-size="7" fill="#78350f">int? no FK</text>
+  <line x1="15" y1="460" x2="225" y2="460" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="460" width="210" height="16" fill="white"/>
+  <text x="42" y="471.5" font-size="8" fill="#111">PrisonName</text>
+  <text x="150" y="471.5" font-size="7" fill="#6b7280">vc(200) snap</text>
+  <line x1="15" y1="476" x2="225" y2="476" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="476" width="210" height="16" fill="#f9fafb"/>
+  <text x="42" y="487.5" font-size="8" fill="#111">ArchiveReason</text>
+  <text x="150" y="487.5" font-size="7" fill="#6b7280">vc(50)</text>
+  <line x1="15" y1="492" x2="225" y2="492" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="15" y="492" width="210" height="16" fill="white"/>
+  <text x="42" y="503.5" font-size="8" fill="#111">ArchivedAt</text>
+  <text x="150" y="503.5" font-size="7" fill="#6b7280">datetime</text>
+  <rect x="15" y="372" width="210" height="136" fill="none" stroke="#546e7a" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- STAFF_CERTIFICATES (265,372) -->
+<g filter="url(#sh)">
+  <rect x="265" y="372" width="210" height="24" fill="#388e3c" rx="3"/>
+  <rect x="265" y="385" width="210" height="13" fill="#388e3c"/>
+  <rect x="265" y="396" width="210" height="80" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="370" y="388" text-anchor="middle" font-size="8.5" font-weight="bold" fill="white">STAFF_CERTIFICATES</text>
+  <rect x="265" y="396" width="210" height="16" fill="#dbeafe"/>
+  <text x="269" y="407.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="292" y="407.5" font-size="8" font-weight="bold" fill="#111">Id</text>
+  <text x="400" y="407.5" font-size="7" fill="#6b7280">int</text>
+  <line x1="265" y1="412" x2="475" y2="412" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="412" width="210" height="16" fill="#dcfce7"/>
+  <text x="269" y="423.5" font-size="6" font-weight="bold" fill="#166534">FK</text>
+  <text x="292" y="423.5" font-size="8" font-weight="bold" fill="#166534">StaffId</text>
+  <text x="400" y="423.5" font-size="7" fill="#6b7280">int -&gt; Staff</text>
+  <line x1="265" y1="428" x2="475" y2="428" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="428" width="210" height="16" fill="white"/>
+  <text x="292" y="439.5" font-size="8" fill="#111">FileName</text>
+  <text x="400" y="439.5" font-size="7" fill="#6b7280">vc(500)</text>
+  <line x1="265" y1="444" x2="475" y2="444" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="444" width="210" height="16" fill="#f9fafb"/>
+  <text x="292" y="455.5" font-size="8" fill="#111">FileType</text>
+  <text x="400" y="455.5" font-size="7" fill="#6b7280">vc(100)</text>
+  <line x1="265" y1="460" x2="475" y2="460" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="460" width="210" height="16" fill="white"/>
+  <text x="292" y="471.5" font-size="8" fill="#111">UploadedAt</text>
+  <text x="400" y="471.5" font-size="7" fill="#6b7280">datetime</text>
+  <rect x="265" y="372" width="210" height="104" fill="none" stroke="#388e3c" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- WANTED_CRIMINALS (515,372) -->
+<g filter="url(#sh)">
+  <rect x="515" y="372" width="210" height="24" fill="#c62828" rx="3"/>
+  <rect x="515" y="385" width="210" height="13" fill="#c62828"/>
+  <rect x="515" y="396" width="210" height="80" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="620" y="388" text-anchor="middle" font-size="8.5" font-weight="bold" fill="white">WANTED_CRIMINALS</text>
+  <text x="723" y="388" font-size="7" fill="#fca5a5" text-anchor="end">Standalone</text>
+  <rect x="515" y="396" width="210" height="16" fill="#dbeafe"/>
+  <text x="519" y="407.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="542" y="407.5" font-size="8" font-weight="bold" fill="#111">Id</text>
+  <text x="650" y="407.5" font-size="7" fill="#6b7280">int</text>
+  <line x1="515" y1="412" x2="725" y2="412" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="412" width="210" height="16" fill="white"/>
+  <text x="542" y="423.5" font-size="8" fill="#111">CriminalName</text>
+  <text x="650" y="423.5" font-size="7" fill="#6b7280">vc(200)</text>
+  <line x1="515" y1="428" x2="725" y2="428" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="428" width="210" height="16" fill="#f9fafb"/>
+  <text x="542" y="439.5" font-size="8" fill="#111">NationalId</text>
+  <text x="650" y="439.5" font-size="7" fill="#6b7280">vc(100)</text>
+  <line x1="515" y1="444" x2="725" y2="444" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="444" width="210" height="16" fill="white"/>
+  <text x="542" y="455.5" font-size="8" fill="#111">RiskLevel</text>
+  <text x="650" y="455.5" font-size="7" fill="#6b7280">vc(50)</text>
+  <line x1="515" y1="460" x2="725" y2="460" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="515" y="460" width="210" height="16" fill="#f9fafb"/>
+  <text x="542" y="471.5" font-size="8" fill="#111">IsActive</text>
+  <text x="650" y="471.5" font-size="7" fill="#6b7280">bit</text>
+  <rect x="515" y="372" width="210" height="104" fill="none" stroke="#c62828" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- ASP_NET_ROLES (765,292) -->
+<g filter="url(#sh)">
+  <rect x="765" y="292" width="210" height="24" fill="#283593" rx="3"/>
+  <rect x="765" y="305" width="210" height="13" fill="#283593"/>
+  <rect x="765" y="316" width="210" height="48" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="870" y="308" text-anchor="middle" font-size="9" font-weight="bold" fill="white">ASP_NET_ROLES</text>
+  <text x="973" y="308" font-size="7" fill="#c7d2fe" text-anchor="end">Identity</text>
+  <rect x="765" y="316" width="210" height="16" fill="#dbeafe"/>
+  <text x="769" y="327.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="792" y="327.5" font-size="8" font-weight="bold" fill="#111">Id</text>
+  <text x="900" y="327.5" font-size="7" fill="#6b7280">guid(450)</text>
+  <line x1="765" y1="332" x2="975" y2="332" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="765" y="332" width="210" height="16" fill="white"/>
+  <text x="792" y="343.5" font-size="8" fill="#111">Name</text>
+  <text x="900" y="343.5" font-size="7" fill="#6b7280">vc(256)</text>
+  <line x1="765" y1="348" x2="975" y2="348" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="765" y="348" width="210" height="16" fill="#f9fafb"/>
+  <text x="792" y="359.5" font-size="8" fill="#111">NormalizedName</text>
+  <text x="900" y="359.5" font-size="7" fill="#6b7280">vc(256)</text>
+  <rect x="765" y="292" width="210" height="72" fill="none" stroke="#283593" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- ACTIVITIES (265,500) -->
+<g filter="url(#sh)">
+  <rect x="265" y="500" width="210" height="24" fill="#37474f" rx="3"/>
+  <rect x="265" y="513" width="210" height="13" fill="#37474f"/>
+  <rect x="265" y="524" width="210" height="80" fill="white" stroke="#cbd5e1" stroke-width=".8"/>
+  <text x="370" y="516" text-anchor="middle" font-size="9.5" font-weight="bold" fill="white">ACTIVITIES</text>
+  <text x="473" y="516" font-size="7" fill="#90a4ae" text-anchor="end">Audit Log</text>
+  <rect x="265" y="524" width="210" height="16" fill="#dbeafe"/>
+  <text x="269" y="535.5" font-size="6" font-weight="bold" fill="#1e40af">PK</text>
+  <text x="292" y="535.5" font-size="8" font-weight="bold" fill="#111">Id</text>
+  <text x="400" y="535.5" font-size="7" fill="#6b7280">int</text>
+  <line x1="265" y1="540" x2="475" y2="540" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="540" width="210" height="16" fill="white"/>
+  <text x="292" y="551.5" font-size="8" fill="#111">Description</text>
+  <text x="400" y="551.5" font-size="7" fill="#6b7280">vc(2000)</text>
+  <line x1="265" y1="556" x2="475" y2="556" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="556" width="210" height="16" fill="#f9fafb"/>
+  <text x="292" y="567.5" font-size="8" fill="#111">ActivityType</text>
+  <text x="400" y="567.5" font-size="7" fill="#6b7280">vc(100)</text>
+  <line x1="265" y1="572" x2="475" y2="572" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="572" width="210" height="16" fill="#fef3c7"/>
+  <text x="269" y="583.5" font-size="6" font-weight="bold" fill="#78350f">*</text>
+  <text x="292" y="583.5" font-size="8" fill="#92400e">UserId</text>
+  <text x="400" y="583.5" font-size="7" fill="#78350f">vc (no FK)</text>
+  <line x1="265" y1="588" x2="475" y2="588" stroke="#e2e8f0" stroke-width=".5"/>
+  <rect x="265" y="588" width="210" height="16" fill="white"/>
+  <text x="292" y="599.5" font-size="8" fill="#111">UserName</text>
+  <text x="400" y="599.5" font-size="7" fill="#6b7280">vc(256)</text>
+  <rect x="265" y="500" width="210" height="104" fill="none" stroke="#37474f" stroke-width="1.2" rx="3"/>
+</g>
+
+<!-- LEGEND -->
+<rect x="15" y="625" width="960" height="30" fill="#1e293b" rx="3"/>
+<rect x="26" y="633" width="10" height="10" fill="#dbeafe" stroke="#1e40af" stroke-width=".8"/>
+<text x="40" y="641" font-size="7.5" fill="#e2e8f0">PK = Primary Key</text>
+<rect x="140" y="633" width="10" height="10" fill="#dcfce7" stroke="#166534" stroke-width=".8"/>
+<text x="154" y="641" font-size="7.5" fill="#e2e8f0">FK = Foreign Key (enforced)</text>
+<rect x="300" y="633" width="10" height="10" fill="#fef9c3" stroke="#92400e" stroke-width=".8"/>
+<text x="314" y="641" font-size="7.5" fill="#e2e8f0">UQ = Unique Index</text>
+<rect x="415" y="633" width="10" height="10" fill="#fef3c7" stroke="#78350f" stroke-width=".8"/>
+<text x="429" y="641" font-size="7.5" fill="#e2e8f0">* = Informational (no FK)</text>
+<line x1="560" y1="638" x2="590" y2="638" stroke="#1565c0" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="596" y="641" font-size="7.5" fill="#e2e8f0">Solid = 1:M</text>
+<line x1="660" y1="638" x2="690" y2="638" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="4,2.5" marker-end="url(#arr)"/>
+<text x="696" y="641" font-size="7.5" fill="#e2e8f0">Dashed = SET NULL</text>
+<text x="26" y="651" font-size="6.5" fill="#64748b">vc = varchar  |  snap = denormalized snapshot  |  PPMS - EF Core Code-First - SQL Server - August 2026</text>
+</svg>

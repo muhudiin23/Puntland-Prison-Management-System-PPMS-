@@ -1,24 +1,159 @@
 @model PPMS.Models.Prison
+@using PPMS.Models
 @{ ViewData["Title"] = "Edit Prison"; }
-<div class="page-header"><h2><i class="fas fa-edit me-2" style="color:#d97706;"></i>Edit Prison</h2></div>
-<div class="card" style="max-width:700px;">
-    <div class="card-body">
-        <form asp-action="Edit" method="post">
-            @Html.AntiForgeryToken()
-            <input asp-for="Id" type="hidden" />
-            <div class="row g-3">
-                <div class="col-md-8"><label class="form-label fw-semibold">Prison Name *</label><input asp-for="PrisonName" class="form-control" /><span asp-validation-for="PrisonName" class="text-danger small"></span></div>
-                <div class="col-md-4"><label class="form-label fw-semibold">City *</label><input asp-for="City" class="form-control" /></div>
-                <div class="col-md-4"><label class="form-label fw-semibold">Capacity *</label><input asp-for="Capacity" type="number" class="form-control" /></div>
-                <div class="col-md-4"><label class="form-label fw-semibold">Current Population</label><input asp-for="CurrentPopulation" type="number" class="form-control" /></div>
-                <div class="col-md-4"><label class="form-label fw-semibold">Security Level</label><select asp-for="SecurityLevel" class="form-select"><option>Minimum</option><option>Medium</option><option>Maximum</option></select></div>
-                <div class="col-12"><label class="form-label fw-semibold">Address</label><input asp-for="Address" class="form-control" /></div>
-                <div class="col-md-6"><label class="form-label fw-semibold">Contact Number</label><input asp-for="ContactNumber" class="form-control" /></div>
-                <div class="col-12 d-flex gap-2 mt-2">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Save Changes</button>
-                    <a href="/Prisons" class="btn btn-outline-secondary">Cancel</a>
-                </div>
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-edit me-2" style="color:#d97706;"></i>Edit Prison</h2>
+        <p class="text-muted mb-0" style="font-size:0.8rem;">@Model.PrisonName</p>
+    </div>
+    <a href="/Prisons" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back</a>
+</div>
+
+<div class="row g-4">
+
+    <!-- ── Prison info form ──────────────────────────────────────────── -->
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-2" style="background:linear-gradient(135deg,#7c3a00,#d97706);">
+                <i class="fas fa-building me-1" style="color:#fff;"></i>
+                <span style="color:#fff;font-weight:700;">PRISON INFORMATION</span>
             </div>
-        </form>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="Id" type="hidden" />
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Prison Name *</label>
+                            <input asp-for="PrisonName" class="form-control" />
+                            <span asp-validation-for="PrisonName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">City *</label>
+                            <input asp-for="City" class="form-control" />
+                            <span asp-validation-for="City" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Capacity *</label>
+                            <input asp-for="Capacity" type="number" class="form-control" min="1" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Current Population</label>
+                            <input asp-for="CurrentPopulation" type="number" class="form-control" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Security Level</label>
+                            <select asp-for="SecurityLevel" class="form-select">
+                                <option value="Minimum">Minimum</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Maximum">Maximum</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Address</label>
+                            <input asp-for="Address" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Contact Number</label>
+                            <input asp-for="ContactNumber" class="form-control" />
+                        </div>
+                        <div class="col-12 d-flex gap-2 mt-2">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Save Prison Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Administrator panel ───────────────────────────────────────── -->
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center gap-2" style="background:linear-gradient(135deg,#1e3a8a,#2563eb);">
+                <i class="fas fa-user-shield me-1" style="color:#fff;"></i>
+                <span style="color:#fff;font-weight:700;">PRISON ADMINISTRATOR</span>
+            </div>
+            <div class="card-body">
+                @{
+                    var assignedAdmin = ViewBag.AssignedAdmin as ApplicationUser;
+                }
+
+                @if (assignedAdmin != null)
+                {
+                    <!-- Current admin info -->
+                    <div class="d-flex align-items-center gap-3 mb-4 p-3"
+                         style="background:rgba(37,99,235,0.07);border:1px solid rgba(37,99,235,0.15);border-radius:12px;">
+                        @if (!string.IsNullOrEmpty(assignedAdmin.ProfilePhotoPath))
+                        {
+                            <img src="@assignedAdmin.ProfilePhotoPath"
+                                 style="width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(37,99,235,0.3);" />
+                        }
+                        else
+                        {
+                            <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1e3a8a,#2563eb);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.3rem;flex-shrink:0;">
+                                @(assignedAdmin.FullName.Length > 0 ? assignedAdmin.FullName[0].ToString().ToUpper() : "?")
+                            </div>
+                        }
+                        <div class="min-width-0">
+                            <div class="fw-bold" style="font-size:0.93rem;">@assignedAdmin.FullName</div>
+                            <div class="text-muted" style="font-size:0.77rem;">@@@assignedAdmin.UserName</div>
+                            @if (!string.IsNullOrEmpty(assignedAdmin.Email))
+                            { <div class="text-muted" style="font-size:0.74rem;"><i class="fas fa-envelope me-1"></i>@assignedAdmin.Email</div> }
+                            <div class="mt-1">
+                                <span class="badge" style="background:#d97706;font-size:0.67rem;">Prison Administrator</span>
+                                <span class="badge @(assignedAdmin.IsActive ? "bg-success" : "bg-secondary") ms-1" style="font-size:0.67rem;">
+                                    @(assignedAdmin.IsActive ? "Active" : "Disabled")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mb-4">
+                        <a href="/Users/Edit/@assignedAdmin.Id" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-user-edit me-1"></i>Edit Account
+                        </a>
+                        <a href="/Users" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-users me-1"></i>User Management
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 mb-3" style="border:2px dashed rgba(37,99,235,0.2);border-radius:12px;">
+                        <i class="fas fa-user-slash fa-2x mb-2 text-muted opacity-50"></i>
+                        <p class="text-muted mb-0" style="font-size:0.84rem;">No administrator assigned to this prison.</p>
+                    </div>
+                }
+
+                <!-- Reassign section — SuperAdmin only -->
+                @if (User.IsInRole("SuperAdmin") && ViewBag.PrisonAdmins != null)
+                {
+                    <div style="border-top:1px solid var(--bs-border-color);padding-top:16px;margin-top:4px;">
+                        <div class="fw-semibold mb-2" style="font-size:0.84rem;">
+                            <i class="fas fa-exchange-alt me-1 text-muted"></i>
+                            @(assignedAdmin != null ? "Change Administrator" : "Assign Administrator")
+                        </div>
+                        <form asp-action="ReassignAdmin" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="prisonId" value="@Model.Id" />
+                            <div class="mb-2">
+                                @Html.DropDownList("adminId",
+                                    ViewBag.PrisonAdmins as Microsoft.AspNetCore.Mvc.Rendering.SelectList,
+                                    "— Select an administrator —",
+                                    new { @class = "form-select form-select-sm" })
+                            </div>
+                            <p class="text-muted mb-2" style="font-size:0.72rem;">
+                                Only users with the <strong>Prison Administrator</strong> role are listed.
+                                The selected user will be linked to this prison.
+                            </p>
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="fas fa-user-check me-1"></i>@(assignedAdmin != null ? "Reassign" : "Assign")
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 </div>

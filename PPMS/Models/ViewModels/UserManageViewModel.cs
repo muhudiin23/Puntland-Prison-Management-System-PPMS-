@@ -18,7 +18,7 @@ namespace PPMS.Models.ViewModels
         [Required]
         public string Role { get; set; } = "StaffUser";
 
-        public string? PrisonAssigned { get; set; }
+        public int? AssignedPrisonId { get; set; }
 
         public bool IsActive { get; set; } = true;
 

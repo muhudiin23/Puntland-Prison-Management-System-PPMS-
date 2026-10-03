@@ -1,4 +1,4 @@
-@model IEnumerable<PPMS.Models.Prisoner>
+@model IEnumerable<PPMS.Models.FormerPrisoner>
 @{ ViewData["Title"] = "Former Prisoners Archive Report"; }
 
 <div class="page-header d-flex justify-content-between align-items-center">
@@ -72,7 +72,7 @@ else
                                 <td>@p.Gender</td>
                                 <td><span class="badge bg-secondary" style="font-size:0.72rem;">@p.CrimeType</span></td>
                                 <td>@p.SentenceDurationMonths mo.</td>
-                                <td>@p.Prison?.PrisonName</td>
+                                <td>@p.PrisonName</td>
                                 <td>@p.EntryDate.ToString("yyyy-MM-dd")</td>
                                 <td>@p.ReleaseDate.ToString("yyyy-MM-dd")</td>
                                 <td><span style="background:@rb;color:@rc;font-size:0.7rem;padding:2px 9px;border-radius:20px;font-weight:700;">@r</span></td>

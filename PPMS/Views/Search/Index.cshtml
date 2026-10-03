@@ -28,8 +28,8 @@
 </div>
 
 @if (ViewBag.Query != null) {
-    var prisoners  = ViewBag.Prisoners         as List<PPMS.Models.Prisoner>       ?? new();
-    var archived   = ViewBag.ArchivedPrisoners as List<PPMS.Models.Prisoner>       ?? new();
+    var prisoners  = ViewBag.Prisoners         as List<PPMS.Models.Prisoner>          ?? new();
+    var archived   = ViewBag.ArchivedPrisoners as List<PPMS.Models.FormerPrisoner>   ?? new();
     var wanted     = ViewBag.WantedCriminals   as List<PPMS.Models.WantedCriminal> ?? new();
     int total      = prisoners.Count + archived.Count + wanted.Count;
 
@@ -106,7 +106,7 @@
                                 <td><strong>@p.FullName</strong></td>
                                 <td>@p.NationalId</td>
                                 <td>@p.CrimeType</td>
-                                <td>@p.Prison?.PrisonName</td>
+                                <td>@p.PrisonName</td>
                                 <td>
                                     @{
                                         var r=p.ArchiveReason??"Administrative";

@@ -37,7 +37,7 @@
                 <div class="card-header"><i class="fas fa-gavel me-2"></i>Criminal Information</div>
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-md-6"><label class="form-label fw-semibold">Crime Type</label><input asp-for="CrimeType" class="form-control" /></div>
+                        <div class="col-md-6"><label class="form-label fw-semibold">Crime Type <span class="text-danger">*</span></label><select asp-for="CrimeType" asp-items="ViewBag.CrimeTypes" class="form-select"><option value="">-- Select Crime Type --</option></select><span asp-validation-for="CrimeType" class="text-danger small"></span></div>
                         <div class="col-md-3"><label class="form-label fw-semibold">Sentence (Months)</label><input asp-for="SentenceDurationMonths" type="number" class="form-control" id="sm" /></div>
                         <div class="col-md-3"><label class="form-label fw-semibold">Status</label><select asp-for="CriminalStatus" class="form-select"><option>Active</option><option>Released</option><option>Transferred</option><option>Escaped</option></select></div>
                         <div class="col-md-4"><label class="form-label fw-semibold">Entry Date</label><input asp-for="EntryDate" type="date" class="form-control" id="ed" /></div>

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,15 @@ namespace PPMS.Controllers
             string? search, string? status, int? prisonId,
             string? from, string? to, string? sort, int page = 1)
         {
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var query = _db.FormerPrisoners.AsQueryable();
+
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(p => p.OriginalPrisonId == userPrisonId.Value);
+            else if (superAdmin && prisonId.HasValue)
+                query = query.Where(p => p.OriginalPrisonId == prisonId.Value);
 
             if (!string.IsNullOrWhiteSpace(search))
                 query = query.Where(p =>
@@ -32,9 +41,6 @@ namespace PPMS.Controllers
 
             if (!string.IsNullOrEmpty(status))
                 query = query.Where(p => p.ArchiveReason == status);
-
-            if (prisonId.HasValue)
-                query = query.Where(p => p.OriginalPrisonId == prisonId.Value);
 
             if (DateTime.TryParse(from, out var fromDt))
                 query = query.Where(p => p.ArchivedAt >= fromDt);
@@ -52,12 +58,16 @@ namespace PPMS.Controllers
                 _           => query.OrderByDescending(p => p.ArchivedAt)
             };
 
-            // Summary counts over full archive
-            ViewBag.TotalArchived    = await _db.FormerPrisoners.CountAsync();
-            ViewBag.ReleasedCount    = await _db.FormerPrisoners.CountAsync(p => p.ArchiveReason == "Released");
-            ViewBag.TransferredCount = await _db.FormerPrisoners.CountAsync(p => p.ArchiveReason == "Transferred");
-            ViewBag.DeceasedCount    = await _db.FormerPrisoners.CountAsync(p => p.ArchiveReason == "Deceased");
-            ViewBag.AdminCount       = await _db.FormerPrisoners.CountAsync(p => p.ArchiveReason == "Administrative");
+            // Summary counts scoped to user's prison
+            var countBase = _db.FormerPrisoners.AsQueryable();
+            if (!superAdmin && userPrisonId.HasValue)
+                countBase = countBase.Where(p => p.OriginalPrisonId == userPrisonId.Value);
+
+            ViewBag.TotalArchived    = await countBase.CountAsync();
+            ViewBag.ReleasedCount    = await countBase.CountAsync(p => p.ArchiveReason == "Released");
+            ViewBag.TransferredCount = await countBase.CountAsync(p => p.ArchiveReason == "Transferred");
+            ViewBag.DeceasedCount    = await countBase.CountAsync(p => p.ArchiveReason == "Deceased");
+            ViewBag.AdminCount       = await countBase.CountAsync(p => p.ArchiveReason == "Administrative");
 
             var paginated = await PaginatedList<FormerPrisoner>.CreateAsync(query, page, PageSize);
 
@@ -70,7 +80,8 @@ namespace PPMS.Controllers
             ViewBag.PageIndex  = paginated.PageIndex;
             ViewBag.TotalPages = paginated.TotalPages;
             ViewBag.TotalCount = paginated.TotalCount;
-            ViewBag.Prisons    = new SelectList(await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
+            if (superAdmin)
+                ViewBag.Prisons = new SelectList(await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
 
             return View(paginated);
         }
@@ -79,6 +90,7 @@ namespace PPMS.Controllers
         {
             var former = await _db.FormerPrisoners.FindAsync(id);
             if (former == null) return NotFound();
+            if (!CanAccess(former)) return Forbid();
             return View(former);
         }
 
@@ -86,7 +98,15 @@ namespace PPMS.Controllers
         {
             var former = await _db.FormerPrisoners.FindAsync(id);
             if (former == null) return NotFound();
+            if (!CanAccess(former)) return Forbid();
             return View(former);
+        }
+
+        private bool CanAccess(FormerPrisoner f)
+        {
+            if (User.IsSuperAdmin()) return true;
+            var userPrisonId = User.PrisonId();
+            return !f.OriginalPrisonId.HasValue || (userPrisonId.HasValue && f.OriginalPrisonId == userPrisonId.Value);
         }
 
         [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "SuperAdmin,PrisonAdministrator")]
@@ -165,7 +185,15 @@ namespace PPMS.Controllers
         public async Task<IActionResult> ExportExcel(
             string? search, string? status, int? prisonId, string? from, string? to)
         {
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var query = _db.FormerPrisoners.AsQueryable();
+
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(p => p.OriginalPrisonId == userPrisonId.Value);
+            else if (superAdmin && prisonId.HasValue)
+                query = query.Where(p => p.OriginalPrisonId == prisonId.Value);
 
             if (!string.IsNullOrWhiteSpace(search))
                 query = query.Where(p =>
@@ -174,9 +202,6 @@ namespace PPMS.Controllers
 
             if (!string.IsNullOrEmpty(status))
                 query = query.Where(p => p.ArchiveReason == status);
-
-            if (prisonId.HasValue)
-                query = query.Where(p => p.OriginalPrisonId == prisonId.Value);
 
             if (DateTime.TryParse(from, out var fromDt))
                 query = query.Where(p => p.ArchivedAt >= fromDt);

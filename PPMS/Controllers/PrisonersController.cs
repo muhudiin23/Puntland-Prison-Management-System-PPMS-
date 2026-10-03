@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -23,17 +24,23 @@ namespace PPMS.Controllers
 
         public async Task<IActionResult> Index(string? search, string? status, int? prisonId, string? sort, int page = 1)
         {
-            // Only show active (non-archived) prisoners
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var query = _db.Prisoners.Include(p => p.Prison)
                 .Where(p => !p.IsArchived)
                 .AsQueryable();
+
+            // Server-side isolation: non-SuperAdmin always scoped to their prison
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(p => p.PrisonId == userPrisonId.Value);
+            else if (superAdmin && prisonId.HasValue)
+                query = query.Where(p => p.PrisonId == prisonId.Value);
 
             if (!string.IsNullOrEmpty(search))
                 query = query.Where(p => p.FullName.Contains(search) || p.NationalId.Contains(search) || p.PrisonerId.Contains(search) || p.CrimeType.Contains(search));
             if (!string.IsNullOrEmpty(status))
                 query = query.Where(p => p.CriminalStatus == status);
-            if (prisonId.HasValue)
-                query = query.Where(p => p.PrisonId == prisonId.Value);
 
             query = sort switch
             {
@@ -53,7 +60,8 @@ namespace PPMS.Controllers
             ViewBag.PageIndex = paginated.PageIndex;
             ViewBag.TotalPages = paginated.TotalPages;
             ViewBag.TotalCount = paginated.TotalCount;
-            ViewBag.Prisons   = new SelectList(await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
+            if (superAdmin)
+                ViewBag.Prisons = new SelectList(await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
             return View(paginated);
         }
 
@@ -148,6 +156,7 @@ namespace PPMS.Controllers
                 .Include(p => p.Evidences)
                 .FirstOrDefaultAsync(p => p.Id == id && !p.IsArchived);
             if (prisoner == null) return NotFound();
+            if (!CanAccessPrison(prisoner.PrisonId)) return Forbid();
             return View(prisoner);
         }
 
@@ -194,6 +203,7 @@ namespace PPMS.Controllers
         {
             var prisoner = await _db.Prisoners.Include(p => p.Prison).FirstOrDefaultAsync(p => p.Id == id && !p.IsArchived);
             if (prisoner == null) return NotFound();
+            if (!CanAccessPrison(prisoner.PrisonId)) return Forbid();
             return View(prisoner);
         }
 
@@ -243,6 +253,13 @@ namespace PPMS.Controllers
                     RecordMovedAt          = DateTime.Now
                 });
                 await _db.SaveChangesAsync();
+
+                // Remove any transfer records before deleting (Restrict FK would block)
+                var transfers = await _db.PrisonerTransfers
+                    .Where(t => t.PrisonerId == prisoner.Id)
+                    .ToListAsync();
+                if (transfers.Count > 0)
+                    _db.PrisonerTransfers.RemoveRange(transfers);
 
                 // Hard-delete prisoner; cascade deletes PrisonerEvidence rows
                 _db.Prisoners.Remove(prisoner);
@@ -340,14 +357,52 @@ namespace PPMS.Controllers
             }
         }
 
-        private async Task PopulateDropdowns()
+        private bool CanAccessPrison(int prisonId)
         {
-            ViewBag.Prisons = new SelectList(await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
+            if (User.IsSuperAdmin()) return true;
+            var userPrisonId = User.PrisonId();
+            return userPrisonId.HasValue && userPrisonId.Value == prisonId;
         }
 
-        private async Task LogActivity(string desc, string type)
+        private async Task PopulateDropdowns()
         {
-            _db.Activities.Add(new Activity { Description = desc, ActivityType = type, UserName = User.Identity?.Name });
+            if (User.IsSuperAdmin())
+            {
+                ViewBag.Prisons = new SelectList(await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync(), "Id", "PrisonName");
+            }
+            else
+            {
+                var prisonId = User.PrisonId();
+                var prisons = prisonId.HasValue
+                    ? await _db.Prisons.Where(p => p.Id == prisonId.Value).ToListAsync()
+                    : new List<Prison>();
+                ViewBag.Prisons = new SelectList(prisons, "Id", "PrisonName");
+            }
+
+            ViewBag.CrimeTypes = new SelectList(new[]
+            {
+                "Murder / Homicide",
+                "Armed Robbery",
+                "Theft / Burglary",
+                "Assault / Battery",
+                "Kidnapping / Abduction",
+                "Sexual Assault / Rape",
+                "Drug Trafficking",
+                "Illegal Weapons Possession",
+                "Terrorism / Extremism",
+                "Piracy",
+                "Human Trafficking",
+                "Fraud / Forgery",
+                "Corruption / Bribery",
+                "Arson",
+                "Vandalism / Property Damage",
+                "Other"
+            });
+        }
+
+        private async Task LogActivity(string desc, string type, int? prisonId = null)
+        {
+            _db.Activities.Add(new Activity { Description = desc, ActivityType = type, UserName = User.Identity?.Name, PrisonId = prisonId ?? User.PrisonId() });
             await _db.SaveChangesAsync();
         }
     }

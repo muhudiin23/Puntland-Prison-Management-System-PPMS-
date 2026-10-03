@@ -8,6 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Allow large file uploads (evidence docs up to 20 MB each, multiple at once)
 builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = 200 * 1024 * 1024);
 
+// In development, force HTTP only so an untrusted dev certificate never blocks startup.
+// HTTPS is handled by a reverse proxy (IIS/nginx) in production.
+if (builder.Environment.IsDevelopment())
+    builder.WebHost.UseUrls("http://localhost:5104");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -56,7 +61,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseSession();

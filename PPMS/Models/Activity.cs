@@ -16,5 +16,6 @@ namespace PPMS.Models
         public string? UserName { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public int? PrisonId { get; set; }
     }
 }

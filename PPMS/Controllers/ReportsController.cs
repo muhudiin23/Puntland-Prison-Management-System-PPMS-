@@ -1,8 +1,10 @@
+using System.Security.Claims;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PPMS.Data;
+using PPMS.Helpers;
 
 namespace PPMS.Controllers
 {
@@ -17,33 +19,55 @@ namespace PPMS.Controllers
 
         public async Task<IActionResult> Prisoners(string? prisonId, string? crimeType, DateTime? from, DateTime? to)
         {
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var query = _db.Prisoners.Include(p => p.Prison).AsQueryable();
-            if (!string.IsNullOrEmpty(prisonId) && int.TryParse(prisonId, out int pid))
+
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(p => p.PrisonId == userPrisonId.Value);
+            else if (superAdmin && !string.IsNullOrEmpty(prisonId) && int.TryParse(prisonId, out int pid))
                 query = query.Where(p => p.PrisonId == pid);
+
             if (!string.IsNullOrEmpty(crimeType))
                 query = query.Where(p => p.CrimeType.Contains(crimeType));
             if (from.HasValue) query = query.Where(p => p.EntryDate >= from.Value);
             if (to.HasValue) query = query.Where(p => p.EntryDate <= to.Value);
 
-            ViewBag.Prisons = await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync();
+            if (superAdmin)
+                ViewBag.Prisons = await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync();
             ViewBag.Selected = new { prisonId, crimeType, from, to };
             return View(await query.OrderBy(p => p.FullName).ToListAsync());
         }
 
         public async Task<IActionResult> Staff(string? prisonId, string? role)
         {
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
             var query = _db.Staff.Include(s => s.Prison).AsQueryable();
-            if (!string.IsNullOrEmpty(prisonId) && int.TryParse(prisonId, out int pid))
+
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(s => s.PrisonId == userPrisonId.Value);
+            else if (superAdmin && !string.IsNullOrEmpty(prisonId) && int.TryParse(prisonId, out int pid))
                 query = query.Where(s => s.PrisonId == pid);
+
             if (!string.IsNullOrEmpty(role))
                 query = query.Where(s => s.Role.Contains(role));
-            ViewBag.Prisons = await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync();
+            if (superAdmin)
+                ViewBag.Prisons = await _db.Prisons.OrderBy(p => p.PrisonName).ToListAsync();
             return View(await query.OrderBy(s => s.FullName).ToListAsync());
         }
 
         public async Task<IActionResult> Prisons()
         {
-            return View(await _db.Prisons.Include(p => p.Prisoners).Include(p => p.Staff).ToListAsync());
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
+            var query = _db.Prisons.Include(p => p.Prisoners).Include(p => p.Staff).AsQueryable();
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(p => p.Id == userPrisonId.Value);
+            return View(await query.ToListAsync());
         }
 
         public async Task<IActionResult> WantedCriminals(string? riskLevel)
@@ -99,7 +123,12 @@ namespace PPMS.Controllers
 
         public async Task<IActionResult> FormerPrisoners(string? status)
         {
-            var query = _db.Prisoners.Include(p => p.Prison).Where(p => p.IsArchived).AsQueryable();
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
+            var query = _db.FormerPrisoners.AsQueryable();
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(p => p.OriginalPrisonId == userPrisonId.Value);
             if (!string.IsNullOrEmpty(status))
                 query = query.Where(p => p.ArchiveReason == status);
             ViewBag.Status = status;
@@ -108,7 +137,12 @@ namespace PPMS.Controllers
 
         public async Task<IActionResult> ExportFormerPrisonersExcel(string? status)
         {
-            var query = _db.Prisoners.Include(p => p.Prison).Where(p => p.IsArchived).AsQueryable();
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
+            var query = _db.FormerPrisoners.AsQueryable();
+            if (!superAdmin && userPrisonId.HasValue)
+                query = query.Where(p => p.OriginalPrisonId == userPrisonId.Value);
             if (!string.IsNullOrEmpty(status))
                 query = query.Where(p => p.ArchiveReason == status);
 
@@ -133,7 +167,7 @@ namespace PPMS.Controllers
                 ws.Cell(i + 2, 4).Value  = p.Gender;
                 ws.Cell(i + 2, 5).Value  = p.CrimeType;
                 ws.Cell(i + 2, 6).Value  = p.SentenceDurationMonths;
-                ws.Cell(i + 2, 7).Value  = p.Prison?.PrisonName ?? "";
+                ws.Cell(i + 2, 7).Value  = p.PrisonName;
                 ws.Cell(i + 2, 8).Value  = p.EntryDate.ToString("yyyy-MM-dd");
                 ws.Cell(i + 2, 9).Value  = p.ReleaseDate.ToString("yyyy-MM-dd");
                 ws.Cell(i + 2, 10).Value = p.ArchiveReason ?? "Administrative";
@@ -148,19 +182,30 @@ namespace PPMS.Controllers
 
         public async Task<IActionResult> Security()
         {
-            ViewBag.ActiveAlerts       = await _db.Alerts.CountAsync(a => a.IsActive && !a.IsDismissed);
-            ViewBag.TotalAlerts        = await _db.Alerts.CountAsync();
-            ViewBag.HighRiskPrisoners  = await _db.Prisoners.CountAsync(p => !p.IsArchived && p.CriminalStatus == "Active" &&
+            var userPrisonId = User.PrisonId();
+            var superAdmin = User.IsSuperAdmin();
+
+            var prisonerQ = _db.Prisoners.AsQueryable();
+            var alertQ = _db.Alerts.AsQueryable();
+            if (!superAdmin && userPrisonId.HasValue)
+            {
+                prisonerQ = prisonerQ.Where(p => p.PrisonId == userPrisonId.Value);
+                alertQ = alertQ.Where(a => a.PrisonId == userPrisonId.Value);
+            }
+
+            ViewBag.ActiveAlerts       = await alertQ.CountAsync(a => a.IsActive && !a.IsDismissed);
+            ViewBag.TotalAlerts        = await alertQ.CountAsync();
+            ViewBag.HighRiskPrisoners  = await prisonerQ.CountAsync(p => !p.IsArchived && p.CriminalStatus == "Active" &&
                                              (p.CrimeType.Contains("Murder") || p.CrimeType.Contains("Terrorism") || p.CrimeType.Contains("Drug")));
             ViewBag.TotalWanted        = await _db.WantedCriminals.CountAsync(w => w.IsActive);
             ViewBag.CriticalWanted     = await _db.WantedCriminals.CountAsync(w => w.IsActive && w.RiskLevel == "Critical");
             ViewBag.HighWanted         = await _db.WantedCriminals.CountAsync(w => w.IsActive && w.RiskLevel == "High");
             ViewBag.MediumWanted       = await _db.WantedCriminals.CountAsync(w => w.IsActive && w.RiskLevel == "Medium");
             ViewBag.LowWanted          = await _db.WantedCriminals.CountAsync(w => w.IsActive && w.RiskLevel == "Low");
-            ViewBag.TotalPrisoners     = await _db.Prisoners.CountAsync(p => !p.IsArchived);
+            ViewBag.TotalPrisoners     = await prisonerQ.CountAsync(p => !p.IsArchived);
             ViewBag.TotalPrisons       = await _db.Prisons.CountAsync();
 
-            ViewBag.RecentAlerts = await _db.Alerts
+            ViewBag.RecentAlerts = await alertQ
                 .Where(a => !a.IsDismissed)
                 .OrderByDescending(a => a.CreatedAt)
                 .Take(20)

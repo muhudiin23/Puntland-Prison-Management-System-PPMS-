@@ -56,10 +56,10 @@
                 <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
 
                 <div class="mb-3">
-                    <label class="form-label">Username</label>
+                    <label class="form-label">Username or Email</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-user"></i></span>
-                        <input asp-for="Username" class="form-control" placeholder="Enter your username" autocomplete="username" />
+                        <input asp-for="Username" class="form-control" placeholder="Enter your username or email" autocomplete="username" />
                     </div>
                     <span asp-validation-for="Username" class="text-danger small"></span>
                 </div>
